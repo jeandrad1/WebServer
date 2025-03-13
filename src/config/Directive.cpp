@@ -1,25 +1,25 @@
-#include "../../include/config/AConfigBlock.hpp"
+#include "../../include/config/Directive.hpp"
 
 /***********************************************************************/
 /*                     Constructors & Destructor                       */
 /***********************************************************************/
 
-AConfigBlock::AConfigBlock(void)
+Directive::Directive(void)
 {
 
 }
 
-AConfigBlock::AConfigBlock(const std::string &name) : _name(name)
+Directive::Directive(const std::string &directive, const std::string &value) : _directive(directive), _value(value)
 {
 
 }
 
-AConfigBlock::AConfigBlock(const AConfigBlock &other)
+Directive::Directive(const Directive &other)
 {
-    *this = other;
+	*this = other;
 }
 
-AConfigBlock::~AConfigBlock(void)
+Directive::~Directive(void)
 {
 
 }
@@ -28,11 +28,12 @@ AConfigBlock::~AConfigBlock(void)
 /*                         Operator Overload                           */
 /***********************************************************************/
 
-AConfigBlock &AConfigBlock::operator=(const AConfigBlock &other)
+Directive &Directive::operator=(const Directive &other)
 {
 	if (this == &other)
 		return (*this);
-	this->_name = other._name;
+	this->_directive = other._directive;
+    this->_value = other._value;
 	if (!blocks.empty())
 	{
 		std::vector<AConfigBlock *>::iterator ite = this->blocks.end();
@@ -50,11 +51,22 @@ AConfigBlock &AConfigBlock::operator=(const AConfigBlock &other)
 /*                          Public Functions                           */
 /***********************************************************************/
 
-void AConfigBlock::addBlock(AConfigBlock *newBlock)
+void	Directive::printConfig(int indent) const
 {
-    this->blocks.push_back(newBlock);
+	std::string spaces(indent * 2, ' ');
+	std::cout << spaces << this->_directive << " " << this->_value << ";\n";
 }
 
 /***********************************************************************/
 /*                          Getters & Setters                          */
 /***********************************************************************/
+
+std::string    Directive::getDirective(void) const
+{
+	return (this->_directive);
+}
+
+std::string    Directive::getValue(void) const
+{
+	return (this->_value);
+}
