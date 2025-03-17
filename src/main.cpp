@@ -6,26 +6,60 @@
 #include "../include/config/Directive.hpp"
 #include "../include/config/HttpBlock.hpp"
 #include "../include/config/LocationBlock.hpp"
+#include "../include/utils/colors.hpp"
+
+void lineBuilder(std::ifstream &filename, std::string &line)
+{
+    std::string static buffer;
+
+	if (buffer.empty())
+	{
+        if (!std::getline(filename, buffer))
+        {
+            line.clear();
+			buffer.clear();
+            return ;
+        }
+	}
+    std::size_t semicolon = buffer.find(';');
+    std::size_t curlyBracket = buffer.find('{');
+	if(semicolon < buffer.size() && (semicolon == std::string::npos || semicolon < curlyBracket))
+	{
+		line = buffer.substr(0, semicolon + 1);
+		buffer = buffer.substr(semicolon + 1);
+	}
+    else if (curlyBracket < buffer.size() && (curlyBracket == std::string::npos || curlyBracket < semicolon))
+    {
+        line = buffer.substr(0, curlyBracket + 1);
+		buffer = buffer.substr(curlyBracket + 1);
+    }
+	else
+	{
+		line = buffer;
+		buffer.clear();
+	}
+    line.erase(0, line.find_first_not_of(" \t"));
+    line.erase(line.find_last_not_of(" \t") + 1);
+}
 
 AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block)
 {
     std::string line;
-    while (std::getline(filename, line))
+    lineBuilder(filename, line);
+    while (!line.empty())
     {
-        line.erase(0, line.find_first_not_of(" \t"));
-        line.erase(line.find_last_not_of(" \t") + 1);
-
+        std::size_t http = line.find("http");
         if (line.empty()) continue;
-
-        if (line.find("server {") != std::string::npos)
+        if (line.find("server") != std::string::npos && line.find("server_name") == std::string::npos)
         {
-            ServerBlock *server = new ServerBlock("server");
+			ServerBlock *server = new ServerBlock("server");
             block.addBlock(server);
             createBlock(filename, *server);
         }
-        else if (line.find("http {") != std::string::npos)
+        else if (http != std::string::npos && http < line.find(" "))
         {
-            HttpBlock *http = new HttpBlock("http");
+            std::cout << BLUE << line << WHITE"\n";
+			HttpBlock *http = new HttpBlock("http");
             block.addBlock(http);
             createBlock(filename, *http);
         }
@@ -37,24 +71,20 @@ AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block)
         }
         else if (line.find("}") != std::string::npos)
         {
-            return (&block);
+			return (&block);
         }
         else
         {
-            std::istringstream iss(line);
+			std::istringstream iss(line);
             std::string key, value;
             if (iss >> key)
             {
-                std::getline(iss, value, ';'); // Read the rest of the line until semicolon
+				std::getline(iss, value, ';'); // Read the rest of the line until semicolon
                 value.erase(0, value.find_first_not_of(" \t")); // Trim leading spaces
-                if (!value.empty() && value[value.size() - 1] == ';')
-                {
-                    value.erase(value.size() - 1); // Remove trailing semicolon
-                }
-                std::cout << "Key: " << key << ", Value: " << value << std::endl;
                 block.addBlock(new Directive(key, value));
             }
         }
+		lineBuilder(filename, line);
     }
     return (&block);
 }
