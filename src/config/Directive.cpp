@@ -54,7 +54,7 @@ Directive &Directive::operator=(const Directive &other)
 void	Directive::printConfig(int indent) const
 {
 	std::string spaces(indent * 2, ' ');
-	std::cout << spaces << this->_directive << " " << this->_value << ";\n";
+	std::cout << spaces << this->_directive << " " << this->_value << "\n";
 }
 
 /***********************************************************************/
