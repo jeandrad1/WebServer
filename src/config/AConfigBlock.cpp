@@ -1,0 +1,60 @@
+#include "../../include/config/AConfigBlock.hpp"
+
+/***********************************************************************/
+/*                     Constructors & Destructor                       */
+/***********************************************************************/
+
+AConfigBlock::AConfigBlock(void)
+{
+
+}
+
+AConfigBlock::AConfigBlock(const std::string &name) : _name(name)
+{
+
+}
+
+AConfigBlock::AConfigBlock(const AConfigBlock &other)
+{
+    *this = other;
+}
+
+AConfigBlock::~AConfigBlock(void)
+{
+
+}
+
+/***********************************************************************/
+/*                         Operator Overload                           */
+/***********************************************************************/
+
+AConfigBlock &AConfigBlock::operator=(const AConfigBlock &other)
+{
+	if (this == &other)
+		return (*this);
+	this->_name = other._name;
+	if (!blocks.empty())
+	{
+		std::vector<AConfigBlock *>::iterator ite = this->blocks.end();
+		for (std::vector<AConfigBlock *>::iterator it = this->blocks.begin(); it != ite; ++it)
+		{
+			delete *it;
+			it = this->blocks.erase(it);
+		}
+	}
+	this->blocks = other.blocks;
+	return (*this);
+}
+
+/***********************************************************************/
+/*                          Public Functions                           */
+/***********************************************************************/
+
+void AConfigBlock::addBlock(AConfigBlock *newBlock)
+{
+    this->blocks.push_back(newBlock);
+}
+
+/***********************************************************************/
+/*                          Getters & Setters                          */
+/***********************************************************************/
