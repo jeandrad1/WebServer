@@ -21,6 +21,8 @@ class AConfigBlock {
 
 		virtual void	printConfig(int indent = 0) const = 0;
 		virtual void	addBlock(AConfigBlock *newBlock);
+
+		std::string getName();
 };
 
 #endif
