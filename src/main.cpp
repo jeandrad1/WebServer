@@ -81,6 +81,7 @@ AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block)
             {
 				std::getline(iss, value, ';'); // Read the rest of the line until semicolon
                 value.erase(0, value.find_first_not_of(" \t")); // Trim leading spaces
+				value.push_back(';');
                 block.addBlock(new Directive(key, value));
             }
         }
