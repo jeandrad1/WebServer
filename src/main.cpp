@@ -22,18 +22,22 @@ void lineBuilder(std::ifstream &filename, std::string &line)
 		}
 	}
 	std::size_t semicolon = buffer.find(';');
-	std::size_t curlyBracket = buffer.find('{');
-	if(semicolon < buffer.size() && (semicolon == std::string::npos || semicolon < curlyBracket))
+	std::size_t curlyBracketOpen = buffer.find('{');
+	std::size_t curlyBracketClose = buffer.find('}');
+    if (curlyBracketClose < buffer.size() && curlyBracketClose < curlyBracketOpen && curlyBracketClose < semicolon)
+    {
+        line = buffer.substr(0, curlyBracketClose + 1);
+		buffer = buffer.substr(curlyBracketClose + 1);
+    }
+	else if(semicolon < buffer.size() && (curlyBracketOpen == std::string::npos || semicolon < curlyBracketOpen))
 	{
 		line = buffer.substr(0, semicolon + 1);
 		buffer = buffer.substr(semicolon + 1);
-		buffer.clear();
 	}
-	else if (curlyBracket < buffer.size() && (curlyBracket == std::string::npos || curlyBracket < semicolon))
+	else if (curlyBracketOpen < buffer.size() && (semicolon == std::string::npos || curlyBracketOpen < semicolon))
 	{
-		line = buffer.substr(0, curlyBracket + 1);
-		buffer = buffer.substr(curlyBracket + 1);
-		buffer.clear();
+		line = buffer.substr(0, curlyBracketOpen + 1);
+		buffer = buffer.substr(curlyBracketOpen + 1);
 	}
 	else
 	{
