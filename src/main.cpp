@@ -1,12 +1,12 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include "../include/utils/colors.hpp"
 #include "../include/config/AConfigBlock.hpp"
 #include "../include/config/ServerBlock.hpp"
 #include "../include/config/Directive.hpp"
 #include "../include/config/HttpBlock.hpp"
 #include "../include/config/LocationBlock.hpp"
-#include "../include/utils/colors.hpp"
 
 void lineBuilder(std::ifstream &filename, std::string &line)
 {
@@ -14,32 +14,36 @@ void lineBuilder(std::ifstream &filename, std::string &line)
 
 	if (buffer.empty())
 	{
-        if (!std::getline(filename, buffer))
-        {
-            line.clear();
+		if (!std::getline(filename, buffer))
+		{
+			line.clear();
 			buffer.clear();
-            return ;
-        }
+			return ;
+		}
 	}
-    std::size_t semicolon = buffer.find(';');
-    std::size_t curlyBracket = buffer.find('{');
+	std::size_t semicolon = buffer.find(';');
+	std::size_t curlyBracket = buffer.find('{');
 	if(semicolon < buffer.size() && (semicolon == std::string::npos || semicolon < curlyBracket))
 	{
 		line = buffer.substr(0, semicolon + 1);
 		buffer = buffer.substr(semicolon + 1);
+		buffer.clear();
 	}
-    else if (curlyBracket < buffer.size() && (curlyBracket == std::string::npos || curlyBracket < semicolon))
-    {
-        line = buffer.substr(0, curlyBracket + 1);
+	else if (curlyBracket < buffer.size() && (curlyBracket == std::string::npos || curlyBracket < semicolon))
+	{
+		line = buffer.substr(0, curlyBracket + 1);
 		buffer = buffer.substr(curlyBracket + 1);
-    }
+		buffer.clear();
+	}
 	else
 	{
 		line = buffer;
 		buffer.clear();
 	}
-    line.erase(0, line.find_first_not_of(" \t"));
-    line.erase(line.find_last_not_of(" \t") + 1);
+	line.erase(0, line.find_first_not_of(" \t"));
+	line.erase(line.find_last_not_of(" \t") + 1);
+	if (line == "")
+		lineBuilder(filename, line);
 }
 
 AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block)
@@ -58,7 +62,6 @@ AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block)
         }
         else if (http != std::string::npos && http < line.find(" "))
         {
-            std::cout << BLUE << line << WHITE"\n";
 			HttpBlock *http = new HttpBlock("http");
             block.addBlock(http);
             createBlock(filename, *http);
@@ -70,9 +73,7 @@ AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block)
             createBlock(filename, *location);
         }
         else if (line.find("}") != std::string::npos)
-        {
 			return (&block);
-        }
         else
         {
 			std::istringstream iss(line);
