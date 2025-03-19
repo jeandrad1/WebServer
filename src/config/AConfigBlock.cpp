@@ -58,3 +58,8 @@ void AConfigBlock::addBlock(AConfigBlock *newBlock)
 /***********************************************************************/
 /*                          Getters & Setters                          */
 /***********************************************************************/
+
+std::string AConfigBlock::getName()
+{
+	return(this->_name);
+}

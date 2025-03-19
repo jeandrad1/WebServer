@@ -1,12 +1,24 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include "../include/utils/colors.hpp"
 #include "../include/config/AConfigBlock.hpp"
 #include "../include/config/ServerBlock.hpp"
 #include "../include/config/Directive.hpp"
 #include "../include/config/HttpBlock.hpp"
 #include "../include/config/LocationBlock.hpp"
-#include "../include/utils/colors.hpp"
+
+bool isFirstMatch(std::size_t const &targetValue, std::size_t const &first,
+    std::size_t const &second, std::size_t const &third)
+{
+    if (targetValue > first)
+        return (false);
+    if (targetValue > second)
+        return (false);
+    if (targetValue > third)
+        return (false);
+    return (true);
+}
 
 void lineBuilder(std::ifstream &filename, std::string &line)
 {
@@ -14,32 +26,48 @@ void lineBuilder(std::ifstream &filename, std::string &line)
 
 	if (buffer.empty())
 	{
-        if (!std::getline(filename, buffer))
-        {
-            line.clear();
+		if (!std::getline(filename, buffer))
+		{
+			line.clear();
 			buffer.clear();
-            return ;
-        }
+			return ;
+		}
 	}
-    std::size_t semicolon = buffer.find(';');
-    std::size_t curlyBracket = buffer.find('{');
-	if(semicolon < buffer.size() && (semicolon == std::string::npos || semicolon < curlyBracket))
+	std::size_t semicolon = buffer.find(';');
+	std::size_t curlyBracketOpen = buffer.find('{');
+	std::size_t curlyBracketClose = buffer.find('}');
+    std::size_t hash = buffer.find('#');
+    if (curlyBracketClose < buffer.size() && isFirstMatch(curlyBracketClose, curlyBracketOpen, semicolon, hash))
+    {
+        line = buffer.substr(0, curlyBracketClose + 1);
+		buffer = buffer.substr(curlyBracketClose + 1);
+    }
+    else if (curlyBracketOpen < buffer.size() && isFirstMatch(curlyBracketOpen, curlyBracketClose, semicolon, hash))
+    {
+        line = buffer.substr(0, curlyBracketOpen + 1);
+        buffer = buffer.substr(curlyBracketOpen + 1);
+    }
+	else if(semicolon < buffer.size() && isFirstMatch(semicolon, curlyBracketClose, curlyBracketOpen, hash))
 	{
 		line = buffer.substr(0, semicolon + 1);
 		buffer = buffer.substr(semicolon + 1);
 	}
-    else if (curlyBracket < buffer.size() && (curlyBracket == std::string::npos || curlyBracket < semicolon))
+    else if (hash < buffer.size() && isFirstMatch(hash, curlyBracketClose, curlyBracketOpen, semicolon))
     {
-        line = buffer.substr(0, curlyBracket + 1);
-		buffer = buffer.substr(curlyBracket + 1);
+        line = buffer.substr(0, hash);
+        buffer.clear();
+        std::cout << BLUE << line << WHITE;
+        std::cout << RED << buffer << WHITE;
     }
 	else
 	{
 		line = buffer;
 		buffer.clear();
 	}
-    line.erase(0, line.find_first_not_of(" \t"));
-    line.erase(line.find_last_not_of(" \t") + 1);
+	line.erase(0, line.find_first_not_of(" \t"));
+	line.erase(line.find_last_not_of(" \t") + 1);
+	if (line == "")
+		lineBuilder(filename, line);
 }
 
 AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block)
@@ -58,7 +86,6 @@ AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block)
         }
         else if (http != std::string::npos && http < line.find(" "))
         {
-            std::cout << BLUE << line << WHITE"\n";
 			HttpBlock *http = new HttpBlock("http");
             block.addBlock(http);
             createBlock(filename, *http);
@@ -70,9 +97,7 @@ AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block)
             createBlock(filename, *location);
         }
         else if (line.find("}") != std::string::npos)
-        {
 			return (&block);
-        }
         else
         {
 			std::istringstream iss(line);
@@ -81,6 +106,7 @@ AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block)
             {
 				std::getline(iss, value, ';'); // Read the rest of the line until semicolon
                 value.erase(0, value.find_first_not_of(" \t")); // Trim leading spaces
+				value.push_back(';');
                 block.addBlock(new Directive(key, value));
             }
         }
