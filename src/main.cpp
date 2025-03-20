@@ -56,8 +56,6 @@ void lineBuilder(std::ifstream &filename, std::string &line)
     {
         line = buffer.substr(0, hash);
         buffer.clear();
-        std::cout << BLUE << line << WHITE;
-        std::cout << RED << buffer << WHITE;
     }
 	else
 	{
