@@ -32,7 +32,7 @@ $(NAME) : $(OBJS)
 clean:
 	@$(RM) $(OBJS)
 	@echo
-	@echo "$(RED)Cleaning objects. $(RESET)"
+	@echo "$(RED) Cleaning objects. $(RESET)"
 
 fclean: clean
 	@$(RM) $(NAME)
