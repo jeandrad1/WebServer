@@ -56,7 +56,7 @@ void lineBuilder(std::ifstream &filename, std::string &line)
 	}
 	line.erase(0, line.find_first_not_of(" \t"));
 	line.erase(line.find_last_not_of(" \t") + 1);
-	if (line == "")
+	if (line == "" || line == "{")
 		lineBuilder(filename, line);
 }
 
