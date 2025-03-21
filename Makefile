@@ -6,6 +6,7 @@ CFLAGS = -Wall -Wextra -Werror
 CPP98_FLAG = -std=c++98
 
 FILES = main \
+		composite/composite \
 		config/AConfigBlock \
 		config/Directive \
 		config/ServerBlock \
