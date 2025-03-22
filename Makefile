@@ -11,6 +11,8 @@ FILES = main \
 		config/ServerBlock \
 		config/HttpBlock \
 		config/LocationBlock \
+		factory/StrategyFactory \
+		strategy/strategies/ErrorPageStrategy \
 
 SRCS_DIR = ./src/
 OBJS_DIR = ./src/
