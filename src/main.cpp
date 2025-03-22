@@ -7,6 +7,9 @@
 #include "../include/config/HttpBlock.hpp"
 #include "../include/config/LocationBlock.hpp"
 #include "../include/utils/colors.hpp"
+#include "../include/factory/StrategyFactory.hpp"
+#include "../include/strategy/IValidationStrategy.hpp"
+#include "../include/strategy/strategies/ErrorPageStrategy.hpp"
 
 void lineBuilder(std::ifstream &filename, std::string &line)
 {
@@ -40,6 +43,11 @@ void lineBuilder(std::ifstream &filename, std::string &line)
 	}
     line.erase(0, line.find_first_not_of(" \t"));
     line.erase(line.find_last_not_of(" \t") + 1);
+}
+
+IValidationStrategy* createErrorPageStrategy()
+{
+    return new ErrorPageStrategy();
 }
 
 AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block)
@@ -89,6 +97,28 @@ AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block)
     return (&block);
 }
 
+void factoryCheck(AConfigBlock &config)
+{
+    std::vector<AConfigBlock *>::iterator ite = config.blocks.end();
+    for (std::vector<AConfigBlock *>::iterator it = config.blocks.begin(); it != ite; ++it)
+    {
+        if (Directive *directive = dynamic_cast<Directive *>(*it))
+        {
+            IValidationStrategy *strategy = StrategyFactory::getInstance().chooseStrategy(dynamic_cast<Directive*>(*it)->getDirective());
+            if (strategy)
+            {
+                std::cout << "Strategy detected: ";
+                strategy->validate(directive->getValue());
+            }
+        }
+        else
+        {
+            std::cout << "Config block detected\n";
+            factoryCheck(**it);
+        }
+    }
+}
+
 int main(int argc, char **argv)
 {
     if (argc != 2)
@@ -105,8 +135,12 @@ int main(int argc, char **argv)
     }
     ServerBlock config("Config");
     AConfigBlock *config_ptr = createBlock(file, config);
+    ErrorPageStrategy errorPage;
+    StrategyFactory::getInstance().registerStrategy("error_page", createErrorPageStrategy);
 
-    config_ptr->printConfig(0); // Print the parsed configuration
+    factoryCheck(config);
+
+    //config_ptr->printConfig(0); // Print the parsed configuration
     file.close();
     
     return 0; // No memory leaks since we used `config` (automatic variable)
