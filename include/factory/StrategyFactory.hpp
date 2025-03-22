@@ -1,7 +1,7 @@
 #ifndef STRATEGYFACTORY_HPP
 # define STRATEGYFACTORY_HPP
 
-# include "IValidationStrategy.hpp"
+# include "../strategy/IValidationStrategy.hpp"
 # include <map>
 # include <string>
 
