@@ -13,25 +13,28 @@
 /*                          Public Functions                           */
 /***********************************************************************/
 
-static StrategyFactory &StrategyFactory::getInstance(void)
+StrategyFactory &StrategyFactory::getInstance(void)
 {
     static StrategyFactory instance;
     return (instance); 
 }
 
-void registerStrategy(const std::string &name, StrategyCreateFuncPtr func)
+void StrategyFactory::registerStrategy(const std::string &name, StrategyCreateFuncPtr func)
 {
     this->strategyMap[name] = func;
 }
 
-IValidationStrategy	*chooseStrategy(const std::string &name)
+IValidationStrategy	*StrategyFactory::chooseStrategy(const std::string &name)
 {
-    if (strategyMap.find(name) != strategyMap.end())
+    if (this->strategyMap.find(name) != strategyMap.end())
     {
         return (strategyMap[name]());
     }
     else
+    {
+        std::cout << "No strategy detected, name: " << name << "\n";
         return (NULL);
+    }
 }
 
 /***********************************************************************/
