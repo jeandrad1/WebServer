@@ -7,6 +7,7 @@ CPP98_FLAG = -std=c++98
 
 FILES = main \
 		composite/composite \
+		composite/lineBuilder \
 		config/AConfigBlock \
 		config/Directive \
 		config/ServerBlock \

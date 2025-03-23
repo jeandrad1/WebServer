@@ -17,7 +17,8 @@ int main(int argc, char **argv)
     ServerBlock config("Config");
     AConfigBlock *config_ptr = createBlock(file, config);
 
-    config_ptr->printConfig(0); // Print the parsed configuration
+    config_ptr->getBlock(1)->printConfig(0); // Print the parsed configuration
+    
     file.close();
     
     return 0; // No memory leaks since we used `config` (automatic variable)
