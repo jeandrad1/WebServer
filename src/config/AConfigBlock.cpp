@@ -73,3 +73,13 @@ AConfigBlock *AConfigBlock::getBlock(int index)
 		it++;
 	return(*it);
 }
+
+AConfigBlock *AConfigBlock::getBeginBlock()
+{
+	return(*this->blocks.begin());
+}
+
+AConfigBlock *AConfigBlock::getEndBlock()
+{
+	return(*this->blocks.end());
+}

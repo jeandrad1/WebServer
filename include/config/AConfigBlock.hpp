@@ -25,6 +25,8 @@ class AConfigBlock {
 
 		std::string getName();
 		AConfigBlock *getBlock(int index);
+		AConfigBlock *getBeginBlock();
+		AConfigBlock *getEndBlock();
 };
 
 #endif
