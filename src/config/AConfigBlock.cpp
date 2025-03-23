@@ -63,3 +63,23 @@ std::string AConfigBlock::getName()
 {
 	return(this->_name);
 }
+
+AConfigBlock *AConfigBlock::getBlock(int index)
+{
+	if (index >= this->blocks.size())
+		throw(std::out_of_range("Index exceeds blocks size"));
+	std::vector<AConfigBlock*>::iterator it = this->blocks.begin();
+	for (int i = 0; i != index; i++)
+		it++;
+	return(*it);
+}
+
+AConfigBlock *AConfigBlock::getBeginBlock()
+{
+	return(*this->blocks.begin());
+}
+
+AConfigBlock *AConfigBlock::getEndBlock()
+{
+	return(*this->blocks.end());
+}
