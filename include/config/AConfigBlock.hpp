@@ -4,6 +4,7 @@
 # include <iostream>
 # include <vector>
 # include <string>
+# include <stdexcept>
 
 class AConfigBlock {
 
@@ -21,6 +22,11 @@ class AConfigBlock {
 
 		virtual void	printConfig(int indent = 0) const = 0;
 		virtual void	addBlock(AConfigBlock *newBlock);
+
+		std::string getName();
+		AConfigBlock *getBlock(int index);
+		AConfigBlock *getBeginBlock();
+		AConfigBlock *getEndBlock();
 };
 
 #endif
