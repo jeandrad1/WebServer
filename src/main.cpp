@@ -1,93 +1,4 @@
-#include <fstream>
-#include <sstream>
-#include <iostream>
-#include "../include/config/AConfigBlock.hpp"
-#include "../include/config/ServerBlock.hpp"
-#include "../include/config/Directive.hpp"
-#include "../include/config/HttpBlock.hpp"
-#include "../include/config/LocationBlock.hpp"
-#include "../include/utils/colors.hpp"
-
-void lineBuilder(std::ifstream &filename, std::string &line)
-{
-    std::string static buffer;
-
-	if (buffer.empty())
-	{
-        if (!std::getline(filename, buffer))
-        {
-            line.clear();
-			buffer.clear();
-            return ;
-        }
-	}
-    std::size_t semicolon = buffer.find(';');
-    std::size_t curlyBracket = buffer.find('{');
-	if(semicolon < buffer.size() && (semicolon == std::string::npos || semicolon < curlyBracket))
-	{
-		line = buffer.substr(0, semicolon + 1);
-		buffer = buffer.substr(semicolon + 1);
-	}
-    else if (curlyBracket < buffer.size() && (curlyBracket == std::string::npos || curlyBracket < semicolon))
-    {
-        line = buffer.substr(0, curlyBracket + 1);
-		buffer = buffer.substr(curlyBracket + 1);
-    }
-	else
-	{
-		line = buffer;
-		buffer.clear();
-	}
-    line.erase(0, line.find_first_not_of(" \t"));
-    line.erase(line.find_last_not_of(" \t") + 1);
-}
-
-AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block)
-{
-    std::string line;
-    lineBuilder(filename, line);
-    while (!line.empty())
-    {
-        std::size_t http = line.find("http");
-        if (line.empty()) continue;
-        if (line.find("server") != std::string::npos && line.find("server_name") == std::string::npos)
-        {
-			ServerBlock *server = new ServerBlock("server");
-            block.addBlock(server);
-            createBlock(filename, *server);
-        }
-        else if (http != std::string::npos && http < line.find(" "))
-        {
-            std::cout << BLUE << line << WHITE"\n";
-			HttpBlock *http = new HttpBlock("http");
-            block.addBlock(http);
-            createBlock(filename, *http);
-        }
-        else if (line.find("location") != std::string::npos)
-        {
-            LocationBlock *location = new LocationBlock("location");
-            block.addBlock(location);
-            createBlock(filename, *location);
-        }
-        else if (line.find("}") != std::string::npos)
-        {
-			return (&block);
-        }
-        else
-        {
-			std::istringstream iss(line);
-            std::string key, value;
-            if (iss >> key)
-            {
-				std::getline(iss, value, ';'); // Read the rest of the line until semicolon
-                value.erase(0, value.find_first_not_of(" \t")); // Trim leading spaces
-                block.addBlock(new Directive(key, value));
-            }
-        }
-		lineBuilder(filename, line);
-    }
-    return (&block);
-}
+#include "../include/pattern/composite.hpp"
 
 int main(int argc, char **argv)
 {
@@ -106,7 +17,8 @@ int main(int argc, char **argv)
     ServerBlock config("Config");
     AConfigBlock *config_ptr = createBlock(file, config);
 
-    config_ptr->printConfig(0); // Print the parsed configuration
+    config_ptr->getBlock(1)->printConfig(0); // Print the parsed configuration
+    
     file.close();
     
     return 0; // No memory leaks since we used `config` (automatic variable)
