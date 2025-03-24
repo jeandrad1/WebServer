@@ -1,25 +1,25 @@
-#include "../../include/config/Directive.hpp"
+#include "../../../include/parser/config/AConfigBlock.hpp"
 
 /***********************************************************************/
 /*                     Constructors & Destructor                       */
 /***********************************************************************/
 
-Directive::Directive(void)
+AConfigBlock::AConfigBlock(void)
 {
 
 }
 
-Directive::Directive(const std::string &directive, const std::string &value) : _directive(directive), _value(value)
+AConfigBlock::AConfigBlock(const std::string &name) : _name(name)
 {
 
 }
 
-Directive::Directive(const Directive &other)
+AConfigBlock::AConfigBlock(const AConfigBlock &other)
 {
-	*this = other;
+    *this = other;
 }
 
-Directive::~Directive(void)
+AConfigBlock::~AConfigBlock(void)
 {
 
 }
@@ -28,12 +28,11 @@ Directive::~Directive(void)
 /*                         Operator Overload                           */
 /***********************************************************************/
 
-Directive &Directive::operator=(const Directive &other)
+AConfigBlock &AConfigBlock::operator=(const AConfigBlock &other)
 {
 	if (this == &other)
 		return (*this);
-	this->_directive = other._directive;
-    this->_value = other._value;
+	this->_name = other._name;
 	if (!blocks.empty())
 	{
 		std::vector<AConfigBlock *>::iterator ite = this->blocks.end();
@@ -51,22 +50,36 @@ Directive &Directive::operator=(const Directive &other)
 /*                          Public Functions                           */
 /***********************************************************************/
 
-void	Directive::printConfig(int indent) const
+void AConfigBlock::addBlock(AConfigBlock *newBlock)
 {
-	std::string spaces(indent * 2, ' ');
-	std::cout << spaces << this->_directive << " " << this->_value << "\n";
+    this->blocks.push_back(newBlock);
 }
 
 /***********************************************************************/
 /*                          Getters & Setters                          */
 /***********************************************************************/
 
-std::string    Directive::getDirective(void) const
+std::string AConfigBlock::getName()
 {
-	return (this->_directive);
+	return(this->_name);
 }
 
-std::string    Directive::getValue(void) const
+AConfigBlock *AConfigBlock::getBlock(int index)
 {
-	return (this->_value);
+	if (index >= this->blocks.size())
+		throw(std::out_of_range("Index exceeds blocks size"));
+	std::vector<AConfigBlock*>::iterator it = this->blocks.begin();
+	for (int i = 0; i != index; i++)
+		it++;
+	return(*it);
+}
+
+AConfigBlock *AConfigBlock::getBeginBlock()
+{
+	return(*this->blocks.begin());
+}
+
+AConfigBlock *AConfigBlock::getEndBlock()
+{
+	return(*this->blocks.end());
 }

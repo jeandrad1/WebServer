@@ -1,4 +1,5 @@
-#include "../../include/pattern/composite.hpp"
+#include <iostream>
+#include <fstream>
 
 bool isFirstMatch(std::size_t const &targetValue, std::size_t const &first,
 	std::size_t const &second, std::size_t const &third)
@@ -6,7 +7,7 @@ bool isFirstMatch(std::size_t const &targetValue, std::size_t const &first,
     return (targetValue <= first && targetValue <= second && targetValue <= third);
 }
 
-void lineBuilder(std::ifstream &filename, std::string &line)
+void buildConfigLine(std::ifstream &filename, std::string &line)
 {
     std::string static buffer;
 
@@ -51,5 +52,5 @@ void lineBuilder(std::ifstream &filename, std::string &line)
 	line.erase(0, line.find_first_not_of(" \t"));
 	line.erase(line.find_last_not_of(" \t") + 1);
 	if (line == "" || line == "{")
-		lineBuilder(filename, line);
+		buildConfigLine(filename, line);
 }

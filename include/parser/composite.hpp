@@ -5,11 +5,11 @@
 #include <sstream>
 #include <iostream>
 #include "../utils/colors.hpp"
-#include "../config/AConfigBlock.hpp"
-#include "../config/ServerBlock.hpp"
-#include "../config/Directive.hpp"
-#include "../config/HttpBlock.hpp"
-#include "../config/LocationBlock.hpp"
+#include "../parser/config/AConfigBlock.hpp"
+#include "../parser/config/ServerBlock.hpp"
+#include "../parser/config/Directive.hpp"
+#include "../parser/config/HttpBlock.hpp"
+#include "../parser/config/LocationBlock.hpp"
 
 AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block);
 void lineBuilder(std::ifstream &filename, std::string &line);
