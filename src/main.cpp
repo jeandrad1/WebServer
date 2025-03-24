@@ -1,11 +1,5 @@
 #include <fstream>
-#include <sstream>
-#include "../include/utils/colors.hpp"
-#include "../include/parser/config/AConfigBlock.hpp"
 #include "../include/parser/config/ServerBlock.hpp"
-#include "../include/parser/config/Directive.hpp"
-#include "../include/parser/config/HttpBlock.hpp"
-#include "../include/parser/config/LocationBlock.hpp"
 
 AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block);
 
@@ -23,6 +17,7 @@ int main(int argc, char **argv)
         std::cerr << "Error: Could not open the file.\n";
         return (1);
     }
+
     ServerBlock config("Config");
     AConfigBlock *config_ptr = createBlock(file, config);
 
