@@ -1,6 +1,9 @@
 #include "../../../include/strategy/strategies/ErrorPageStrategy.hpp"
 #include <iostream>
 #include <sstream>
+#include <stdlib.h>
+
+/*  error_page [error_code ...] [=[response_code]] uri; */
 
 bool isInteger(std::string value)
 {
@@ -12,14 +15,15 @@ bool isInteger(std::string value)
         if (!isdigit(value[i]))
             return (false);
     }
-
     return (true);
 }
 
-/*bool checkIfCodeIsValid(int code)
+bool checkIfCodeIsValid(int code)
 {
-    if (code)
-}*/
+    if (code >= 400 && code <= 599)
+        return (true);
+    return (false);
+}
 
 bool ErrorPageStrategy::validate(const std::string &value) const
 {
@@ -29,20 +33,18 @@ bool ErrorPageStrategy::validate(const std::string &value) const
 
     while (!iss.eof())
     {
-        std::string val;
+        std::string string;
 
-        iss >> val;
-        if (isInteger(val))
+        iss >> string;
+        if (isInteger(string))
         {
-            int val;
-            iss >> val;
-            std::cout << "Is integer: " << val << "\n";
+            std::cout << "Is integer: " << string << "\n";
+            if (checkIfCodeIsValid(atoi(string.c_str())))
+                std::cout << "Error code is valid\n";
         }
         else
         {
-            std::string page;
-            iss >> page;
-            std::cout << "Is string: " << page << "\n";
+            std::cout << "Is string: " << string << "\n";
         }
     }
     return true;
