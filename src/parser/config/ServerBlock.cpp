@@ -1,25 +1,25 @@
-#include "../../include/config/HttpBlock.hpp"
+#include "../../../include/parser/config/ServerBlock.hpp"
 
 /***********************************************************************/
 /*                     Constructors & Destructor                       */
 /***********************************************************************/
 
-HttpBlock::HttpBlock(void)
+ServerBlock::ServerBlock(void)
 {
 
 }
 
-HttpBlock::HttpBlock(const std::string &name) : AConfigBlock(name)
+ServerBlock::ServerBlock(const std::string &name) : AConfigBlock(name)
 {
 
 }
 
-HttpBlock::HttpBlock(const HttpBlock &other)
+ServerBlock::ServerBlock(const ServerBlock &other)
 {
 	*this = other;
 }
 
-HttpBlock::~HttpBlock(void)
+ServerBlock::~ServerBlock(void)
 {
 
 }
@@ -33,7 +33,7 @@ HttpBlock::~HttpBlock(void)
 /*                          Public Functions                           */
 /***********************************************************************/
 
-void	HttpBlock::printConfig(int indent) const
+void	ServerBlock::printConfig(int indent) const
 {
 	std::string spaces(indent * 2, ' ');
 	std::cout << spaces << _name << " {\n";

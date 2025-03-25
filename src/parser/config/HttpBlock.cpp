@@ -1,25 +1,25 @@
-#include "../../include/config/LocationBlock.hpp"
+#include "../../../include/parser/config/HttpBlock.hpp"
 
 /***********************************************************************/
 /*                     Constructors & Destructor                       */
 /***********************************************************************/
 
-LocationBlock::LocationBlock(void)
-{
-
-} 
-
-LocationBlock::LocationBlock(const std::string &name) : AConfigBlock(name)
+HttpBlock::HttpBlock(void)
 {
 
 }
 
-LocationBlock::LocationBlock(const LocationBlock &other)
+HttpBlock::HttpBlock(const std::string &name) : AConfigBlock(name)
+{
+
+}
+
+HttpBlock::HttpBlock(const HttpBlock &other)
 {
 	*this = other;
 }
 
-LocationBlock::~LocationBlock(void)
+HttpBlock::~HttpBlock(void)
 {
 
 }
@@ -33,7 +33,7 @@ LocationBlock::~LocationBlock(void)
 /*                          Public Functions                           */
 /***********************************************************************/
 
-void	LocationBlock::printConfig(int indent) const
+void	HttpBlock::printConfig(int indent) const
 {
 	std::string spaces(indent * 2, ' ');
 	std::cout << spaces << _name << " {\n";

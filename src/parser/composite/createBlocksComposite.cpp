@@ -1,9 +1,16 @@
-#include "../../include/pattern/composite.hpp"
+#include <fstream>
+#include <sstream>
+#include "../../include/parser/config/ServerBlock.hpp"
+#include "../../include/parser/config/Directive.hpp"
+#include "../../include/parser/config/HttpBlock.hpp"
+#include "../../include/parser/config/LocationBlock.hpp"
+
+void buildConfigLine(std::ifstream &filename, std::string &line);
 
 AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block)
 {
     std::string line;
-    lineBuilder(filename, line);
+    buildConfigLine(filename, line);
     while (!line.empty())
     {
         std::size_t http = line.find("http");
@@ -40,7 +47,7 @@ AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block)
                 block.addBlock(new Directive(key, value));
             }
         }
-		lineBuilder(filename, line);
+		buildConfigLine(filename, line);
     }
     return (&block);
 }
