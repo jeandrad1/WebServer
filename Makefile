@@ -6,11 +6,13 @@ CFLAGS = -Wall -Wextra -Werror
 CPP98_FLAG = -std=c++98
 
 FILES = main \
-		config/AConfigBlock \
-		config/Directive \
-		config/ServerBlock \
-		config/HttpBlock \
-		config/LocationBlock \
+		parser/composite/createBlocksComposite \
+		parser/composite/lineBuilder \
+		parser/config/AConfigBlock \
+		parser/config/Directive \
+		parser/config/ServerBlock \
+		parser/config/HttpBlock \
+		parser/config/LocationBlock \
 
 SRCS_DIR = ./src/
 OBJS_DIR = ./src/
