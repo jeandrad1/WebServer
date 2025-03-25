@@ -1,32 +1,39 @@
 #ifndef ACONFIGBLOCK_HPP
-# define ACONFIGBLOCK_HPP
+#define ACONFIGBLOCK_HPP
 
-# include <iostream>
-# include <vector>
-# include <string>
-# include <stdexcept>
+#include <iostream>
+#include <vector>
+#include <string>
+#include <stdexcept>
 
-class AConfigBlock {
+class AConfigBlock
+{
 
-	protected:
-		std::string					_name;
-		std::vector<AConfigBlock *>	blocks;
-	
-		AConfigBlock(void);
-	public:
-		AConfigBlock(const std::string &name);
-		AConfigBlock(const AConfigBlock &other);
-		virtual	~AConfigBlock(void);
+protected:
+	std::string _name;
+	std::vector<AConfigBlock *> blocks;
 
-		AConfigBlock	&operator=(const AConfigBlock &other);
+	AConfigBlock(void);
 
-		virtual void	printConfig(int indent = 0) const = 0;
-		virtual void	addBlock(AConfigBlock *newBlock);
+public:
+	AConfigBlock(const std::string &name);
+	AConfigBlock(const AConfigBlock &other);
+	virtual ~AConfigBlock(void);
 
-		std::string getName();
-		AConfigBlock *getBlock(int index);
-		AConfigBlock *getBeginBlock();
-		AConfigBlock *getEndBlock();
+	AConfigBlock &operator=(const AConfigBlock &other);
+
+	typedef std::vector<AConfigBlock *>::iterator iterator;
+	typedef std::vector<AConfigBlock *>::const_iterator const_iterator;
+
+	virtual void printConfig(int indent = 0) const = 0;
+	virtual void addBlock(AConfigBlock *newBlock);
+
+	std::string getName();
+
+	AConfigBlock *getBlock(int index);
+	iterator begin();
+	iterator cbegin();
+	iterator cend();
 };
 
 #endif
