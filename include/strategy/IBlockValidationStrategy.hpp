@@ -1,15 +1,13 @@
 #ifndef IBLOCKVALIDATIONSTRATEGY_HPP
 #define IBLOCKVALIDATIONSTRATEGY_HPP
 
-#include <string>
-#include <iostream>
+#include "../parser/config/AConfigBlock.hpp"
 
-class IValidationStrategy
-{
+class IBlockValidationStrategy {
 
-public:
-    virtual ~IBlockValidationStrategy() {}
-    virtual bool validate(AConfigBlock &block) const = 0;
+    public:
+        virtual ~IBlockValidationStrategy() {}
+        virtual bool validate(AConfigBlock &block) const = 0;
 };
 
 #endif
