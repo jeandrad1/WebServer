@@ -43,24 +43,24 @@ AConfigBlock &AConfigBlock::operator=(const AConfigBlock &other)
 	return (*this);
 }
 
-iterator AConfigBlock::begin(void)
+AConfigBlock::iterator AConfigBlock::begin(void)
 {
 	return (this->blocks.begin());
 }
 
-iterator AConfigBlock::end(void)
+AConfigBlock::iterator AConfigBlock::end(void)
 {
 	return (this->blocks.end());
 }
 
-iterator AConfigBlock::cbegin(void)
+AConfigBlock::const_iterator AConfigBlock::begin(void) const
 {
-	return (this->blocks.cbegin());
+	return (this->blocks.begin());
 }
 
-iterator AConfigBlock::cend(void)
+AConfigBlock::const_iterator AConfigBlock::end(void) const
 {
-	return (this->blocks.cend());
+	return (this->blocks.end());
 }
 
 /***********************************************************************/
@@ -89,14 +89,4 @@ AConfigBlock *AConfigBlock::getBlock(int index)
 	for (int i = 0; i != index; i++)
 		it++;
 	return (*it);
-}
-
-AConfigBlock *AConfigBlock::getBeginBlock()
-{
-	return (*this->blocks.begin());
-}
-
-AConfigBlock *AConfigBlock::getEndBlock()
-{
-	return (*this->blocks.end());
 }
