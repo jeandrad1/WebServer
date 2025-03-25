@@ -1,5 +1,4 @@
 #include "../../../include/strategy/strategies/AutoindexStrategy.hpp"
-#include "../../../include/utils/colors.hpp"
 
 bool AutoindexStrategy::validate(const std::string &value) const
 {
