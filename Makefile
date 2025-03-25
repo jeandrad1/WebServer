@@ -7,7 +7,7 @@ CPP98_FLAG = -std=c++98
 
 FILES = main \
 		parser/composite/createBlocksComposite \
-		parser/composite/lineBuilder \
+		parser/composite/buildConfigLine \
 		parser/config/AConfigBlock \
 		parser/config/Directive \
 		parser/config/ServerBlock \
