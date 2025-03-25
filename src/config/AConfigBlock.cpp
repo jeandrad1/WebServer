@@ -6,22 +6,19 @@
 
 AConfigBlock::AConfigBlock(void)
 {
-
 }
 
 AConfigBlock::AConfigBlock(const std::string &name) : _name(name)
 {
-
 }
 
 AConfigBlock::AConfigBlock(const AConfigBlock &other)
 {
-    *this = other;
+	*this = other;
 }
 
 AConfigBlock::~AConfigBlock(void)
 {
-
 }
 
 /***********************************************************************/
@@ -46,13 +43,33 @@ AConfigBlock &AConfigBlock::operator=(const AConfigBlock &other)
 	return (*this);
 }
 
+iterator AConfigBlock::begin(void)
+{
+	return (this->blocks.begin());
+}
+
+iterator AConfigBlock::end(void)
+{
+	return (this->blocks.end());
+}
+
+iterator AConfigBlock::cbegin(void)
+{
+	return (this->blocks.cbegin());
+}
+
+iterator AConfigBlock::cend(void)
+{
+	return (this->blocks.cend());
+}
+
 /***********************************************************************/
 /*                          Public Functions                           */
 /***********************************************************************/
 
 void AConfigBlock::addBlock(AConfigBlock *newBlock)
 {
-    this->blocks.push_back(newBlock);
+	this->blocks.push_back(newBlock);
 }
 
 /***********************************************************************/
@@ -61,25 +78,25 @@ void AConfigBlock::addBlock(AConfigBlock *newBlock)
 
 std::string AConfigBlock::getName()
 {
-	return(this->_name);
+	return (this->_name);
 }
 
 AConfigBlock *AConfigBlock::getBlock(int index)
 {
 	if (index >= this->blocks.size())
 		throw(std::out_of_range("Index exceeds blocks size"));
-	std::vector<AConfigBlock*>::iterator it = this->blocks.begin();
+	std::vector<AConfigBlock *>::iterator it = this->blocks.begin();
 	for (int i = 0; i != index; i++)
 		it++;
-	return(*it);
+	return (*it);
 }
 
 AConfigBlock *AConfigBlock::getBeginBlock()
 {
-	return(*this->blocks.begin());
+	return (*this->blocks.begin());
 }
 
 AConfigBlock *AConfigBlock::getEndBlock()
 {
-	return(*this->blocks.end());
+	return (*this->blocks.end());
 }
