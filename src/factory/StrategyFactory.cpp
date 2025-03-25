@@ -4,6 +4,11 @@
 /*                     Constructors & Destructor                       */
 /***********************************************************************/
 
+StrategyFactory::StrategyFactory(void)
+{
+    registerAllStrategies(*this);
+}
+
 /***********************************************************************/
 /*                         Operator Overload                           */
 /***********************************************************************/
@@ -13,7 +18,7 @@
 /*                          Public Functions                           */
 /***********************************************************************/
 
-static StrategyFactory &StrategyFactory::getInstance(void)
+StrategyFactory &StrategyFactory::getInstance(void)
 {
     static StrategyFactory instance;
     return (instance); 

@@ -1,7 +1,7 @@
 #ifndef STRATEGYFACTORY_HPP
 # define STRATEGYFACTORY_HPP
 
-# include "IValidationStrategy.hpp"
+# include "../strategy/IValidationStrategy.hpp"
 # include <map>
 # include <string>
 
@@ -11,6 +11,8 @@ class StrategyFactory {
 
 	private:
 		std::map<std::string, StrategyCreateFuncPtr> strategyMap;
+
+		StrategyFactory(void);
 
 	public:
 		static StrategyFactory &getInstance(void);
