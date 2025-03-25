@@ -32,8 +32,9 @@ public:
 
 	AConfigBlock *getBlock(int index);
 	iterator begin();
-	iterator cbegin();
-	iterator cend();
+	iterator end();
+	const_iterator begin() const;
+	const_iterator end() const;
 };
 
 #endif
