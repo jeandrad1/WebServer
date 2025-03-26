@@ -9,12 +9,13 @@ void	factoryCheck(AConfigBlock &config)
 	std::vector<AConfigBlock *>::iterator ite = config.end();
 	for (std::vector<AConfigBlock *>::iterator it = config.begin(); it != ite; ++it)
 	{
+		//std::cout << (*it)->getName() << "\n";
 		if (Directive *directive = dynamic_cast<Directive *>(*it))
 		{
 			IValidationStrategy *strategy = StrategyFactory::getInstance().chooseStrategy(dynamic_cast<Directive*>(*it)->getDirective());
 			if (strategy)
 			{
-				if (strategy->validate(directive->getValue()))
+				if (!strategy->validate(directive->getValue()))
 					std::cout << "Error detected for directive " << directive->getDirective() << " with value " << directive->getValue() << "\n"; 
 			}
 		}

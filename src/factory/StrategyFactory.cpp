@@ -1,13 +1,10 @@
 #include "../../include/factory/StrategyFactory.hpp"
 
+void registerAllStrategies(StrategyFactory factory);
+
 /***********************************************************************/
 /*                     Constructors & Destructor                       */
 /***********************************************************************/
-
-StrategyFactory::StrategyFactory(void)
-{
-    registerAllStrategies(*this);
-}
 
 /***********************************************************************/
 /*                         Operator Overload                           */
