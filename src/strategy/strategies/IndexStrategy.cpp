@@ -1,56 +1,47 @@
-#include "include/strategy/IndexStrategy.hpp"
+#include "../../../include/strategy/IndexStrategy.hpp"
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <cctype>
 
-bool check_chars(std::string value)
+bool check_chars(const std::string &value)
 {
-    long count = 0;
-    for (char c : value)
+    for (size_t i = 0; i < value.size(); i++)
     {
+        char c = value[i];
         if (c > 31 && c < 127)
-            count++;
+            return true; // Only needs one valid character
     }
-    return count != 0;
+    return false;
 }
 
 std::string trim(const std::string &str)
 {
-    if (str.empty())
+    if (str.size() == 0)
         return "";
-    size_t first = str.find_first_not_of(' ');
+
+    size_t first = str.find_first_not_of(" \t\r\n");
     if (first == std::string::npos)
         return "";
 
-    size_t last = str.find_last_not_of(' ');
-    return str.substr(first, (last - first + 1));
+    size_t last = str.find_last_not_of(" \t\r\n");
+    return str.substr(first, last - first + 1);
 }
-
 
 int count_whitespace(const std::string &str)
 {
-    int i = 0;
-    int j = 0;
-    while (i < str.length())
+    int count = 0;
+    for (size_t i = 0; i < str.size(); i++)
     {
-        if (std::isspace(str[i]) == 0)
-            i++;
-        j++;
+        if (std::isspace(str[i]))
+            count++;
     }
-    return (j);
+    return count;
 }
 
-bool correct_end(const std::string &value)
+bool check_filename(const std::string &word)
 {
-    if (value.find(' ') == std::string::npos)
-    {
-        if (value.size() > 5 && value.substr(value.size() - 5) == ".html")
-            return true;
-        else
-            return false;
-    }
-    return false;
+    return word.size() >= 5 && word.substr(word.size() - 5) == ".html";
 }
 
 bool split(const std::string &value)
@@ -59,40 +50,26 @@ bool split(const std::string &value)
     std::string word;
     while (iss >> word)
     {
-        if (word.size() > 5 && word.substr(word.size() - 5) == ".html")
-            continue;
-        else
+        if (!check_filename(word))
             return false;
     }
     return true;
 }
 
-bool IndexStrategy::validate(std::string const &value) const
+bool IndexStrategy::validate(const std::string &value) const
 {
-    // check if null
     if (value.empty())
         return false;
-    
-    // check there are some spaces and letters
-    if (check_chars(value) == false)
-        return false;
-    
-    // Check to see that it is not just empty spaces
-    if (count_whitespace(value) == value.length())
+
+    if (!check_chars(value))
         return false;
 
-    // Trim the ends
+    if (count_whitespace(value) == (int)value.length())
+        return false;
+
     std::string real_value = trim(value);
     if (real_value.empty())
-		return false;
+        return false;
 
-    // If one word do a .html end check
-    if (correct_end(real_value) == false)
-		return false;
-
-    // Else split and do a loop of the function before
-    if (split(real_value) == false)
-		return false;
-
-    return true;
+    return split(real_value);
 }
