@@ -13,6 +13,10 @@ FILES = main \
 		parser/config/ServerBlock \
 		parser/config/HttpBlock \
 		parser/config/LocationBlock \
+		factory/registerAllStrategies \
+		factory/factoryCheck \
+		factory/createStrategies \
+		factory/StrategyFactory \
 
 SRCS_DIR = ./src/
 OBJS_DIR = ./src/
