@@ -12,8 +12,6 @@ class StrategyFactory {
 	private:
 		std::map<std::string, StrategyCreateFuncPtr> strategyMap;
 
-		StrategyFactory(void);
-
 	public:
 		static StrategyFactory &getInstance(void);
 
