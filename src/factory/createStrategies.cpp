@@ -16,7 +16,7 @@ IValidationStrategy *createClientMaxBodySizeStrategy(void)
     return (new ClientMaxBodySizeStrategy());
 }
 
-IValidationStrategy *createIndexStrategy(void)
+/*IValidationStrategy *createIndexStrategy(void)
 {
     return (new IndexStrategy());
 }
@@ -29,4 +29,4 @@ IValidationStrategy *createRootStrategy(void)
 IValidationStrategy *createServerNameStrategy(void)
 {
     return (new ServerNameStrategy());
-}
+}*/
