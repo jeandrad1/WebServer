@@ -18,6 +18,8 @@ void	factoryCheck(AConfigBlock &config)
 				if (!strategy->validate(directive->getValue()))
 					std::cout << "Error detected for directive " << directive->getDirective() << " with value " << directive->getValue() << "\n"; 
 			}
+			else
+				std::cout << "Error: Invalid directive " << directive->getDirective() << "\n";
 		}
 		else
 		{
