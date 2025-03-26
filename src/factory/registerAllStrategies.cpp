@@ -3,6 +3,7 @@
 
 void registerAllStrategies(StrategyFactory factory)
 {
+    std::cout << "Entra 2\n";
     StrategyFactory::getInstance().registerStrategy("autoindex", createAutoIndexStrategy);
     StrategyFactory::getInstance().registerStrategy("client_max_body_size", createClientMaxBodySizeStrategy);
     StrategyFactory::getInstance().registerStrategy("error_page", createErrorPageStrategy);
