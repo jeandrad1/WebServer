@@ -2,7 +2,7 @@
 #include <cctype>
 #include <string>
 
-bool validate(const std::string &value)
+bool ServerNameStrategy::validate(const std::string &value) const
 {
     if (value.size() == 0)
         return false;
