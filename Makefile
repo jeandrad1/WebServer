@@ -20,7 +20,7 @@ FILES = main \
 		factory/factoryCheck \
 		factory/createStrategies \
 		factory/StrategyFactory \
-#		strategy/strategies/IndexStrategy \
+		strategy/strategies/IndexStrategy \
 		strategy/strategies/RootStrategy \
 		strategy/strategies/ServerNameStrategy \
 
