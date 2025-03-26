@@ -1,7 +1,7 @@
 #ifndef INDEXSTRATEGY_HPP
 # define INDEXSTRATEGY_HPP
 
-# include "IValidationStrategy.hpp"
+# include "../IValidationStrategy.hpp"
 
 class IndexStrategy : public IValidationStrategy
 {
