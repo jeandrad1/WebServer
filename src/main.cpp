@@ -4,6 +4,7 @@
 
 AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block);
 void	factoryCheck(AConfigBlock &config);
+void registerAllStrategies(StrategyFactory factory);
 
 int main(int argc, char **argv)
 {
@@ -22,8 +23,9 @@ int main(int argc, char **argv)
 
     ServerBlock config("Config");
     AConfigBlock *config_ptr = createBlock(file, config);
-
+    registerAllStrategies(StrategyFactory::getInstance());
     config_ptr->getBlock(0)->printConfig(0); // Print the parsed configuration
+    factoryCheck(*config_ptr);
     
     file.close();
     
