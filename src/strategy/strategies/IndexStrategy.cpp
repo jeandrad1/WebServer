@@ -1,4 +1,4 @@
-#include "include/strategy/IndexStrategy.hpp"
+#include "../../../include/strategy/strategies/IndexStrategy.hpp"
 #include <iostream>
 #include <sstream>
 #include <string>
