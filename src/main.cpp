@@ -1,123 +1,10 @@
 #include <fstream>
-#include <sstream>
-#include <iostream>
-#include "../include/config/AConfigBlock.hpp"
-#include "../include/config/ServerBlock.hpp"
-#include "../include/config/Directive.hpp"
-#include "../include/config/HttpBlock.hpp"
-#include "../include/config/LocationBlock.hpp"
-#include "../include/utils/colors.hpp"
+#include "../include/parser/config/ServerBlock.hpp"
 #include "../include/factory/StrategyFactory.hpp"
-#include "../include/strategy/IValidationStrategy.hpp"
-#include "../include/strategy/strategies/ErrorPageStrategy.hpp"
 
-void lineBuilder(std::ifstream &filename, std::string &line)
-{
-    std::string static buffer;
-
-	if (buffer.empty())
-	{
-        if (!std::getline(filename, buffer))
-        {
-            line.clear();
-			buffer.clear();
-            return ;
-        }
-	}
-    std::size_t semicolon = buffer.find(';');
-    std::size_t curlyBracket = buffer.find('{');
-	if(semicolon < buffer.size() && (semicolon == std::string::npos || semicolon < curlyBracket))
-	{
-		line = buffer.substr(0, semicolon + 1);
-		buffer = buffer.substr(semicolon + 1);
-	}
-    else if (curlyBracket < buffer.size() && (curlyBracket == std::string::npos || curlyBracket < semicolon))
-    {
-        line = buffer.substr(0, curlyBracket + 1);
-		buffer = buffer.substr(curlyBracket + 1);
-    }
-	else
-	{
-		line = buffer;
-		buffer.clear();
-	}
-    line.erase(0, line.find_first_not_of(" \t"));
-    line.erase(line.find_last_not_of(" \t") + 1);
-}
-
-IValidationStrategy* createErrorPageStrategy()
-{
-    return new ErrorPageStrategy();
-}
-
-AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block)
-{
-    std::string line;
-    lineBuilder(filename, line);
-    while (!line.empty())
-    {
-        std::size_t http = line.find("http");
-        if (line.empty()) continue;
-        if (line.find("server") != std::string::npos && line.find("server_name") == std::string::npos)
-        {
-			ServerBlock *server = new ServerBlock("server");
-            block.addBlock(server);
-            createBlock(filename, *server);
-        }
-        else if (http != std::string::npos && http < line.find(" "))
-        {
-            std::cout << BLUE << line << WHITE"\n";
-			HttpBlock *http = new HttpBlock("http");
-            block.addBlock(http);
-            createBlock(filename, *http);
-        }
-        else if (line.find("location") != std::string::npos)
-        {
-            LocationBlock *location = new LocationBlock("location");
-            block.addBlock(location);
-            createBlock(filename, *location);
-        }
-        else if (line.find("}") != std::string::npos)
-        {
-			return (&block);
-        }
-        else
-        {
-			std::istringstream iss(line);
-            std::string key, value;
-            if (iss >> key)
-            {
-				std::getline(iss, value, ';'); // Read the rest of the line until semicolon
-                value.erase(0, value.find_first_not_of(" \t")); // Trim leading spaces
-                block.addBlock(new Directive(key, value));
-            }
-        }
-		lineBuilder(filename, line);
-    }
-    return (&block);
-}
-
-void factoryCheck(AConfigBlock &config)
-{
-    std::vector<AConfigBlock *>::iterator ite = config.blocks.end();
-    for (std::vector<AConfigBlock *>::iterator it = config.blocks.begin(); it != ite; ++it)
-    {
-        if (Directive *directive = dynamic_cast<Directive *>(*it))
-        {
-            IValidationStrategy *strategy = StrategyFactory::getInstance().chooseStrategy(dynamic_cast<Directive*>(*it)->getDirective());
-            if (strategy)
-            {
-                std::cout << "Strategy detected: ";
-                strategy->validate(directive->getValue());
-            }
-        }
-        else
-        {
-            std::cout << "Config block detected\n";
-            factoryCheck(**it);
-        }
-    }
-}
+AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block);
+void	factoryCheck(AConfigBlock &config);
+void registerAllStrategies(StrategyFactory factory);
 
 int main(int argc, char **argv)
 {
@@ -133,14 +20,13 @@ int main(int argc, char **argv)
         std::cerr << "Error: Could not open the file.\n";
         return (1);
     }
+
     ServerBlock config("Config");
     AConfigBlock *config_ptr = createBlock(file, config);
-    ErrorPageStrategy errorPage;
-    StrategyFactory::getInstance().registerStrategy("error_page", createErrorPageStrategy);
-
-    factoryCheck(config);
-
-    //config_ptr->printConfig(0); // Print the parsed configuration
+    registerAllStrategies(StrategyFactory::getInstance());
+    config_ptr->getBlock(0)->printConfig(0); // Print the parsed configuration
+    factoryCheck(*config_ptr);
+    
     file.close();
     
     return 0; // No memory leaks since we used `config` (automatic variable)

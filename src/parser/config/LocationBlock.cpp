@@ -1,25 +1,25 @@
-#include "../../include/config/ServerBlock.hpp"
+#include "../../../include/parser/config/LocationBlock.hpp"
 
 /***********************************************************************/
 /*                     Constructors & Destructor                       */
 /***********************************************************************/
 
-ServerBlock::ServerBlock(void)
+LocationBlock::LocationBlock(void)
+{
+
+} 
+
+LocationBlock::LocationBlock(const std::string &name) : AConfigBlock(name)
 {
 
 }
 
-ServerBlock::ServerBlock(const std::string &name) : AConfigBlock(name)
-{
-
-}
-
-ServerBlock::ServerBlock(const ServerBlock &other)
+LocationBlock::LocationBlock(const LocationBlock &other)
 {
 	*this = other;
 }
 
-ServerBlock::~ServerBlock(void)
+LocationBlock::~LocationBlock(void)
 {
 
 }
@@ -33,7 +33,7 @@ ServerBlock::~ServerBlock(void)
 /*                          Public Functions                           */
 /***********************************************************************/
 
-void	ServerBlock::printConfig(int indent) const
+void	LocationBlock::printConfig(int indent) const
 {
 	std::string spaces(indent * 2, ' ');
 	std::cout << spaces << _name << " {\n";

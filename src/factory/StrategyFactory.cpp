@@ -1,5 +1,7 @@
 #include "../../include/factory/StrategyFactory.hpp"
 
+void registerAllStrategies(StrategyFactory factory);
+
 /***********************************************************************/
 /*                     Constructors & Destructor                       */
 /***********************************************************************/

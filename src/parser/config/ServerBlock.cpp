@@ -1,25 +1,25 @@
-#include "../../include/config/AConfigBlock.hpp"
+#include "../../../include/parser/config/ServerBlock.hpp"
 
 /***********************************************************************/
 /*                     Constructors & Destructor                       */
 /***********************************************************************/
 
-AConfigBlock::AConfigBlock(void)
+ServerBlock::ServerBlock(void)
 {
 
 }
 
-AConfigBlock::AConfigBlock(const std::string &name) : _name(name)
+ServerBlock::ServerBlock(const std::string &name) : AConfigBlock(name)
 {
 
 }
 
-AConfigBlock::AConfigBlock(const AConfigBlock &other)
+ServerBlock::ServerBlock(const ServerBlock &other)
 {
-    *this = other;
+	*this = other;
 }
 
-AConfigBlock::~AConfigBlock(void)
+ServerBlock::~ServerBlock(void)
 {
 
 }
@@ -28,31 +28,20 @@ AConfigBlock::~AConfigBlock(void)
 /*                         Operator Overload                           */
 /***********************************************************************/
 
-AConfigBlock &AConfigBlock::operator=(const AConfigBlock &other)
-{
-	if (this == &other)
-		return (*this);
-	this->_name = other._name;
-	if (!blocks.empty())
-	{
-		std::vector<AConfigBlock *>::iterator ite = this->blocks.end();
-		for (std::vector<AConfigBlock *>::iterator it = this->blocks.begin(); it != ite; ++it)
-		{
-			delete *it;
-			it = this->blocks.erase(it);
-		}
-	}
-	this->blocks = other.blocks;
-	return (*this);
-}
 
 /***********************************************************************/
 /*                          Public Functions                           */
 /***********************************************************************/
 
-void AConfigBlock::addBlock(AConfigBlock *newBlock)
+void	ServerBlock::printConfig(int indent) const
 {
-    this->blocks.push_back(newBlock);
+	std::string spaces(indent * 2, ' ');
+	std::cout << spaces << _name << " {\n";
+	for (size_t i = 0; i < blocks.size(); ++i)
+	{
+		blocks[i]->printConfig(indent + 1);
+	}
+	std::cout << spaces << "}\n";
 }
 
 /***********************************************************************/

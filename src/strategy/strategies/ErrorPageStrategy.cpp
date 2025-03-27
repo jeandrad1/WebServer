@@ -41,10 +41,14 @@ bool ErrorPageStrategy::validate(const std::string &value) const
             std::cout << "Is integer: " << string << "\n";
             if (checkIfCodeIsValid(atoi(string.c_str())))
                 std::cout << "Error code is valid\n";
+            else
+                std::cout << "Error code is invalid\n";
         }
         else
         {
             std::cout << "Is string: " << string << "\n";
+            if (string[0] == '=' && iss.eof())
+                return (false);
         }
     }
     return true;
