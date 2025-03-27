@@ -1,17 +1,14 @@
-
-#include "../include/strategy/strategies/RootStragegy.hpp"
+#include "../../../include/strategy/strategies/RootStragegy.hpp"
 #include <string>
 #include <set>
 #include <algorithm>
 
-
-bool RootStrategy::validate(const std::string &value) const
+std::string get_substring_before_semicolon(const std::string &value)
 {
-    if (value.empty() || value.length() > 260)
-        return false;
-    if (hasForbiddenCharacters(value) || isReservedName(value))
-        return false;
-    return true;
+    if (value.empty() || value[value.size() - 1] != ';')
+        return "";
+
+    return value.substr(0, value.size() - 1);
 }
 
 bool RootStrategy::hasForbiddenCharacters(const std::string &value) const
@@ -37,4 +34,21 @@ bool RootStrategy::isReservedName(const std::string &value) const
     #else
         return false;
 #endif
+}
+
+bool RootStrategy::validate(const std::string &value) const
+{
+    if (value.empty())
+        return false;
+
+    if (value[value.size() - 1] != ';')
+        return false;
+
+    std::string real_value = get_substring_before_semicolon(real_value);
+
+    if (real_value.empty() || real_value.length() > 260)
+        return false;
+    if (hasForbiddenCharacters(real_value) || isReservedName(real_value))
+        return false;
+    return true;
 }
