@@ -4,17 +4,14 @@
 
 std::string get_substring_before_semicolon(const std::string &value)
 {
-    // Ensure the value ends with a semicolon
     if (value.empty() || value[value.size() - 1] != ';')
         return "";
 
-    // Return the substring before the semicolon
     return value.substr(0, value.size() - 1);
 }
 
 bool ServerNameStrategy::validate(const std::string &value) const
 {    
-    
     if (value.size() == 0)
         return false;
 
