@@ -10,7 +10,6 @@
 class Directive : public AConfigBlock {
 
 	private:
-		std::string					_directive;
 		std::string	_value;
 	
 		Directive(void);
