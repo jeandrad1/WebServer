@@ -9,7 +9,7 @@ bool isURL(const std::string &path);
 bool checkValidErrorCode(int code);
 bool checkCodeIsValid(int code);
 bool validateEqualModifier(std::string str);
-bool checkIfStringIsValid(std::string str, std::istringstream &iss);
+bool checkIfStringIsValid(std::string str, std::istringstream &iss, int &possibleStringValues);
 
 /*  error_page [error_code ...] [=[response_code]] uri; */
 
@@ -34,7 +34,7 @@ bool ErrorPageStrategy::validate(const std::string &value) const
         {
             if (possibleStringValues >= 2)
                 return (false);
-            if (!checkIfStringIsValid(string, iss))
+            if (!checkIfStringIsValid(string, iss, possibleStringValues))
             {
                 return (false);
             }
@@ -97,15 +97,22 @@ bool validateEqualModifier(std::string str)
     return (false);
 }
 
-bool checkIfStringIsValid(std::string str, std::istringstream &iss)
+bool checkIfStringIsValid(std::string str, std::istringstream &iss, int &possibleStringValues)
 {
-    if (validateEqualModifier(str) && !iss.eof())
+    if (validateEqualModifier(str) && !iss.eof() && possibleStringValues == 0)
         return (true);
-
-    if (isURI(str) || isURL(str))
+    
+    if (((isURI(str) && !isURL(str)) || (!isURI(str) && isURL(str))))
     {
+        if (possibleStringValues == 0 || possibleStringValues == 1)
+            possibleStringValues = 2; 
         if (str.find(';') != std::string::npos)
+        {
+            std::cout << "String: " << str << "\n";
             return (true);
+        }
+        else
+            return (false);
     }
     return (false);
 }
