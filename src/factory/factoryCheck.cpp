@@ -11,14 +11,19 @@ void factoryCheck(AConfigBlock &config)
 	{
 		if (Directive *directive = dynamic_cast<Directive *>(*it))
 		{
+			std::cout << "Entra\n";
 			IValidationStrategy *strategy = StrategyFactory::getInstance().chooseStrategy(dynamic_cast<Directive *>(*it)->getName());
 			if (strategy)
 			{
 				if (!strategy->validate(directive->getValue()))
+				{
 					std::cout << "Error detected for directive " << directive->getName() << " with value " << directive->getValue() << "\n";
+				}
 			}
 			else
+			{
 				std::cout << "Error: Invalid directive " << directive->getName() << "\n";
+			}
 		}
 		else
 		{

@@ -2,7 +2,7 @@
 #include <vector>
 //#include "../../../include/utils/colors.hpp"
 
-static bool isCode(std::string const &value)
+/*static bool isCode(std::string const &value)
 {
     std::vector<std::string> valid = \
     {"301", "302", "303", "307", "308", \
@@ -23,6 +23,13 @@ static bool isCode(std::string const &value)
             return true;
     }
     return false;
+}*/
+
+static bool isCode(int code)
+{
+    if (code >= 100 && code <= 599)
+        return (true);
+    return (false);
 }
 
 static bool oneParameter(std::string const &arg)

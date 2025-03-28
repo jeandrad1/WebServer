@@ -16,15 +16,25 @@ IValidationStrategy *createClientMaxBodySizeStrategy(void)
     return (new ClientMaxBodySizeStrategy());
 }
 
-IValidationStrategy *createIndexStrategy(void)
+/*IValidationStrategy *createIndexStrategy(void)
 {
     return (new IndexStrategy());
-}
+}*/
 
-IValidationStrategy *createRootStrategy(void)
+/*IValidationStrategy *createListenStrategy(void)
+{
+    return (new ListenStrategy());
+}*/
+
+/*IValidationStrategy *createRootStrategy(void)
 {
     return (new RootStrategy());
-}
+}*/
+
+/*IValidationStrategy *createReturnStrategy(void)
+{
+    return (new ReturnStrategy());
+}*/
 
 IValidationStrategy *createServerNameStrategy(void)
 {

@@ -23,6 +23,8 @@ FILES = main \
 		strategy/strategies/IndexStrategy \
 		strategy/strategies/RootStrategy \
 		strategy/strategies/ServerNameStrategy \
+#		strategy/strategies/ListenStrategy \
+		strategy/strategies/ReturnStrategy \
 
 $(shell mkdir -p ./src/obj)
 $(shell mkdir -p ./src/obj/parser/composite)
