@@ -4,6 +4,14 @@
 #include <string>
 #include <cctype>
 
+std::string get_substring_before_semicolon(const std::string &value)
+{
+    if (value.empty() || value[value.size() - 1] != ';')
+        return "";
+
+    return value.substr(0, value.size() - 1);
+}
+
 bool check_chars(const std::string &value)
 {
     for (size_t i = 0; i < value.size(); i++)
@@ -61,15 +69,20 @@ bool IndexStrategy::validate(const std::string &value) const
     if (value.empty())
         return false;
 
-    if (!check_chars(value))
+    if (value[value.size() - 1] != ';')
         return false;
 
-    if (count_whitespace(value) == (int)value.length())
+    std::string real_value = get_substring_before_semicolon(real_value);
+
+    if (!check_chars(real_value))
         return false;
 
-    std::string real_value = trim(value);
+    if (count_whitespace(real_value) == (int)value.length())
+        return false;
+
+    std::string trimmed_value = trim(real_value);
     if (real_value.empty())
         return false;
 
-    return split(real_value);
+    return split(trimmed_value);
 }

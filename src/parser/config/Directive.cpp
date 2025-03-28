@@ -9,9 +9,9 @@ Directive::Directive(void)
 
 }
 
-Directive::Directive(const std::string &directive, const std::string &value) : _directive(directive), _value(value)
+Directive::Directive(const std::string &directive, const std::string &value) : _value(value)
 {
-
+	_name = directive;
 }
 
 Directive::Directive(const Directive &other)
@@ -32,7 +32,7 @@ Directive &Directive::operator=(const Directive &other)
 {
 	if (this == &other)
 		return (*this);
-	this->_directive = other._directive;
+	this->_name = other._name;
     this->_value = other._value;
 	if (!blocks.empty())
 	{
@@ -54,17 +54,12 @@ Directive &Directive::operator=(const Directive &other)
 void	Directive::printConfig(int indent) const
 {
 	std::string spaces(indent * 2, ' ');
-	std::cout << spaces << this->_directive << " " << this->_value << "\n";
+	std::cout << spaces << this->_name << " " << this->_value << "\n";
 }
 
 /***********************************************************************/
 /*                          Getters & Setters                          */
 /***********************************************************************/
-
-std::string    Directive::getDirective(void) const
-{
-	return (this->_directive);
-}
 
 std::string    Directive::getValue(void) const
 {

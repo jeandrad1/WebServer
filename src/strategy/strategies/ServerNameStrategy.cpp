@@ -2,25 +2,38 @@
 #include <cctype>
 #include <string>
 
+std::string get_substring_before_semicolon(const std::string &value)
+{
+    if (value.empty() || value[value.size() - 1] != ';')
+        return "";
+
+    return value.substr(0, value.size() - 1);
+}
+
 bool ServerNameStrategy::validate(const std::string &value) const
 {
     if (value.size() == 0)
         return false;
 
-    if (value.size() < 1 || value.size() > 253)
+    if (value[value.size() - 1] != ';')
         return false;
 
-    for (size_t i = 0; i < value.size(); ++i)
+    std::string real_value = get_substring_before_semicolon(value);
+
+    if (real_value.size() < 1 || real_value.size() > 253)
+        return false;
+
+    for (size_t i = 0; i < real_value.size(); ++i)
     {
-        char c = value[i];
+        char c = real_value[i];
         if (!std::isalnum(static_cast<unsigned char>(c)) && c != '.' && c != '-')
             return false;
 
-        if (c == '.' && i > 0 && value[i - 1] == '.')
+        if (c == '.' && i > 0 && real_value[i - 1] == '.')
             return false;
     }
 
-    if (value[0] == '-' || value[value.size() - 1] == '-')
+    if (real_value[0] == '-' || real_value[value.size() - 1] == '-')
         return false;
 
     return true;

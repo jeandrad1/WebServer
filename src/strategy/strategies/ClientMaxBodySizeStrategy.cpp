@@ -13,11 +13,11 @@ bool ClientMaxBodySizeStrategy::validate(const std::string &value) const
 	if (FirstLetterPos == 0)
 		return false;
 	if (FirstLetterPos == std::string::npos)
-		return true;
+		return false;
 	std::string FirstLetter = value.substr(FirstLetterPos);
-	if (FirstLetter == "k" || FirstLetter == "K" \
-		|| FirstLetter == "m" || FirstLetter == "M" \
-		|| FirstLetter == "g" || FirstLetter == "G")
+	if (FirstLetter == ";" || FirstLetter == "k;" || FirstLetter == "K;" \
+		|| FirstLetter == "m;" || FirstLetter == "M;" \
+		|| FirstLetter == "g;" || FirstLetter == "G;")
 		return true;
 	return false;
 }
