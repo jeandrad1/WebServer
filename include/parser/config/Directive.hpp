@@ -1,30 +1,31 @@
 #ifndef DIRECTIVE_HPP
-# define DIRECTIVE_HPP
+#define DIRECTIVE_HPP
 
-# include <iostream>
-# include <vector>
-# include <string>
+#include <iostream>
+#include <vector>
+#include <string>
 
-# include "AConfigBlock.hpp"
+#include "AConfigBlock.hpp"
 
-class Directive : public AConfigBlock {
+class Directive : public AConfigBlock
+{
 
-	private:
-		std::string	_value;
-	
-		Directive(void);
-	public:
-		Directive(const std::string &directive, const std::string &value);
-		Directive(const Directive &other);
-		virtual	~Directive(void);
+private:
+	std::string _value;
 
-		Directive	&operator=(const Directive &other);
+	Directive(void);
 
-		std::string	getValue(void) const;
-		std::string	getDirective(void) const;
+public:
+	Directive(const std::string &directive, const std::string &value);
+	Directive(const Directive &other);
+	virtual ~Directive(void);
 
-		virtual void	printConfig(int indent = 0) const;
-		//virtual void	addBlock(Directive *newBlock);
+	Directive &operator=(const Directive &other);
+
+	std::string getValue(void) const;
+
+	virtual void printConfig(int indent = 0) const;
+	// virtual void	addBlock(Directive *newBlock);
 };
 
 #endif
