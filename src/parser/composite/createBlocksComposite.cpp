@@ -14,6 +14,7 @@ AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block)
     while (!line.empty())
     {
         std::size_t http = line.find("http");
+        std::size_t semicolon = line.find(";");
         if (line.empty()) continue;
         if (line.find("server") != std::string::npos && line.find("server_name") == std::string::npos)
         {
@@ -41,9 +42,14 @@ AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block)
             std::string key, value;
             if (iss >> key)
             {
-				std::getline(iss, value, ';');
-                value.erase(0, value.find_first_not_of(" \t"));
-				value.push_back(';');
+                if (semicolon < line.size())
+                {
+                    std::getline(iss, value, ';');
+                    value.erase(0, value.find_first_not_of(" \t"));
+                }
+                else
+                    std::getline(iss, value);
+                value.push_back(';');
                 block.addBlock(new Directive(key, value));
             }
         }
