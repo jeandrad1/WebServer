@@ -2,7 +2,7 @@
 #include <cctype>
 #include <string>
 
-std::string get_substring_before_semicolon(const std::string &value)
+static std::string get_substring_before_semicolon(const std::string &value)
 {
     if (value.empty() || value[value.size() - 1] != ';')
         return "";

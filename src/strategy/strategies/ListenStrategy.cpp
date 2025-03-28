@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include <cctype>
 
-std::string get_substring_before_semicolon(const std::string &value)
+static std::string get_substring_before_semicolon(const std::string &value)
 {
     if (value.empty() || value[value.size() - 1] != ';')
         return "";
@@ -75,4 +75,3 @@ bool ListenStrategy::validate(const std::string &value) const
     }
     return is_valid_port(real_value);
 }
-
