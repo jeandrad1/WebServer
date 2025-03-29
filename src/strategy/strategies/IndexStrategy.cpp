@@ -72,12 +72,12 @@ bool IndexStrategy::validate(const std::string &value) const
     if (value[value.size() - 1] != ';')
         return false;
 
-    std::string real_value = get_substring_before_semicolon(real_value);
+    std::string real_value = get_substring_before_semicolon(value);
 
     if (!check_chars(real_value))
         return false;
 
-    if (count_whitespace(real_value) == (int)value.length())
+    if (count_whitespace(real_value) == (int)real_value.length())
         return false;
 
     std::string trimmed_value = trim(real_value);
