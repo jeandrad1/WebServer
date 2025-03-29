@@ -49,7 +49,7 @@ AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block)
                     value.push_back(';');
                 }
                 else
-                std::getline(iss, value);
+                    std::getline(iss, value);
                 block.addBlock(new Directive(key, value));
             }
         }
