@@ -21,7 +21,7 @@ int main(int argc, char **argv)
     ServerBlock config("Config");
     AConfigBlock *config_ptr = createBlock(file, config);
 
-    config_ptr->getBlock(0)->printConfig(0); // Print the parsed configuration
+    config_ptr->printConfig(0); // Print the parsed configuration
     
     file.close();
     

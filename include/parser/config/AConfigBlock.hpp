@@ -29,8 +29,9 @@ public:
 	virtual void addBlock(AConfigBlock *newBlock);
 
 	std::string getName();
+	std::vector<AConfigBlock *> getBlock();
 
-	AConfigBlock *getBlock(int index);
+	AConfigBlock *getIndexBlock(int index);
 	iterator begin();
 	iterator end();
 	const_iterator begin() const;
