@@ -44,7 +44,7 @@ bool RootStrategy::validate(const std::string &value) const
     if (value[value.size() - 1] != ';')
         return false;
 
-    std::string real_value = get_substring_before_semicolon(real_value);
+    std::string real_value = get_substring_before_semicolon(value);
 
     if (real_value.empty() || real_value.length() > 260)
         return false;
