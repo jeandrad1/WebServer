@@ -3,9 +3,12 @@
 
 LocationBlockStrategy::LocationBlockStrategy()
 {
-	this->validateBlock = {	"root", "index", \
-		"client_max_body_size", "autoindex", \
-		"error_page", "return"};
+	this->validateBlock.push_back("root");
+	this->validateBlock.push_back("index");
+	this->validateBlock.push_back("client_max_body_size");
+	this->validateBlock.push_back("autoindex");
+	this->validateBlock.push_back("error_page");
+	this->validateBlock.push_back("return");
 }
 
 bool LocationBlockStrategy::validate(std::vector<AConfigBlock*> const &block) const

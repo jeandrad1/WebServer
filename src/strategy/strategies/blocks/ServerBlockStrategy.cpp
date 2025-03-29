@@ -1,11 +1,17 @@
 #include "../../../../include/strategy/blocks/ServerBlockStrategy.hpp"
-//#include "../../../../include/parser/config/Directive.hpp"
+#include "../../../../include/parser/config/Directive.hpp"
 
 ServerBlockStrategy::ServerBlockStrategy()
 {
-	this->validateBlock = {"location", "listen", "server_name", \
-		"root", "index", "client_max_body_size", "autoindex", \
-		"error_page", "return"};
+    this->validateBlock.push_back("location");
+    this->validateBlock.push_back("listen");
+    this->validateBlock.push_back("server_name");
+    this->validateBlock.push_back("root");
+    this->validateBlock.push_back("index");
+    this->validateBlock.push_back("client_max_body_size");
+    this->validateBlock.push_back("autoindex");
+    this->validateBlock.push_back("error_page");
+    this->validateBlock.push_back("return");
 }
 
 bool ServerBlockStrategy::validate(std::vector<AConfigBlock*> const &block) const
@@ -19,22 +25,6 @@ bool ServerBlockStrategy::validate(std::vector<AConfigBlock*> const &block) cons
 	return true;
 }
 
-/* int main() {
-    // Crear algunos bloques de configuración válidos e inválidos
-    Directive valid1("root", "p");
-    Directive valid2("index", "p");
-    Directive invalid("alohomora", "p");
-
-    // Crear vectores de prueba
-    std::vector<AConfigBlock*> validBlocks = { &valid1, &valid2 };   // Todos válidos
-    std::vector<AConfigBlock*> invalidBlocks = { &valid1, &invalid }; // Uno inválido
-
-    // Crear la estrategia de validación
-    ServerBlockStrategy validator;
-
-    // Probar validación
-    std::cout << "Valid blocks: " << (validator.validate(validBlocks) ? "PASS" : "FAIL") << std::endl;
-    std::cout << "Invalid blocks: " << (validator.validate(invalidBlocks) ? "PASS" : "FAIL") << std::endl;
-
+int main() {
     return 0;
-} */
+}
