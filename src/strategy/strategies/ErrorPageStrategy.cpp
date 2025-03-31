@@ -23,7 +23,6 @@ bool ErrorPageStrategy::validate(const std::string &value) const
         std::string string;
 
         iss >> string;
-        std::cout << "Check: " << string << "\n";
         if (isInteger(string))
         {
             if (possibleStringValues > 0)
@@ -33,17 +32,13 @@ bool ErrorPageStrategy::validate(const std::string &value) const
         }
         else
         {
-            std::cout << "Check 2: " << string << "\n";
-            std::cout << "Before: " << possibleStringValues << "\n";
             if (!checkIfStringIsValid(string, iss, possibleStringValues))
             {
                 return (false);
             }
-            std::cout << "Check 3: " << string << "\n";
             possibleStringValues++;
         }
     }
-    std::cout << "After: " << possibleStringValues << "\n";
     if (possibleStringValues > 4)
         return (false);
     return (true);
@@ -93,7 +88,7 @@ bool checkCodeIsValid(int code)
 bool validateEqualModifier(std::string str)
 {
     size_t equalPosition = str.find('=');
-    if (equalPosition == std::string::npos && !isURI(str) && !isURL(str))
+    if (equalPosition == std::string::npos && !isURI(str) && !isURL(str) && isInteger(str))
         return (true);
 
     std::string code = str.substr(equalPosition + 1);
