@@ -26,11 +26,29 @@ void StrategyFactory::registerStrategy(const std::string &name, StrategyCreateFu
     this->strategyMap[name] = func;
 }
 
+void StrategyFactory::registerStrategy(const std::string &name, StrategyBlockCreateFuncPtr func)
+{
+    this->strategyBlockMap[name] = func;
+}
+
 IValidationStrategy	*StrategyFactory::chooseStrategy(const std::string &name)
 {
     if (this->strategyMap.find(name) != strategyMap.end())
     {
         return (strategyMap[name]());
+    }
+    else
+    {
+        std::cout << "No strategy detected, name: " << name << "\n";
+        return (NULL);
+    }
+}
+
+IValidationStrategyBlock	*StrategyFactory::chooseStrategyBlock(const std::string &name)
+{
+    if (this->strategyBlockMap.find(name) != strategyBlockMap.end())
+    {
+        return (strategyBlockMap[name]());
     }
     else
     {

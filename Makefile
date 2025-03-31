@@ -23,8 +23,11 @@ FILES = main \
 		strategy/strategies/IndexStrategy \
 		strategy/strategies/RootStrategy \
 		strategy/strategies/ServerNameStrategy \
-#		strategy/strategies/ListenStrategy \
+		strategy/strategies/ListenStrategy \
 		strategy/strategies/ReturnStrategy \
+		strategy/strategies/HttpBlockStrategy \
+		strategy/strategies/LocationBlockStrategy \
+		strategy/strategies/ServerBlockStrategy \
 
 $(shell mkdir -p ./src/obj)
 $(shell mkdir -p ./src/obj/parser/composite)
