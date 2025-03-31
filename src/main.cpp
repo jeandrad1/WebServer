@@ -3,8 +3,9 @@
 #include "../include/factory/StrategyFactory.hpp"
 
 AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block);
-void	factoryCheck(AConfigBlock &config);
+int	factoryCheck(AConfigBlock &config);
 void registerAllStrategies(StrategyFactory factory);
+void registerBlockStrategies(StrategyFactory factory);
 
 int main(int argc, char **argv)
 {
@@ -24,9 +25,10 @@ int main(int argc, char **argv)
     ServerBlock config("Config");
     AConfigBlock *config_ptr = createBlock(file, config);
     registerAllStrategies(StrategyFactory::getInstance());
+    registerBlockStrategies(StrategyFactory::getInstance());
     config_ptr->getBlock(0)->printConfig(0); // Print the parsed configuration
-    factoryCheck(*config_ptr);
-    
+    int error = factoryCheck(*config_ptr);
+    std::cout << error << "\n";
     file.close();
     
     return 0; // No memory leaks since we used `config` (automatic variable)
