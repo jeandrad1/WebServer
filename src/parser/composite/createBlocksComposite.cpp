@@ -46,10 +46,10 @@ AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block)
                 {
                     std::getline(iss, value, ';');
                     value.erase(0, value.find_first_not_of(" \t"));
+                    value.push_back(';');
                 }
                 else
                     std::getline(iss, value);
-                value.push_back(';');
                 block.addBlock(new Directive(key, value));
             }
         }
