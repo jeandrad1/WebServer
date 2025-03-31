@@ -2,7 +2,7 @@
 #include <vector>
 //#include "../../../include/utils/colors.hpp"
 
-/*static bool isCode(std::string const &value)
+static bool isCode(std::string const &value)
 {
     std::vector<std::string> valid;
     valid.push_back("200"); valid.push_back("204"); valid.push_back("206");
@@ -23,14 +23,14 @@
             return true;
     }
     return false;
-}*/
+}
 
-static bool isCode(int code)
+/*static bool isCode(int code)
 {
     if (code >= 100 && code <= 599)
         return (true);
     return (false);
-}
+}*/
 
 static bool oneParameter(std::string const &arg)
 {
