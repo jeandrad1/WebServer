@@ -4,14 +4,14 @@
 
 /*static bool isCode(std::string const &value)
 {
-    std::vector<std::string> valid = \
-    {"301", "302", "303", "307", "308", \
-    "200", "204", "206", \
-    "400", "401", "403", "404", "405", "410", \
-    "500", "502", "503", "504"};
+    std::vector<std::string> valid;
+    valid.push_back("200"); valid.push_back("204"); valid.push_back("206");
+    valid.push_back("301"); valid.push_back("302"); valid.push_back("303"); valid.push_back("307"); valid.push_back("308");
+    valid.push_back("400"); valid.push_back("401"); valid.push_back("403"); valid.push_back("404"); valid.push_back("405"); valid.push_back("410");
+    valid.push_back("500"); valid.push_back("502"); valid.push_back("503"); valid.push_back("504");
     if(value.size() != 3)
         return false;
-    for(int i = 0; i < value.size(); i++)
+    for(unsigned long i = 0; i < value.size(); i++)
     {
         if (!std::isdigit(value[i]))
             return false;
@@ -71,7 +71,7 @@ bool ReturnStrategy::validate(const std::string &value) const
 	}
 }
 
-/* int main()
+/*int main()
 {
     ReturnStrategy rs;
 
@@ -90,4 +90,4 @@ bool ReturnStrategy::validate(const std::string &value) const
 	std::cout << "Test 6: " << (rs.validate(test6) ? RED"true" : GREEN "false") << WHITE << std::endl;
 
     return 0;
-} */
+}*/

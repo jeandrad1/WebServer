@@ -3,7 +3,8 @@
 
 HttpBlockStrategy::HttpBlockStrategy()
 {
-	this->validateBlock = {	"client_max_body_size", "error_page"};
+	this->validateBlock.push_back("client_max_body_size");
+    this->validateBlock.push_back("error_page");
 }
 
 bool HttpBlockStrategy::validate(std::vector<AConfigBlock*> const &block) const
