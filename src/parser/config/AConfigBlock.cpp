@@ -81,12 +81,7 @@ std::string AConfigBlock::getName()
 	return (this->_name);
 }
 
-std::vector<AConfigBlock *> AConfigBlock::getBlock()
-{
-	return (this->blocks);
-}
-
-AConfigBlock *AConfigBlock::getIndexBlock(int index)
+AConfigBlock *AConfigBlock::getBlock(int index)
 {
 	if (index >= this->blocks.size())
 		throw(std::out_of_range("Index exceeds blocks size"));
@@ -94,4 +89,9 @@ AConfigBlock *AConfigBlock::getIndexBlock(int index)
 	for (int i = 0; i != index; i++)
 		it++;
 	return (*it);
+}
+
+std::vector<AConfigBlock *> AConfigBlock::getBlocksVector(void)
+{
+	return (this->blocks);
 }
