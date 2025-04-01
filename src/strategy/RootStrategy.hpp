@@ -1,7 +1,9 @@
 #ifndef RootStrategy_HPP
 # define RootStrategy_HPP
 
-#include "../IValidationStrategy.hpp"
+# include "IValidationStrategy.hpp"
+# include <set>
+# include <algorithm>
 
 class RootStrategy : public IValidationStrategy
 {

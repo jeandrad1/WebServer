@@ -1,4 +1,4 @@
-#include "../../../include/parser/config/LocationBlock.hpp"
+#include "LocationBlock.hpp"
 
 /***********************************************************************/
 /*                     Constructors & Destructor                       */

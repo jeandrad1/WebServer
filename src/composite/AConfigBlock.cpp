@@ -1,4 +1,4 @@
-#include "../../../include/parser/config/AConfigBlock.hpp"
+#include "AConfigBlock.hpp"
 
 /***********************************************************************/
 /*                     Constructors & Destructor                       */

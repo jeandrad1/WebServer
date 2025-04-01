@@ -1,7 +1,9 @@
 #ifndef ERRORPAGESTRATEGY_HPP
 # define ERRORPAGESTRATEGY_HPP
 
-# include "../IValidationStrategy.hpp"
+# include "IValidationStrategy.hpp"
+# include <stdlib.h>
+# include <sstream>
 
 class ErrorPageStrategy : public IValidationStrategy {
 

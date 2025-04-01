@@ -1,11 +1,8 @@
 #ifndef IVALIDATIONSTRATEGYBLOCK_HPP
 # define IVALIDATIONSTRATEGYBLOCK_HPP
 
-# include <string>
-# include <iostream>
-# include <vector>
+# include "../composite/AConfigBlock.hpp"
 # include <algorithm>
-# include "../parser/config/AConfigBlock.hpp"
 
 class IValidationStrategyBlock {
 	protected:

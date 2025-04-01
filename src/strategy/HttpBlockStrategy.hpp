@@ -1,7 +1,7 @@
 #ifndef HTTPBLOCKSTRATEGY_HPP
 # define HTTPBLOCKSTRATEGY_HPP
 
-# include "../IValidationStrategyBlock.hpp"
+# include "IValidationStrategyBlock.hpp"
 
 class HttpBlockStrategy : public IValidationStrategyBlock {
 	public:

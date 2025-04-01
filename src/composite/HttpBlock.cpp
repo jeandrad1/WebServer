@@ -1,4 +1,4 @@
-#include "../../../include/parser/config/HttpBlock.hpp"
+#include "HttpBlock.hpp"
 
 /***********************************************************************/
 /*                     Constructors & Destructor                       */

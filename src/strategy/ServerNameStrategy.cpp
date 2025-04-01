@@ -1,6 +1,4 @@
-#include "../../../include/strategy/strategies/ServerNameStrategy.hpp"
-#include <cctype>
-#include <string>
+#include "ServerNameStrategy.hpp"
 
 std::string getSubstringBeforeSemicolon(const std::string &value);
 

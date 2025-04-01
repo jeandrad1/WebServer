@@ -1,6 +1,6 @@
 #include <fstream>
-#include "../include/parser/config/ServerBlock.hpp"
-#include "../include/factory/StrategyFactory.hpp"
+#include "./composite/ServerBlock.hpp"
+#include "./factory/StrategyFactory.hpp"
 
 AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block);
 int	factoryCheck(AConfigBlock &config);

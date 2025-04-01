@@ -1,5 +1,4 @@
-#include "../../../include/strategy/blocks/ServerBlockStrategy.hpp"
-#include "../../../include/parser/config/Directive.hpp"
+#include "ServerBlockStrategy.hpp"
 
 ServerBlockStrategy::ServerBlockStrategy()
 {
@@ -24,7 +23,3 @@ bool ServerBlockStrategy::validate(std::vector<AConfigBlock*> const &block) cons
 	}
 	return true;
 }
-
-/*int main() {
-    return 0;
-}*/

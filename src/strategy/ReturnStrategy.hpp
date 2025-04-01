@@ -1,7 +1,8 @@
 #ifndef ReturnStrategy_HPP
 # define ReturnStrategy_HPP
 
-#include "../IValidationStrategy.hpp"
+# include "IValidationStrategy.hpp"
+# include <vector>
 
 class ReturnStrategy : public IValidationStrategy
 {

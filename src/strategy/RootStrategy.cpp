@@ -1,7 +1,4 @@
-#include "../../../include/strategy/strategies/RootStragegy.hpp"
-#include <string>
-#include <set>
-#include <algorithm>
+#include "RootStrategy.hpp"
 
 std::string getSubstringBeforeSemicolon(const std::string &value);
 

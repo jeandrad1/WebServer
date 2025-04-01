@@ -1,7 +1,4 @@
-#include "../../../include/strategy/strategies/ErrorPageStrategy.hpp"
-#include <iostream>
-#include <sstream>
-#include <stdlib.h>
+#include "ErrorPageStrategy.hpp"
 
 bool isInteger(std::string value);
 bool isURI(const std::string &path);

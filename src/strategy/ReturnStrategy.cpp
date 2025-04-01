@@ -1,6 +1,5 @@
-#include "../../../include/strategy/strategies/ReturnStrategy.hpp"
+#include "ReturnStrategy.hpp"
 #include <vector>
-//#include "../../../include/utils/colors.hpp"
 
 static bool isCode(std::string const &value)
 {
@@ -24,13 +23,6 @@ static bool isCode(std::string const &value)
     }
     return false;
 }
-
-/*static bool isCode(int code)
-{
-    if (code >= 100 && code <= 599)
-        return (true);
-    return (false);
-}*/
 
 static bool oneParameter(std::string const &arg)
 {
@@ -70,24 +62,3 @@ bool ReturnStrategy::validate(const std::string &value) const
 		return (twoParameter(code, direction));
 	}
 }
-
-/*int main()
-{
-    ReturnStrategy rs;
-
-    std::string test1 = "200 https://example.com;";
-    std::string test2 = "404;";                   
-	std::string test3 = "500 https://example.com";
-	std::string test4 = "500 https://example.com;";
-    std::string test5 = "patata;";                 
-    std::string test6 = "999 https://example.com;";
-
-    std::cout << "Test 1: " << (rs.validate(test1) ? GREEN"true" : RED "false") << WHITE << std::endl;
-    std::cout << "Test 2: " << (rs.validate(test2) ? GREEN"true" : RED "false") << WHITE << std::endl;
-    std::cout << "Test 3: " << (rs.validate(test3) ? RED"true" : GREEN "false") << WHITE << std::endl;
-    std::cout << "Test 4: " << (rs.validate(test4) ? GREEN"true" : RED "false") << WHITE << std::endl;
-    std::cout << "Test 5: " << (rs.validate(test5) ? RED"true" : GREEN "false") << WHITE << std::endl;
-	std::cout << "Test 6: " << (rs.validate(test6) ? RED"true" : GREEN "false") << WHITE << std::endl;
-
-    return 0;
-}*/

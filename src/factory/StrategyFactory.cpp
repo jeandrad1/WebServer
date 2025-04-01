@@ -1,4 +1,4 @@
-#include "../../include/factory/StrategyFactory.hpp"
+#include "StrategyFactory.hpp"
 
 void registerAllStrategies(StrategyFactory factory);
 

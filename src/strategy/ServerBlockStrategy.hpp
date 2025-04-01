@@ -1,7 +1,8 @@
 #ifndef SERVERBLOCKSTRATEGY_HPP
 # define SERVERBLOCKSTRATEGY_HPP
 
-# include "../IValidationStrategyBlock.hpp"
+# include "IValidationStrategyBlock.hpp"
+# include <cstdlib>
 
 class ServerBlockStrategy : public IValidationStrategyBlock {
 

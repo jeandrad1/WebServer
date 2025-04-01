@@ -1,7 +1,7 @@
 #ifndef CLIENTMAXBODYSIZESTRATEGY_HPP
 # define CLIENTMAXBODYSIZESTRATEGY_HPP
 
-# include "../IValidationStrategy.hpp"
+# include "IValidationStrategy.hpp"
 
 class  ClientMaxBodySizeStrategy : public IValidationStrategy {
 

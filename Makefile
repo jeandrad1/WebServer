@@ -6,34 +6,33 @@ CFLAGS = -Wall -Wextra -Werror
 CPP98_FLAG = -std=c++98
 
 FILES = main \
-		parser/composite/createBlocksComposite \
-		parser/composite/buildConfigLine \
-		parser/config/AConfigBlock \
-		parser/config/Directive \
-		parser/config/ServerBlock \
-		parser/config/HttpBlock \
-		parser/config/LocationBlock \
-		strategy/strategies/AutoindexStrategy \
-		strategy/strategies/ClientMaxBodySizeStrategy \
-		strategy/strategies/ErrorPageStrategy \
+		composite/createBlocksComposite \
+		composite/buildConfigLine \
+		composite/AConfigBlock \
+		composite/Directive \
+		composite/ServerBlock \
+		composite/HttpBlock \
+		composite/LocationBlock \
+		strategy/AutoindexStrategy \
+		strategy/ClientMaxBodySizeStrategy \
+		strategy/ErrorPageStrategy \
 		factory/registerAllStrategies \
 		factory/factoryCheck \
 		factory/createStrategies \
 		factory/StrategyFactory \
-		strategy/strategies/IndexStrategy \
-		strategy/strategies/RootStrategy \
-		strategy/strategies/ServerNameStrategy \
-		strategy/strategies/ListenStrategy \
-		strategy/strategies/ReturnStrategy \
-		strategy/strategies/HttpBlockStrategy \
-		strategy/strategies/LocationBlockStrategy \
-		strategy/strategies/ServerBlockStrategy \
+		strategy/IndexStrategy \
+		strategy/RootStrategy \
+		strategy/ServerNameStrategy \
+		strategy/ListenStrategy \
+		strategy/ReturnStrategy \
+		strategy/HttpBlockStrategy \
+		strategy/LocationBlockStrategy \
+		strategy/ServerBlockStrategy \
 		utils/utils
 
 $(shell mkdir -p ./build)
-$(shell mkdir -p ./build/parser/composite)
-$(shell mkdir -p ./build/parser/config)
-$(shell mkdir -p ./build/strategy/strategies)
+$(shell mkdir -p ./build/composite)
+$(shell mkdir -p ./build/strategy)
 $(shell mkdir -p ./build/factory)
 $(shell mkdir -p ./build/utils)
 $(shell mkdir -p ./build/charge_flag_makefile)
@@ -71,9 +70,8 @@ re: fclean setup all
 
 setup:
 	$(shell mkdir -p ./build)
-	$(shell mkdir -p ./build/parser/composite)
-	$(shell mkdir -p ./build/parser/config)
-	$(shell mkdir -p ./build/strategy/strategies)
+	$(shell mkdir -p ./build/composite)
+	$(shell mkdir -p ./build/strategy)
 	$(shell mkdir -p ./build/factory)
 	$(shell mkdir -p ./build/utils)
 	$(shell mkdir -p ./build/charge_flag_makefile)

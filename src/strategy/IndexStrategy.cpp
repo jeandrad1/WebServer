@@ -1,8 +1,4 @@
-#include "../../../include/strategy/strategies/IndexStrategy.hpp"
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <cctype>
+#include "IndexStrategy.hpp"
 
 std::string getSubstringBeforeSemicolon(const std::string &value);
 bool checkChars(const std::string &value);

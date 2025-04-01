@@ -1,8 +1,8 @@
-#include "../../include/strategy/IValidationStrategy.hpp"
-#include "../../include/strategy/IValidationStrategyBlock.hpp"
-#include "../../include/parser/config/AConfigBlock.hpp"
-#include "../../include/parser/config/Directive.hpp"
-#include "../../include/factory/StrategyFactory.hpp"
+#include "../strategy/IValidationStrategy.hpp"
+#include "../strategy/IValidationStrategyBlock.hpp"
+#include "../composite/AConfigBlock.hpp"
+#include "../composite/Directive.hpp"
+#include "StrategyFactory.hpp"
 
 bool	factoryCheckDirectiveCase(AConfigBlock::iterator it, Directive *directive);
 bool	factoryCheckBlockCase(AConfigBlock::iterator it);

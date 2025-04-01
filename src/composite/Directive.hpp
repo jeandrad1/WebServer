@@ -1,10 +1,6 @@
 #ifndef DIRECTIVE_HPP
 #define DIRECTIVE_HPP
 
-#include <iostream>
-#include <vector>
-#include <string>
-
 #include "AConfigBlock.hpp"
 
 class Directive : public AConfigBlock
@@ -25,7 +21,6 @@ public:
 	std::string getValue(void) const;
 
 	virtual void printConfig(int indent = 0) const;
-	// virtual void	addBlock(Directive *newBlock);
 };
 
 #endif

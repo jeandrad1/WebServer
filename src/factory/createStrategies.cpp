@@ -1,5 +1,5 @@
-#include "../../include/factory/StrategyFactory.hpp"
-#include "../../include/factory/createStrategies.hpp"
+#include "StrategyFactory.hpp"
+#include "createStrategies.hpp"
 
 /**********************************************************************/
 /*                      Create Block Strategies                       */

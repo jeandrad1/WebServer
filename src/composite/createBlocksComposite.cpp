@@ -1,9 +1,9 @@
 #include <fstream>
 #include <sstream>
-#include "../../../include/parser/config/ServerBlock.hpp"
-#include "../../../include/parser/config/Directive.hpp"
-#include "../../../include/parser/config/HttpBlock.hpp"
-#include "../../../include/parser/config/LocationBlock.hpp"
+#include "ServerBlock.hpp"
+#include "Directive.hpp"
+#include "HttpBlock.hpp"
+#include "LocationBlock.hpp"
 
 void buildConfigLine(std::ifstream &filename, std::string &line);
 AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block);

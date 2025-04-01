@@ -1,7 +1,9 @@
 #ifndef LISTENSTRATEGY_HPP
 # define LISTENSTRATEGY_HPP
 
-# include "../IValidationStrategy.hpp"
+# include "IValidationStrategy.hpp"
+# include <cstdlib>
+# include <sstream>
 
 class ListenStrategy : public IValidationStrategy
 {

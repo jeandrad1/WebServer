@@ -1,4 +1,4 @@
-#include "../../../include/parser/config/Directive.hpp"
+#include "Directive.hpp"
 
 /***********************************************************************/
 /*                     Constructors & Destructor                       */

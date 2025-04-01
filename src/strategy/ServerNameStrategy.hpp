@@ -1,7 +1,8 @@
 #ifndef ServerNameStrategy_HPP
 #define ServerNameStrategy_HPP
 
-#include "../IValidationStrategy.hpp"
+# include "IValidationStrategy.hpp"
+# include <cctype>
 
 class ServerNameStrategy : public IValidationStrategy
 {

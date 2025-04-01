@@ -1,4 +1,4 @@
-#include "../../../include/strategy/strategies/ClientMaxBodySizeStrategy.hpp"
+#include "ClientMaxBodySizeStrategy.hpp"
 
 bool ClientMaxBodySizeStrategy::validate(const std::string &value) const
 {
@@ -21,31 +21,3 @@ bool ClientMaxBodySizeStrategy::validate(const std::string &value) const
 		return true;
 	return false;
 }
-
-/*int main()
-{
-	ClientMaxBodySizeStrategy validator;
-
-	std::string testCases[] = {
-		"",       // Vacío (debe fallar)
-		"0",      // Válido
-		"123",    // Válido
-		"50k",    // Válido
-		"100M",   // Válido
-		"2G",     // Válido
-		"10kb",   // Inválido (extra 'b')
-		"XYZ",    // Inválido (no empieza con número)
-		"20a",    // Inválido (unidad no válida)
-		"512K",   // Válido
-		"300m",   // Válido
-		"500g",   // Válido
-		"10000000000" // Válido (solo números)
-	};
-
-	for(int i = 0; i < 13; ++i) 
-	{
-		std::cout << "Test case: \"" << testCases[i] << "\" --> " << (validator.validate(testCases[i]) ? RED"Valid" : GREEN"Invalid") << WHITE << std::endl;
-	}
-
-	return 0;
-}*/

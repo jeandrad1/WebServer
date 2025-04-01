@@ -1,7 +1,7 @@
 #ifndef LOCATIONBLOCKSTRATEGY_HPP
 # define LOCATIONBLOCKSTRATEGY_HPP
 
-# include "../IValidationStrategyBlock.hpp"
+# include "IValidationStrategyBlock.hpp"
 
 class LocationBlockStrategy : public IValidationStrategyBlock {
 

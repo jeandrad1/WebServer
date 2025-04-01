@@ -1,9 +1,4 @@
-#include "../../../include/strategy/strategies/ListenStrategy.hpp"
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <cstdlib>
-#include <cctype>
+#include "ListenStrategy.hpp"
 
 std::string getSubstringBeforeSemicolon(const std::string &value);
 

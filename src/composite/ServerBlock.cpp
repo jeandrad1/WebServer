@@ -1,4 +1,4 @@
-#include "../../../include/parser/config/ServerBlock.hpp"
+#include "ServerBlock.hpp"
 
 /***********************************************************************/
 /*                     Constructors & Destructor                       */
