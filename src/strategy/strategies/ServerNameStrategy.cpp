@@ -2,17 +2,7 @@
 #include <cctype>
 #include <string>
 
-<<<<<<< HEAD
-static std::string get_substring_before_semicolon(const std::string &value)
-{
-    if (value.empty() || value[value.size() - 1] != ';')
-        return "";
-
-    return value.substr(0, value.size() - 1);
-}
-=======
 std::string getSubstringBeforeSemicolon(const std::string &value);
->>>>>>> feature/strategy-pattern
 
 bool ServerNameStrategy::validate(const std::string &value) const
 {

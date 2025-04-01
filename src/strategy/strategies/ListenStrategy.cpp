@@ -5,14 +5,7 @@
 #include <cstdlib>
 #include <cctype>
 
-<<<<<<< HEAD
-static std::string get_substring_before_semicolon(const std::string &value)
-{
-    if (value.empty() || value[value.size() - 1] != ';')
-        return "";
-=======
 std::string getSubstringBeforeSemicolon(const std::string &value);
->>>>>>> feature/strategy-pattern
 
 bool isValidPort(const std::string &port_str)
 {
