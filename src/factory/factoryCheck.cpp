@@ -11,23 +11,23 @@ int factoryCheck(AConfigBlock &config)
 {
 	std::vector<AConfigBlock *>::iterator ite = config.end();
 
-	int	errorLog = 0;
+	int	errorCounter = 0;
 	for (std::vector<AConfigBlock *>::iterator it = config.begin(); it != ite; ++it)
 	{
 		if (Directive *directive = dynamic_cast<Directive *>(*it))
 		{
 			if (!factoryCheckDirectiveCase(it, directive))
-				errorLog++;
+				errorCounter++;
 		}
 		else
 		{
 			if (!factoryCheckBlockCase(it))
-				errorLog++;
+				errorCounter++;
 
-			errorLog += factoryCheck(**it);
+			errorCounter += factoryCheck(**it);
 		}
 	}
-	return (errorLog);
+	return (errorCounter);
 }
 
 bool	factoryCheckDirectiveCase(AConfigBlock::iterator it, Directive *directive)
