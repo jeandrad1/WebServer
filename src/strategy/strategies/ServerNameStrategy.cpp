@@ -2,6 +2,7 @@
 #include <cctype>
 #include <string>
 
+<<<<<<< HEAD
 static std::string get_substring_before_semicolon(const std::string &value)
 {
     if (value.empty() || value[value.size() - 1] != ';')
@@ -9,6 +10,9 @@ static std::string get_substring_before_semicolon(const std::string &value)
 
     return value.substr(0, value.size() - 1);
 }
+=======
+std::string getSubstringBeforeSemicolon(const std::string &value);
+>>>>>>> feature/strategy-pattern
 
 bool ServerNameStrategy::validate(const std::string &value) const
 {
@@ -18,7 +22,7 @@ bool ServerNameStrategy::validate(const std::string &value) const
     if (value[value.size() - 1] != ';')
         return false;
 
-    std::string real_value = get_substring_before_semicolon(value);
+    std::string real_value = getSubstringBeforeSemicolon(value);
 
     if (real_value.size() < 1 || real_value.size() > 253)
         return false;
