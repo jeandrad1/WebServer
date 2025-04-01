@@ -29,16 +29,16 @@ FILES = main \
 		strategy/strategies/LocationBlockStrategy \
 		strategy/strategies/ServerBlockStrategy \
 
-$(shell mkdir -p ./src/obj)
-$(shell mkdir -p ./src/obj/parser/composite)
-$(shell mkdir -p ./src/obj/parser/config)
-$(shell mkdir -p ./src/obj/strategy/strategies)
-$(shell mkdir -p ./src/obj/factory)
-$(shell mkdir -p ./src/obj/utils)
-$(shell mkdir -p ./src/obj/charge_flag_makefile)
+$(shell mkdir -p ./build)
+$(shell mkdir -p ./build/parser/composite)
+$(shell mkdir -p ./build/parser/config)
+$(shell mkdir -p ./build/strategy/strategies)
+$(shell mkdir -p ./build/factory)
+$(shell mkdir -p ./build/utils)
+$(shell mkdir -p ./build/charge_flag_makefile)
 
 SRCS_DIR = ./src/
-OBJS_DIR = ./src/obj/
+OBJS_DIR = ./build/
 
 SRCS = $(addprefix $(SRCS_DIR), $(addsuffix .cpp, $(FILES)))
 OBJS = $(addprefix $(OBJS_DIR), $(addsuffix .o, $(FILES)))
@@ -57,7 +57,7 @@ $(NAME) : $(OBJS) $(OBJS_DIR)charge_flag_makefile/charge.flag
 clean:
 	@$(RM) $(OBJS)
 	@$(RM) $(OBJS_DIR)charge_flag_makefile/charge.flag:
-	$(shell rm -rf ./src/obj)
+	$(shell rm -rf ./build)
 	@echo
 	@echo "$(RED) Cleaning objects. $(RESET)"
 
@@ -69,13 +69,13 @@ fclean: clean
 re: fclean setup all
 
 setup:
-	$(shell mkdir -p ./src/obj)
-	$(shell mkdir -p ./src/obj/parser/composite)
-	$(shell mkdir -p ./src/obj/parser/config)
-	$(shell mkdir -p ./src/obj/strategy/strategies)
-	$(shell mkdir -p ./src/obj/factory)
-	$(shell mkdir -p ./src/obj/utils)
-	$(shell mkdir -p ./src/obj/charge_flag_makefile)
+	$(shell mkdir -p ./build)
+	$(shell mkdir -p ./build/parser/composite)
+	$(shell mkdir -p ./build/parser/config)
+	$(shell mkdir -p ./build/strategy/strategies)
+	$(shell mkdir -p ./build/factory)
+	$(shell mkdir -p ./build/utils)
+	$(shell mkdir -p ./build/charge_flag_makefile)
 
 PHONY: clean fclean all re setup
 
