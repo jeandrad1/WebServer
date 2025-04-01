@@ -28,6 +28,7 @@ FILES = main \
 		strategy/strategies/HttpBlockStrategy \
 		strategy/strategies/LocationBlockStrategy \
 		strategy/strategies/ServerBlockStrategy \
+		utils/utils
 
 $(shell mkdir -p ./build)
 $(shell mkdir -p ./build/parser/composite)

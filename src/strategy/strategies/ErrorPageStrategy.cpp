@@ -8,10 +8,14 @@ bool isURI(const std::string &path);
 bool isURL(const std::string &path);
 bool checkValidErrorCode(int code);
 bool checkCodeIsValid(int code);
-bool validateEqualModifier(std::string str);
-bool checkIfStringIsValid(std::string str, std::istringstream &iss, int &possibleStringValues);
+static bool validateEqualModifier(std::string str);
+static bool checkIfStringIsValid(std::string str, std::istringstream &iss, int &possibleStringValues);
 
-/*  error_page [error_code ...] [=[response_code]] uri; */
+/* Syntax for error_page: 
+    
+    error_page [error_code ...] [=[response_code]] uri;
+
+*/
 
 bool ErrorPageStrategy::validate(const std::string &value) const
 {
@@ -39,53 +43,10 @@ bool ErrorPageStrategy::validate(const std::string &value) const
             possibleStringValues++;
         }
     }
-    if (possibleStringValues > 4)
-        return (false);
     return (true);
 }
 
-bool isInteger(std::string value)
-{
-    if (value.empty())
-        return (false);
-
-    for (size_t i = 0; i < value.size(); ++i)
-    {
-        if (!isdigit(value[i]))
-            return (false);
-    }
-    return (true);
-}
-
-bool isURI(const std::string &path)
-{
-    if (path[0] == '/')
-        return (true);
-    return (false);
-}
-
-bool isURL(const std::string &path)
-{
-    if (path.find("http://") == 0 || path.find("https://") == 0)
-        return (true);
-    return (false);
-}
-
-bool checkValidErrorCode(int code)
-{
-    if (code >= 400 && code <= 599)
-        return (true);
-    return (false);
-}
-
-bool checkCodeIsValid(int code)
-{
-    if (code >= 100 && code <= 599)
-        return (true);
-    return (false);
-}
-
-bool validateEqualModifier(std::string str)
+static bool validateEqualModifier(std::string str)
 {
     size_t equalPosition = str.find('=');
     if (equalPosition == std::string::npos && !isURI(str) && !isURL(str) && isInteger(str))
@@ -97,7 +58,7 @@ bool validateEqualModifier(std::string str)
     return (false);
 }
 
-bool checkIfStringIsValid(std::string str, std::istringstream &iss, int &possibleStringValues)
+static bool checkIfStringIsValid(std::string str, std::istringstream &iss, int &possibleStringValues)
 {
     if (validateEqualModifier(str) && !iss.eof() && possibleStringValues == 0)
         return (true);
