@@ -5,15 +5,9 @@
 #include <cstdlib>
 #include <cctype>
 
-std::string get_substring_before_semicolon(const std::string &value)
-{
-    if (value.empty() || value[value.size() - 1] != ';')
-        return "";
+std::string getSubstringBeforeSemicolon(const std::string &value);
 
-    return value.substr(0, value.size() - 1);
-}
-
-bool is_valid_port(const std::string &port_str)
+bool isValidPort(const std::string &port_str)
 {
     if (port_str.empty() || port_str.size() > 5)
         return false;
@@ -28,7 +22,7 @@ bool is_valid_port(const std::string &port_str)
     return port >= 1 && port <= 65535;
 }
 
-bool is_valid_ip(const std::string &ip_str)
+bool isValidIp(const std::string &ip_str)
 {
     std::istringstream iss(ip_str);
     std::string segment;
@@ -62,7 +56,7 @@ bool ListenStrategy::validate(const std::string &value) const
     if (value[value.size() - 1] != ';')
         return false;
 
-    std::string real_value = get_substring_before_semicolon(value);
+    std::string real_value = getSubstringBeforeSemicolon(value);
 
     size_t colon_pos = real_value.find(':');
 
@@ -71,8 +65,8 @@ bool ListenStrategy::validate(const std::string &value) const
         std::string ip = real_value.substr(0, colon_pos);
         std::string port = real_value.substr(colon_pos + 1);
 
-        return is_valid_ip(ip) && is_valid_port(port);
+        return isValidIp (ip) && isValidPort(port);
     }
-    return is_valid_port(real_value);
+    return isValidPort(real_value);
 }
 
