@@ -6,6 +6,7 @@
 #include "../../../include/parser/config/LocationBlock.hpp"
 
 void buildConfigLine(std::ifstream &filename, std::string &line);
+AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block);
 
 static void processDirective(const std::string &line, AConfigBlock &block)
 {
