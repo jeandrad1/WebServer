@@ -28,7 +28,6 @@ int main(int argc, char **argv)
     registerBlockStrategies(StrategyFactory::getInstance());
     config_ptr->getBlock(0)->printConfig(0); // Print the parsed configuration
     int error = factoryCheck(*config_ptr);
-    std::cout << error << "\n";
     file.close();
     
     return 0; // No memory leaks since we used `config` (automatic variable)
