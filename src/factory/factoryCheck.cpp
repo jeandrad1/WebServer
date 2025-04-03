@@ -38,8 +38,10 @@ bool	factoryCheckDirectiveCase(AConfigBlock::iterator it, Directive *directive)
 		if (!strategy->validate(directive->getValue()))
 		{
 			std::cout << "Error detected for directive " << directive->getName() << " with value " << directive->getValue() << "\n";
+			delete strategy;
 			return (false);
 		}
+		delete strategy;
 	}
 	else
 	{
@@ -57,8 +59,10 @@ bool	factoryCheckBlockCase(AConfigBlock::iterator it)
 		if (!strategyBlock->validate((*it)->getBlocksVector()))
 		{
 			std::cout << "Error detected for block " << (*it)->getName() << "\n";
+			delete strategyBlock;
 			return (false);
 		}
+		delete strategyBlock;
 	}
 	else
 	{
