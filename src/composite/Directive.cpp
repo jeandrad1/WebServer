@@ -28,12 +28,14 @@ Directive::~Directive(void)
 /*                         Operator Overload                           */
 /***********************************************************************/
 
-Directive &Directive::operator=(const Directive &other)
+Directive	&Directive::operator=(const Directive &other)
 {
 	if (this == &other)
 		return (*this);
+
 	this->_name = other._name;
-    this->_value = other._value;
+	this->_value = other._value;
+
 	if (!blocks.empty())
 	{
 		std::vector<AConfigBlock *>::iterator ite = this->blocks.end();
@@ -61,7 +63,7 @@ void	Directive::printConfig(int indent) const
 /*                          Getters & Setters                          */
 /***********************************************************************/
 
-std::string    Directive::getValue(void) const
+std::string	Directive::getValue(void) const
 {
 	return (this->_value);
 }

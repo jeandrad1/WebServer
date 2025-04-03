@@ -5,12 +5,16 @@
 # include <algorithm>
 
 class IValidationStrategyBlock {
+
 	protected:
-		std::vector<std::string> validateBlock;
+
+		std::vector<std::string>	validDirectives;
+
 	public:
-		IValidationStrategyBlock() : validateBlock() {}
-		virtual ~IValidationStrategyBlock() {}
-		virtual bool validate(std::vector<AConfigBlock*> const &block) const = 0;
+
+		IValidationStrategyBlock() : validDirectives() {}
+		virtual	~IValidationStrategyBlock() {}
+		virtual bool	validate(std::vector<AConfigBlock*> const &block) const = 0;
 };
 
 #endif

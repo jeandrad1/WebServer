@@ -6,8 +6,9 @@
 
 class ReturnStrategy : public IValidationStrategy
 {
-    public:
-        bool validate(const std::string &value) const;
+
+	public:
+		bool	validate(const std::string &value) const;
 };
 
 #endif

@@ -14,17 +14,17 @@
 # include "../strategy/HttpBlockStrategy.hpp"
 # include "../strategy/LocationBlockStrategy.hpp"
 
-IValidationStrategyBlock *createServerBlockStrategy(void);
-IValidationStrategyBlock *createHttpBlockStrategy(void);
-IValidationStrategyBlock *createLocationBlockStrategy(void);
+IValidationStrategyBlock	*createServerBlockStrategy(void);
+IValidationStrategyBlock	*createHttpBlockStrategy(void);
+IValidationStrategyBlock	*createLocationBlockStrategy(void);
 
-IValidationStrategy *createAutoIndexStrategy(void);
-IValidationStrategy *createClientMaxBodySizeStrategy(void);
-IValidationStrategy *createErrorPageStrategy(void);
-IValidationStrategy *createIndexStrategy(void);
-IValidationStrategy *createListenStrategy(void);
-IValidationStrategy *createRootStrategy(void);
-IValidationStrategy *createReturnStrategy(void);
-IValidationStrategy *createServerNameStrategy(void);
+IValidationStrategy			*createAutoIndexStrategy(void);
+IValidationStrategy			*createClientMaxBodySizeStrategy(void);
+IValidationStrategy			*createErrorPageStrategy(void);
+IValidationStrategy			*createIndexStrategy(void);
+IValidationStrategy			*createListenStrategy(void);
+IValidationStrategy			*createRootStrategy(void);
+IValidationStrategy			*createReturnStrategy(void);
+IValidationStrategy			*createServerNameStrategy(void);
 
 #endif

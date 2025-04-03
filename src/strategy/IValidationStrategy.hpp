@@ -7,8 +7,8 @@
 class IValidationStrategy {
 
 	public:
-		virtual ~IValidationStrategy() {}
-		virtual bool validate(const std::string &value) const = 0;
+		virtual	~IValidationStrategy() {}
+		virtual bool	validate(const std::string &value) const = 0;
 };
 
 #endif

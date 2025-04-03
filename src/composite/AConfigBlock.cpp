@@ -20,11 +20,11 @@ AConfigBlock::AConfigBlock(const AConfigBlock &other)
 AConfigBlock::~AConfigBlock(void)
 {
 	for (std::vector<AConfigBlock *>::iterator it = blocks.begin(); it != blocks.end(); ++it)
-    {
+	{
 		if (*it)
-       		delete *it;
-    }
-    blocks.clear();
+			delete *it;
+	}
+	blocks.clear();
 }
 
 /***********************************************************************/

@@ -6,8 +6,9 @@
 class LocationBlockStrategy : public IValidationStrategyBlock {
 
 	public:
-        LocationBlockStrategy();
-		virtual bool validate(std::vector<AConfigBlock*> const &block) const;
+
+		LocationBlockStrategy();
+		virtual bool	validate(std::vector<AConfigBlock*> const &block) const;
 };
 
 #endif

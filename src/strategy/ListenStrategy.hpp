@@ -8,7 +8,7 @@
 class ListenStrategy : public IValidationStrategy
 {
 	public:
-		bool validate(const std::string &value) const;
+		bool	validate(const std::string &value) const;
 };
 
 #endif

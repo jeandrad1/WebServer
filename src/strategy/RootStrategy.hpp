@@ -1,5 +1,5 @@
-#ifndef RootStrategy_HPP
-# define RootStrategy_HPP
+#ifndef ROOTSTRATEGY_HPP
+# define ROOTSTRATEGY_HPP
 
 # include "IValidationStrategy.hpp"
 # include <set>
@@ -7,12 +7,14 @@
 
 class RootStrategy : public IValidationStrategy
 {
-    public:
-        bool validate(const std::string &value) const;
+	public:
+		
+		bool	validate(const std::string &value) const;
 
-    private:
-        bool hasForbiddenCharacters(const std::string &value) const;
-        bool isReservedName(const std::string &value) const;
+	private:
+
+		bool	hasForbiddenCharacters(const std::string &value) const;
+		bool	isReservedName(const std::string &value) const;
 };
 
 #endif

@@ -8,7 +8,7 @@
 class ErrorPageStrategy : public IValidationStrategy {
 
 	public:
-		virtual bool validate(const std::string &value) const;
+		virtual bool	validate(const std::string &value) const;
 };
 
 #endif

@@ -1,13 +1,13 @@
 #include <iostream>
 #include <fstream>
 
-static bool isFirstMatch(std::size_t const &targetValue, std::size_t const &first,
+static bool	isFirstMatch(std::size_t const &targetValue, std::size_t const &first,
 	std::size_t const &second, std::size_t const &third)
 {
-    return (targetValue <= first && targetValue <= second && targetValue <= third);
+	return (targetValue <= first && targetValue <= second && targetValue <= third);
 }
 
-static void extractBufferLine(std::string &buffer, std::string &line, std::size_t const &symbol)
+static void	extractBufferLine(std::string &buffer, std::string &line, std::size_t const &symbol)
 {
 	line = buffer.substr(0, symbol + 1);
 	buffer = buffer.substr(symbol + 1);
@@ -15,7 +15,7 @@ static void extractBufferLine(std::string &buffer, std::string &line, std::size_
 	line.erase(line.find_last_not_of(" \t") + 1);
 }
 
-static void extractBufferLineAndErase(std::string &buffer, std::string &line, std::size_t const &symbol)
+static void	extractBufferLineAndErase(std::string &buffer, std::string &line, std::size_t const &symbol)
 {
 	if (symbol != std::string::npos)
 		line = buffer.substr(0, symbol);
@@ -26,9 +26,9 @@ static void extractBufferLineAndErase(std::string &buffer, std::string &line, st
 	line.erase(line.find_last_not_of(" \t") + 1);
 }
 
-void buildConfigLine(std::ifstream &filename, std::string &line)
+void	buildConfigLine(std::ifstream &filename, std::string &line)
 {
-    std::string static buffer;
+	static std::string	buffer;
 
 	if (buffer.empty())
 	{
@@ -42,15 +42,15 @@ void buildConfigLine(std::ifstream &filename, std::string &line)
 	std::size_t semicolon = buffer.find(';');
 	std::size_t curlyBracketOpen = buffer.find('{');
 	std::size_t curlyBracketClose = buffer.find('}');
-    std::size_t hash = buffer.find('#');
-    if (curlyBracketClose < buffer.size() && isFirstMatch(curlyBracketClose, curlyBracketOpen, semicolon, hash))
+	std::size_t hash = buffer.find('#');
+	if (curlyBracketClose < buffer.size() && isFirstMatch(curlyBracketClose, curlyBracketOpen, semicolon, hash))
 		extractBufferLine(buffer, line, curlyBracketClose);
-    else if (curlyBracketOpen < buffer.size() && isFirstMatch(curlyBracketOpen, curlyBracketClose, semicolon, hash))
+	else if (curlyBracketOpen < buffer.size() && isFirstMatch(curlyBracketOpen, curlyBracketClose, semicolon, hash))
 		extractBufferLine(buffer, line, curlyBracketOpen);
 	else if(semicolon < buffer.size() && isFirstMatch(semicolon, curlyBracketClose, curlyBracketOpen, hash))
 		extractBufferLine(buffer, line, semicolon);
-    else if (hash < buffer.size() && isFirstMatch(hash, curlyBracketClose, curlyBracketOpen, semicolon))
-    	extractBufferLineAndErase(buffer, line, hash);
+	else if (hash < buffer.size() && isFirstMatch(hash, curlyBracketClose, curlyBracketOpen, semicolon))
+		extractBufferLineAndErase(buffer, line, hash);
 	else
 		extractBufferLineAndErase(buffer, line, std::string::npos);
 	if (line == "" || line == "{")

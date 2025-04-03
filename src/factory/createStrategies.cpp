@@ -5,61 +5,61 @@
 /*                      Create Block Strategies                       */
 /**********************************************************************/
 
-IValidationStrategyBlock *createServerBlockStrategy(void)
+IValidationStrategyBlock	*createServerBlockStrategy(void)
 {
-    return (new ServerBlockStrategy());
+	return (new ServerBlockStrategy());
 }
 
 IValidationStrategyBlock *createHttpBlockStrategy(void)
 {
-    return (new HttpBlockStrategy());
+	return (new HttpBlockStrategy());
 }
 
 IValidationStrategyBlock *createLocationBlockStrategy(void)
 {
-    return (new LocationBlockStrategy());
+	return (new LocationBlockStrategy());
 }
 
 /**********************************************************************/
 /*                   Create Directives Strategies                     */
 /**********************************************************************/
 
-IValidationStrategy *createErrorPageStrategy(void)
+IValidationStrategy	*createErrorPageStrategy(void)
 {
-    return (new ErrorPageStrategy());
+	return (new ErrorPageStrategy());
 }
 
-IValidationStrategy *createAutoIndexStrategy(void)
+IValidationStrategy	*createAutoIndexStrategy(void)
 {
-    return (new AutoindexStrategy());
+	return (new AutoindexStrategy());
 }
 
-IValidationStrategy *createClientMaxBodySizeStrategy(void)
+IValidationStrategy	*createClientMaxBodySizeStrategy(void)
 {
-    return (new ClientMaxBodySizeStrategy());
+	return (new ClientMaxBodySizeStrategy());
 }
 
-IValidationStrategy *createIndexStrategy(void)
+IValidationStrategy	*createIndexStrategy(void)
 {
-    return (new IndexStrategy());
+	return (new IndexStrategy());
 }
 
-IValidationStrategy *createListenStrategy(void)
+IValidationStrategy	*createListenStrategy(void)
 {
-    return (new ListenStrategy());
+	return (new ListenStrategy());
 }
 
-IValidationStrategy *createRootStrategy(void)
+IValidationStrategy	*createRootStrategy(void)
 {
-    return (new RootStrategy());
+	return (new RootStrategy());
 }
 
-IValidationStrategy *createReturnStrategy(void)
+IValidationStrategy	*createReturnStrategy(void)
 {
-    return (new ReturnStrategy());
+	return (new ReturnStrategy());
 }
 
-IValidationStrategy *createServerNameStrategy(void)
+IValidationStrategy	*createServerNameStrategy(void)
 {
-    return (new ServerNameStrategy());
+	return (new ServerNameStrategy());
 }

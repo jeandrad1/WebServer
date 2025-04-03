@@ -7,9 +7,9 @@
 bool	factoryCheckDirectiveCase(AConfigBlock::iterator it, Directive *directive);
 bool	factoryCheckBlockCase(AConfigBlock::iterator it);
 
-int factoryCheck(AConfigBlock &config)
+int	factoryCheck(AConfigBlock &config)
 {
-	std::vector<AConfigBlock *>::iterator ite = config.end();
+	std::vector<AConfigBlock *>::iterator	ite = config.end();
 
 	int	errorCounter = 0;
 	for (std::vector<AConfigBlock *>::iterator it = config.begin(); it != ite; ++it)
@@ -32,7 +32,7 @@ int factoryCheck(AConfigBlock &config)
 
 bool	factoryCheckDirectiveCase(AConfigBlock::iterator it, Directive *directive)
 {
-	IValidationStrategy *strategy = StrategyFactory::getInstance().chooseStrategy(dynamic_cast<Directive *>(*it)->getName());
+	IValidationStrategy	*strategy = StrategyFactory::getInstance().chooseStrategy(dynamic_cast<Directive *>(*it)->getName());
 	if (strategy)
 	{
 		if (!strategy->validate(directive->getValue()))
@@ -51,7 +51,7 @@ bool	factoryCheckDirectiveCase(AConfigBlock::iterator it, Directive *directive)
 
 bool	factoryCheckBlockCase(AConfigBlock::iterator it)
 {
-	IValidationStrategyBlock *strategyBlock = StrategyFactory::getInstance().chooseStrategyBlock((*it)->getName());
+	IValidationStrategyBlock	*strategyBlock = StrategyFactory::getInstance().chooseStrategyBlock((*it)->getName());
 	if (strategyBlock)
 	{
 		if (!strategyBlock->validate((*it)->getBlocksVector()))

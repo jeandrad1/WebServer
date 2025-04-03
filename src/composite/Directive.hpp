@@ -7,7 +7,7 @@ class Directive : public AConfigBlock
 {
 
 private:
-	std::string _value;
+	std::string	_value;
 
 	Directive(void);
 
@@ -16,11 +16,11 @@ public:
 	Directive(const Directive &other);
 	virtual ~Directive(void);
 
-	Directive &operator=(const Directive &other);
+	Directive		&operator=(const Directive &other);
 
-	std::string getValue(void) const;
+	std::string		getValue(void) const;
 
-	virtual void printConfig(int indent = 0) const;
+	virtual void	printConfig(int indent = 0) const;
 };
 
 #endif

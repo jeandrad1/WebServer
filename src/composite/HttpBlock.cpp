@@ -35,7 +35,7 @@ HttpBlock::~HttpBlock(void)
 
 void	HttpBlock::printConfig(int indent) const
 {
-	std::string spaces(indent * 2, ' ');
+	std::string	spaces(indent * 2, ' ');
 	std::cout << spaces << _name << " {\n";
 	for (size_t i = 0; i < blocks.size(); ++i)
 	{

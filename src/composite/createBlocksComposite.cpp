@@ -5,13 +5,15 @@
 #include "HttpBlock.hpp"
 #include "LocationBlock.hpp"
 
-void buildConfigLine(std::ifstream &filename, std::string &line);
-AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block);
+void			buildConfigLine(std::ifstream &filename, std::string &line);
+AConfigBlock	*createBlock(std::ifstream &filename, AConfigBlock &block);
 
-static void processDirective(const std::string &line, AConfigBlock &block)
+static void	processDirective(const std::string &line, AConfigBlock &block)
 {
-	std::istringstream iss(line);
-	std::string key, value;
+	std::istringstream	iss(line);
+	std::string			key;
+	std::string			value;
+
 	if (iss >> key)
 	{
 		std::size_t semicolon = line.find(";");
@@ -27,27 +29,28 @@ static void processDirective(const std::string &line, AConfigBlock &block)
 	}
 }
 
-static AConfigBlock *createAndAddBlock(const std::string &type, AConfigBlock &block, std::ifstream &filename)
+static AConfigBlock	*createAndAddBlock(const std::string &type, AConfigBlock &block, std::ifstream &filename)
 {
-    AConfigBlock *newBlock = NULL;
-    
-    if (type == "server")
-        newBlock = new ServerBlock(type);
-    else if (type == "http")
-        newBlock = new HttpBlock(type);
-    else if (type == "location")
-        newBlock = new LocationBlock(type);
-    if (newBlock)
-    {
-        block.addBlock(newBlock);
-        createBlock(filename, *newBlock);
-    }
-    return newBlock;
+	AConfigBlock	*newBlock = NULL;
+
+	if (type == "server")
+		newBlock = new ServerBlock(type);
+	else if (type == "http")
+		newBlock = new HttpBlock(type);
+	else if (type == "location")
+		newBlock = new LocationBlock(type);
+	if (newBlock)
+	{
+		block.addBlock(newBlock);
+		createBlock(filename, *newBlock);
+	}
+	return (newBlock);
 }
 
-AConfigBlock *createBlock(std::ifstream &filename, AConfigBlock &block)
+AConfigBlock	*createBlock(std::ifstream &filename, AConfigBlock &block)
 {
-	std::string line;
+	std::string	line;
+
 	buildConfigLine(filename, line);
 	while (!line.empty())
 	{

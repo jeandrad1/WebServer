@@ -6,14 +6,14 @@
 # include <map>
 # include <string>
 
-typedef IValidationStrategy *(*StrategyCreateFuncPtr)();
-typedef IValidationStrategyBlock *(*StrategyBlockCreateFuncPtr)();
+typedef IValidationStrategy			*(*StrategyCreateFuncPtr)();
+typedef IValidationStrategyBlock	*(*StrategyBlockCreateFuncPtr)();
 
 class StrategyFactory {
 
 	private:
-		std::map<std::string, StrategyCreateFuncPtr> strategyMap;
-		std::map<std::string, StrategyBlockCreateFuncPtr> strategyBlockMap;
+		std::map<std::string, StrategyCreateFuncPtr>		strategyMap;
+		std::map<std::string, StrategyBlockCreateFuncPtr>	strategyBlockMap;
 
 	public:
 		static StrategyFactory &getInstance(void);

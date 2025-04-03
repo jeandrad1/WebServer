@@ -8,7 +8,7 @@ class ServerBlockStrategy : public IValidationStrategyBlock {
 
 	public:
 		ServerBlockStrategy();
-		virtual bool validate(std::vector<AConfigBlock*> const &block) const;
+		virtual bool	validate(std::vector<AConfigBlock*> const &block) const;
 };
 
 #endif
