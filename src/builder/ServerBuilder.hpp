@@ -2,8 +2,9 @@
 # define SERSERVERBUILDER_HPP
 
 # include "IConfigBuilder.hpp"
+# include "DirectiveProcessor.hpp"
 
-class ServerBuilder : public IConfigBuilder
+class ServerBuilder : public IConfigBuilder, public DirectiveProcessor<ServerBuilder>
 {
     public:
         ~ServerBuilder() {}
@@ -11,19 +12,17 @@ class ServerBuilder : public IConfigBuilder
         void    setDirective(const std::string &key,const std::string &value);
         void    addNestedBuilder(ServerBuilder *child);
         void    *build(void);
-/*
-        this->validDirectives.push_back("location");
-        this->validDirectives.push_back("listen");
-        this->validDirectives.push_back("server_name");
-        this->validDirectives.push_back("root");
-        this->validDirectives.push_back("index");
-        this->validDirectives.push_back("client_max_body_size");
-        this->validDirectives.push_back("autoindex");
-        this->validDirectives.push_back("error_page");
-        this->validDirectives.push_back("return");
-*/
 
-    
+        void    handleLocation(void);
+        void    handleListen(void);
+        void    handleServerName(void);
+        void    handleRoot(void);
+        void    handleIndex(void);
+        void    handleClientMaxBodySize(void);
+        void    handleAutoindex(void);
+        void    handleErrorPage(void);
+        void    handleReturn(void)
+
 };
 
 #endif
