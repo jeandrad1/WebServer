@@ -7,7 +7,7 @@
 class ServerBuilder : public IConfigBuilder, public DirectiveProcessor<ServerBuilder>
 {
     public:
-        // Constructor must call registerhandle
+        // Constructor must call register handle
         ServerBuilder();
         ~ServerBuilder() {}
 
@@ -15,16 +15,17 @@ class ServerBuilder : public IConfigBuilder, public DirectiveProcessor<ServerBui
         void    addNestedBuilder(ServerBuilder *child);
         void    *build(void);
 
-        void    handleLocation(std::string value);
-        void    handleListen(std::string value);
-        void    handleServerName(std::string value);
-        void    handleRoot(std::string value);
-        void    handleIndex(std::string value);
-        void    handleClientMaxBodySize(std::string value);
-        void    handleAutoindex(std::string value);
-        void    handleErrorPage(std::string value);
-        void    handleReturn(std::string value);
+        void    handleListen(const std::string &value);
+        void    handleServerName(const std::string &value);
+        void    handleRoot(const std::string &value);
+        void    handleIndex(const std::string &value);
+        void    handleClientMaxBodySize(const std::string &value);
+        void    handleAutoindex(const std::string &value);
+        void    handleErrorPage(const std::string &value);
+        void    handleReturn(const std::string &value);
 
+        void    handleLocation(const std::string &value);
+        
     private:
         bool    built;
 
