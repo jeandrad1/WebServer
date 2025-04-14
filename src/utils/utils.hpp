@@ -1,6 +1,8 @@
 #ifndef UTILS_HPP
 # define UTILS_HPP
 
+# include <string>
+
 bool	    isInteger(std::string value);
 bool	    isURI(const std::string &path);
 bool	    isURL(const std::string &path);
