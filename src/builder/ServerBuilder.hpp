@@ -7,7 +7,7 @@
 class ServerBuilder : public IConfigBuilder, public DirectiveProcessor<ServerBuilder>
 {
     public:
-        // Constructor must call register handle
+        // The constructor lacks the handle for location
         ServerBuilder();
         ~ServerBuilder() {}
 

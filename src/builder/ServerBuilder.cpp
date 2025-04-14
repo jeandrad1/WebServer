@@ -10,5 +10,4 @@ ServerBuilder::ServerBuilder()
     registerHandler("autoindex", &ServerBuilder::handleAutoindex);
     registerHandler("error_page", &ServerBuilder::handleErrorPage);
     registerHandler("return", &ServerBuilder::handleReturn);
-
 }
