@@ -40,3 +40,11 @@ void    ServerBuilder::handleRoot(const std::string &value)
     this->ServerConfig->root = value;
 }
 
+void    ServerBuilder::handleAutoindex(const std::string &value)
+{
+    if (value == "off")
+        this->ServerConfig->autoindex = false;
+    else
+        this->ServerConfig->autoindex = true;
+}
+
