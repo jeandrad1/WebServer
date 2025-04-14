@@ -11,6 +11,13 @@ struct ListenValues
     int port;
 };
 
+struct ReturnValues
+{
+    std::string http;
+    int code;
+};
+
+
 class ServerConfig
 {
     public:
@@ -25,7 +32,7 @@ class ServerConfig
         std::string     clientMaxBodySize;
         bool            autoindex;
         std::string     errorPage;
-        std::string     _return;
+        ReturnValues    *_return;
 
     private:
         bool    built;

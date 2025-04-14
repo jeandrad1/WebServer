@@ -48,3 +48,20 @@ void    ServerBuilder::handleAutoindex(const std::string &value)
         this->ServerConfig->autoindex = true;
 }
 
+void    ServerBuilder::handleReturn(const std::string &value)
+{
+    int http_pos = value.find("h");
+
+    if(http_pos != std::string::npos)
+    {
+        this->ServerConfig->_return->http = value.substr(http_pos, value.size());
+        std::string port_str = value.substr(0, http_pos);
+        this->ServerConfig->_return->code = std::atoi(port_str.c_str());
+    }
+    else
+    {
+        this->ServerConfig->_return->code = std::atoi(value.c_str());
+    }
+}
+
+
