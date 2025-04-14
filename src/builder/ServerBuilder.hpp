@@ -24,8 +24,6 @@ class ServerBuilder : public IConfigBuilder, public DirectiveProcessor<ServerBui
         void    handleAutoindex(const std::string &value);
         void    handleErrorPage(const std::string &value);
         void    handleReturn(const std::string &value);
-
-        void    handleLocation(const std::string &value);
         
     private:
         bool            built;
