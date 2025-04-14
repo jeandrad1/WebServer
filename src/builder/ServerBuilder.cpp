@@ -34,3 +34,9 @@ void    ServerBuilder::handleServerName(const std::string &value)
 {
     this->ServerConfig->serverName = value;
 }
+
+void    ServerBuilder::handleRoot(const std::string &value)
+{
+    this->ServerConfig->root = value;
+}
+
