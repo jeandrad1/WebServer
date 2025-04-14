@@ -13,6 +13,26 @@ ServerBuilder::ServerBuilder()
     registerHandler("return", &ServerBuilder::handleReturn);
 }
 
+void *ServerBuilder::build()
+{
+    if (this->ServerConfig->listen->ip.empty())
+        this->ServerConfig->listen->ip = "42.42.42.42";
+    if (this->ServerConfig->listen->port == NULL)
+        this->ServerConfig->listen->port = 42;
+    if (this->ServerConfig->serverName.empty())
+        this->ServerConfig->serverName = "http://example.com";
+    if (this->ServerConfig->root.empty())
+        this->ServerConfig->root = "/";
+    if (this->ServerConfig->listen->port == NULL)
+        this->ServerConfig->listen->port = 42;
+    if (this->ServerConfig->autoindex == NULL)
+        this->ServerConfig->autoindex = false;
+    if (this->ServerConfig->_return->code == NULL)
+        this->ServerConfig->_return->code = 200;
+    if (this->ServerConfig->_return->http.empty())
+        this->ServerConfig->_return->http = "example.com";
+}
+
 void    ServerBuilder::handleListen(const std::string &value)
 {
     int colon_pos = value.find(":");
