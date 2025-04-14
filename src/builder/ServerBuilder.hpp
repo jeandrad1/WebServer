@@ -16,7 +16,7 @@ class ServerBuilder : public IConfigBuilder, public DirectiveProcessor<ServerBui
         void    addNestedBuilder(ServerBuilder *child);
         void    *build(void);
 
-        void    handleListen(const std::string &value);
+        void    handleListen(const std::string &value); // checks the server values and if they are not set it sets them with default values
         void    handleServerName(const std::string &value);
         void    handleRoot(const std::string &value);
         void    handleIndex(const std::string &value);

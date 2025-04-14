@@ -29,3 +29,8 @@ void    ServerBuilder::handleListen(const std::string &value)
         this->ServerConfig->listen->port = std::atoi(value.c_str());
     }
 }
+
+void    ServerBuilder::handleServerName(const std::string &value)
+{
+    this->ServerConfig->serverName = value;
+}
