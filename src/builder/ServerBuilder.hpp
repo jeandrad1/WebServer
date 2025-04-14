@@ -3,6 +3,7 @@
 
 # include "IConfigBuilder.hpp"
 # include "DirectiveProcessor.hpp"
+# include "ServerConfig.hpp"
 
 class ServerBuilder : public IConfigBuilder, public DirectiveProcessor<ServerBuilder>
 {
@@ -27,7 +28,8 @@ class ServerBuilder : public IConfigBuilder, public DirectiveProcessor<ServerBui
         void    handleLocation(const std::string &value);
         
     private:
-        bool    built;
+        bool            built;
+        ServerConfig    *ServerConfig; 
 
 };
 

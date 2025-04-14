@@ -5,6 +5,12 @@
 # include "DirectiveProcessor.hpp"
 # include <vector>
 
+struct ListenValues
+{
+    std::string ip;
+    int port;
+};
+
 class ServerConfig
 {
     public:
@@ -12,7 +18,7 @@ class ServerConfig
         ~ServerConfig() {}
 
         std::vector<std::string> location;
-        unsigned int    listen;
+        ListenValues    *listen;
         std::string     serverName;
         std::string     root;
         std::string     index;
