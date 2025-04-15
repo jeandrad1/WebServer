@@ -6,8 +6,10 @@
 
 typedef struct s_errorPage
 {
-    std::string target;
+    std::string         target;
     std::vector<int> statusCodes;
+    bool                isEqualModifier;
+    int                 equalModifier;            
 }   t_errorPage;
 
 #endif

@@ -26,7 +26,7 @@ void    HttpBuilder::addNestedBuilder(IConfigBuilder *child)
 
 void    HttpBuilder::handleClientMaxBodySize(const std::string &value)
 {
-    if (!value)
+    if (value.empty())
         return ;
     
     std::istringstream iss(value);
@@ -53,26 +53,37 @@ void    HttpBuilder::handleClientMaxBodySize(const std::string &value)
 
 void    HttpBuilder::handleErrorPage(const std::string &value)
 {
-    if (value.empty())
-        return ;
-
     std::istringstream iss(value);
     std::vector<std::string> values;
     std::string info;
     t_errorPage errorPage;
-
+    
+    if (value.empty())
+    return ;
+    
     while (!iss.eof())
     {
         iss >> info;
         values.push_back(info);
     }
+    
     std::vector<std::string>::iterator ite = values.end();
     ite--;
     std::string target = *ite;
+
     errorPage.target = target.substr(0, target.size() - 1);
+    errorPage.isEqualModifier = false;
+    errorPage.equalModifier = 0;
+
     for (std::vector<std::string>::iterator it = values.begin(); it != ite; it++)
     {
-        errorPage.statusCodes.push_back(*it);
+        if ((*it).find('='))
+        {
+            errorPage.isEqualModifier = true;
+            errorPage.equalModifier = std::stoi((*it).substr(1, (*it).size()));
+            break ;
+        }
+        errorPage.statusCodes.push_back(std::stoi(*it));
     }
     this->http->errorPages.push_back(errorPage);
 }
