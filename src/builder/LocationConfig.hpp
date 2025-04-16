@@ -6,9 +6,9 @@
 
 class LocationConfig
 {
-    public:
-        std::string root;
-        std::vector<std::string> root;
+	public:
+		std::string					root;
+		std::vector<std::string>	index;
 };
 
 #endif

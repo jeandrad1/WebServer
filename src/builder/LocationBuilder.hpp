@@ -8,7 +8,7 @@
 class LocationBuilder : public IConfigBuilder, public DirectiveProcessor<LocationBuilder>
 {
 	private:
-	LocationConfig	*location;
+	LocationConfig	*LocationConfig;
 	bool			built;
 
 	public:
