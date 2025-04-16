@@ -26,6 +26,13 @@ void *LocationBuilder::build(void)
 		this->LocationConfig->_return->code = 200;
 	if (this->LocationConfig->_return->http.empty())
 		this->LocationConfig->_return->http = "example.com";
+	if (this->LocationConfig->errorPages.empty())
+	{
+		t_errorPage error;
+		error.target = "";
+		error.isEqualModifier = false;
+		error.equalModifier = 0;
+	}
 }
 
 void    LocationBuilder::handleRoot(const std::string &value)
