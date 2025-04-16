@@ -4,6 +4,7 @@
 # include "IConfigBuilder.hpp"
 # include "DirectiveProcessor.hpp"
 # include "HttpConfig.hpp"
+# include "structs.hpp"
 
 class HttpBuilder : public IConfigBuilder, public DirectiveProcessor<HttpBuilder> {
 

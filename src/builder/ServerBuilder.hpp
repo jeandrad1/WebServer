@@ -3,6 +3,7 @@
 
 # include "IConfigBuilder.hpp"
 # include "DirectiveProcessor.hpp"
+# include "ServerConfig.hpp"
 
 class ServerBuilder : public IConfigBuilder, public DirectiveProcessor<ServerBuilder>
 {
@@ -13,9 +14,9 @@ class ServerBuilder : public IConfigBuilder, public DirectiveProcessor<ServerBui
 
         void    setDirective(const std::string &key,const std::string &value);
         void    addNestedBuilder(ServerBuilder *child);
-        void    *build(void);
+        void    *build(void); // checks the server values and if they are not set it sets them with default values
 
-        void    handleListen(const std::string &value);
+        void    handleListen(const std::string &value); 
         void    handleServerName(const std::string &value);
         void    handleRoot(const std::string &value);
         void    handleIndex(const std::string &value);
@@ -23,11 +24,10 @@ class ServerBuilder : public IConfigBuilder, public DirectiveProcessor<ServerBui
         void    handleAutoindex(const std::string &value);
         void    handleErrorPage(const std::string &value);
         void    handleReturn(const std::string &value);
-
-        void    handleLocation(const std::string &value);
         
     private:
-        bool    built;
+        bool            built;
+        ServerConfig    *ServerConfig; 
 
 };
 

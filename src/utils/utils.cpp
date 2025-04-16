@@ -1,6 +1,8 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <sstream>
+
 
 bool	isInteger(std::string value)
 {
