@@ -28,6 +28,7 @@ FILES = main \
 		strategy/HttpBlockStrategy \
 		strategy/LocationBlockStrategy \
 		strategy/ServerBlockStrategy \
+		manager/WebservManager \
 		utils/utils
 
 $(shell mkdir -p ./build)
@@ -35,6 +36,7 @@ $(shell mkdir -p ./build/composite)
 $(shell mkdir -p ./build/strategy)
 $(shell mkdir -p ./build/factory)
 $(shell mkdir -p ./build/utils)
+$(shell mkdir -p ./build/manager)
 $(shell mkdir -p ./build/charge_flag_makefile)
 
 SRCS_DIR = ./src/
@@ -74,6 +76,7 @@ setup:
 	$(shell mkdir -p ./build/strategy)
 	$(shell mkdir -p ./build/factory)
 	$(shell mkdir -p ./build/utils)
+	$(shell mkdir -p ./build/manager)
 	$(shell mkdir -p ./build/charge_flag_makefile)
 
 PHONY: clean fclean all re setup
