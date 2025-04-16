@@ -1,6 +1,7 @@
 #ifndef HTTPBUILDER_HPP
 # define HTTPBUILDER_HPP
 
+# include <sstream>
 # include "IConfigBuilder.hpp"
 # include "DirectiveProcessor.hpp"
 # include "HttpConfig.hpp"
