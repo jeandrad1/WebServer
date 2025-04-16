@@ -13,7 +13,7 @@ class ServerBuilder : public IConfigBuilder, public DirectiveProcessor<ServerBui
         ~ServerBuilder() {}
 
         void    setDirective(const std::string &key,const std::string &value);
-        void    addNestedBuilder(ServerBuilder *child);
+        void    addNestedBuilder(IConfigBuilder *child);
         void    *build(void); // checks the server values and if they are not set it sets them with default values
 
         void    handleListen(const std::string &value); 
@@ -27,7 +27,7 @@ class ServerBuilder : public IConfigBuilder, public DirectiveProcessor<ServerBui
         
     private:
         bool            built;
-        ServerConfig    *ServerConfig; 
+        ServerConfig    *serverConfig; 
 
 };
 

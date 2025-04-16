@@ -1,10 +1,17 @@
-#include <fstream>
-#include <vector>
-#include "../composite/ServerBlock.hpp"
-#include "../composite/HttpBlock.hpp"
-#include "../factory/StrategyFactory.hpp"
+# include <fstream>
+# include <vector>
+# include "../composite/ServerBlock.hpp"
+# include "../composite/HttpBlock.hpp"
+# include "../composite/LocationBlock.hpp"
+# include "../factory/StrategyFactory.hpp"
 
 #include "HttpConfig.hpp"
+#include "ServerConfig.hpp"
+#include "LocationConfig.hpp"
+#include "LocationBuilder.hpp"
+#include "ServerBuilder.hpp"
+#include "HttpBuilder.hpp"
+#include "Directive.hpp"
 
 std::vector<AConfigBlock *> BuildConfig(AConfigBlock *config_ptr)
 {
@@ -20,9 +27,12 @@ std::vector<AConfigBlock *> BuildConfig(AConfigBlock *config_ptr)
                 if (Directive *directive = dynamic_cast<Directive *>(*blockIt))
                     httpBuilder.dispatchDirective(directive->getName(), directive->getValue());
                 else
-                    httpBuilder.addNestedBuilder(new ServerBuilder());
+                {
+                    ServerBuilder *serverBuilder = new ServerBuilder();
+                    httpBuilder.addNestedBuilder(serverBuilder);
+                }
             }
-            builtConfigs.push_back(static_cast<HttpConfig *>(httpBuilder.build()));
+            builtConfigs.push_back(static_cast<AConfigBlock *>(httpBuilder.build()));
         }
 
         else if (ServerBlock *serverBlock = dynamic_cast<ServerBlock *>(*it))
@@ -33,12 +43,15 @@ std::vector<AConfigBlock *> BuildConfig(AConfigBlock *config_ptr)
                 if (Directive *directive = dynamic_cast<Directive *>(*blockIt))
                     serverBuilder.dispatchDirective(directive->getName(), directive->getValue());
                 else
-                    serverBuilder.addNestedBuilder(new LocationBuilder());
+                {
+                    LocationBuilder *locationBuilder = new LocationBuilder();
+                    serverBuilder.addNestedBuilder(locationBuilder);
+                }
             }
-            builtConfigs.push_back(static_cast<ServerConfig *>(serverBuilder.build()));
+            builtConfigs.push_back(static_cast<AConfigBlock *>(serverBuilder.build()));
         }
 
-        else if (LocationBlock *httpBlock = dynamic_cast<LocationBlock *>(*it))
+        else if (LocationBlock *locationBlock = dynamic_cast<LocationBlock *>(*it))
         {
             LocationBuilder locationBuilder;
             for (AConfigBlock::iterator blockIt = locationBlock->begin(); blockIt != locationBlock->end(); ++blockIt)
@@ -46,7 +59,7 @@ std::vector<AConfigBlock *> BuildConfig(AConfigBlock *config_ptr)
                 if (Directive *directive = dynamic_cast<Directive *>(*blockIt))
                     locationBuilder.dispatchDirective(directive->getName(), directive->getValue());
             }
-            builtConfigs.push_back(static_cast<LocationConfig *>(locationBuilder.build()));
+            builtConfigs.push_back(static_cast<AConfigBlock *>(locationBuilder.build()));
         }
     }
     return builtConfigs;

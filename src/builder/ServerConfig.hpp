@@ -6,6 +6,9 @@
 # include "LocationConfig.hpp"
 # include <vector>
 
+const int DEFAULT_PORT = -1;
+const int DEFAULT_HTTP_CODE = -1;
+
 struct ListenValues
 {
     std::string ip;
@@ -22,9 +25,15 @@ struct ReturnValues
 class ServerConfig
 {
     public:
-        ServerConfig();
-        ~ServerConfig() {}
+    ServerConfig()
+    {
+        listen->port = DEFAULT_PORT;
+        _return->code = DEFAULT_HTTP_CODE;
+        built = false;       
+    }
 
+    ~ServerConfig() {}
+    
         std::vector<LocationConfig *>   locations;
         ListenValues                    *listen;
         std::string                     serverName;
