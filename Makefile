@@ -29,12 +29,17 @@ FILES = main \
 		strategy/LocationBlockStrategy \
 		strategy/ServerBlockStrategy \
 		manager/WebservManager \
+		builder/BuildConfig \
+		builder/HttpBuilder \
+		builder/LocationBuilder \
+		builder/ServerBuilder \
 		utils/utils
 
 $(shell mkdir -p ./build)
 $(shell mkdir -p ./build/composite)
 $(shell mkdir -p ./build/strategy)
 $(shell mkdir -p ./build/factory)
+$(shell mkdir -p ./build/builder)
 $(shell mkdir -p ./build/utils)
 $(shell mkdir -p ./build/manager)
 $(shell mkdir -p ./build/charge_flag_makefile)
@@ -75,6 +80,7 @@ setup:
 	$(shell mkdir -p ./build/composite)
 	$(shell mkdir -p ./build/strategy)
 	$(shell mkdir -p ./build/factory)
+	$(shell mkdir -p ./build/builder)
 	$(shell mkdir -p ./build/utils)
 	$(shell mkdir -p ./build/manager)
 	$(shell mkdir -p ./build/charge_flag_makefile)
