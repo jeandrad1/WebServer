@@ -14,3 +14,15 @@ void LocationBuilder::handleRoot(std::string const &value)
 {
     this->location->root = value;
 }
+
+/* static std::vector<std::string> index_split(std::string const &value)
+{
+    
+}
+
+void LocationBuilder::handleIndex(std::string const &value)
+{
+    std::string real_value = value.substr(0, value.size() - 1);
+    std::vector<std::string> index = split_str(real_value, " ");
+    this->ServerConfig->index = index;
+} */
