@@ -1,12 +1,19 @@
 #include "ServerBuilder.hpp"
+#include "LocationBuilder.hpp"
 #include <algorithm>
 #include <string>
 #include <sstream>
 
-// Is in utils
+// this function is in utils
 std::vector<std::string> split_str(const std::string &str, const std::string &delimiter);
 
-ServerBuilder::ServerBuilder()
+void    ServerBuilder::addNestedBuilder(IConfigBuilder *child)
+{
+    LocationConfig *newLocation = static_cast<LocationConfig *>(child->build());
+    ServerConfig->locations.push_back(newLocation);
+}
+
+ServerBuilder::ServerBuilder() : built(false)
 {
     registerHandler("listen", &ServerBuilder::handleListen);
     registerHandler("server_name", &ServerBuilder::handleServerName);
