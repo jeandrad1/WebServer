@@ -18,6 +18,11 @@ HttpBuilder::HttpBuilder() : built(false)
 /*                          Public Functions                           */
 /***********************************************************************/
 
+void    HttpBuilder::setDirective(const std::string &name, const std::string &value)
+{
+    dispatchDirective(name, value);
+}
+
 void    HttpBuilder::addNestedBuilder(IConfigBuilder *child)
 {
     ServerConfig *newServer = static_cast<ServerConfig *>(child->build());
