@@ -8,16 +8,16 @@
 class LocationBuilder : public IConfigBuilder, public DirectiveProcessor<LocationBuilder>
 {
 	private:
-	LocationConfig	*LocationConfig;
+	LocationConfig	*locationConfig;
 	bool			built;
 
 	public:
 	LocationBuilder();
-	virtual ~LocationBuilder() {}
+	~LocationBuilder(){};
 
-	virtual void setDirective(const std::string &key,const std::string &value);
-	virtual void addNestedBuilder(IConfigBuilder *child);
-	virtual void *build(void);
+	void setDirective(const std::string &key,const std::string &value);
+	void addNestedBuilder(IConfigBuilder *child){};
+	void *build(void);
 
 	void handleRoot(std::string const &value);
 	void handleIndex(std::string const &value);

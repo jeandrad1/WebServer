@@ -10,7 +10,7 @@ class HttpConfig {
     public:
         std::vector<ServerConfig *> servers;
         unsigned long               clientMaxBodySize;
-        std::vector<t_errorPage>    errorPages;
+        std::vector<t_locationErrorPage>    errorPages;
 };
 
 #endif

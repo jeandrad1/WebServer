@@ -10,7 +10,7 @@ class ServerBuilder : public IConfigBuilder, public DirectiveProcessor<ServerBui
     public:
         // The constructor lacks the handle for location
         ServerBuilder();
-        ~ServerBuilder() {}
+        ~ServerBuilder();
 
         void    setDirective(const std::string &key,const std::string &value);
         void    addNestedBuilder(IConfigBuilder *child);

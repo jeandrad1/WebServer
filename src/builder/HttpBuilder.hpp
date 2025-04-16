@@ -15,7 +15,7 @@ class HttpBuilder : public IConfigBuilder, public DirectiveProcessor<HttpBuilder
 
     public:
         HttpBuilder();
-        ~HttpBuilder();
+        ~HttpBuilder(){};
 
         void setDirective(const std::string &name, const std::string &value);
         void addNestedBuilder(IConfigBuilder *child);
