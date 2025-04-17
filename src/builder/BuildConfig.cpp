@@ -11,6 +11,7 @@
 #include "ServerBuilder.hpp"
 #include "HttpBuilder.hpp"
 #include "../composite/Directive.hpp"
+#include "../utils/colors.hpp"
 
 class LocationConfig;
 
@@ -26,9 +27,15 @@ std::vector<AConfigBlock *> BuildConfig(AConfigBlock *config_ptr)
     std::cout << "Building configuration..." << std::endl;
     for (AConfigBlock::iterator it = config_ptr->begin(); it != config_ptr->end(); ++it)
     {
-        std::cout << "Processing block..." << std::endl;
-        if (HttpBlock *httpBlock = dynamic_cast<HttpBlock *>(*it))
-        {
+		std::cout << CYAN"Processing block..." << WHITE << std::endl;
+
+		HttpBlock *httpBlock = dynamic_cast<HttpBlock *>(*it);
+		ServerBlock *serverBlock = dynamic_cast<ServerBlock *>(*it);
+		LocationBlock *locationBlock = dynamic_cast<LocationBlock *>(*it);
+
+		if (httpBlock)
+		{
+			std::cout << GREEN"ENTRA EN HTTP\n" << WHITE;
             HttpBuilder httpBuilder;
             std::cout << "Building HTTP block..." << std::endl;
             for (AConfigBlock::iterator blockIt = httpBlock->begin(); blockIt != httpBlock->end(); ++blockIt)
@@ -47,9 +54,9 @@ std::vector<AConfigBlock *> BuildConfig(AConfigBlock *config_ptr)
             }
             builtConfigs.push_back(static_cast<AConfigBlock *>(httpBuilder.build()));
         }
-
-        else if (ServerBlock *serverBlock = dynamic_cast<ServerBlock *>(*it))
+        else if (serverBlock)
         {
+			std::cout << RED"Entra en server\n" << WHITE;
             ServerBuilder serverBuilder;
             std::cout << "Building Server block..." << std::endl;
             for (AConfigBlock::iterator blockIt = serverBlock->begin(); blockIt != serverBlock->end(); ++blockIt)
@@ -66,17 +73,16 @@ std::vector<AConfigBlock *> BuildConfig(AConfigBlock *config_ptr)
             }
             builtConfigs.push_back(static_cast<AConfigBlock *>(serverBuilder.build()));
         }
-
-        else if (LocationBlock *locationBlock = dynamic_cast<LocationBlock *>(*it))
+        else if (locationBlock)
         {
             LocationBuilder locationBuilder;
-            std::cout << "Building Location block..." << std::endl;
-            for (AConfigBlock::iterator blockIt = locationBlock->begin(); blockIt != locationBlock->end(); ++blockIt)
-            {
-                if (Directive *directive = dynamic_cast<Directive *>(*blockIt))
-                    locationBuilder.dispatchDirective(directive->getName(), directive->getValue());
-            }
-            builtConfigs.push_back(static_cast<AConfigBlock *>(locationBuilder.build()));
+			AConfigBlock::iterator blockItEnd = locationBlock->end();
+			for (AConfigBlock::iterator blockIt = locationBlock->begin(); blockIt != blockItEnd; blockIt++)
+			{
+				if (Directive *directive = dynamic_cast<Directive *>(*blockIt))
+					locationBuilder.dispatchDirective(directive->getName(), directive->getValue());
+			}
+			builtConfigs.push_back(static_cast<AConfigBlock *>(locationBuilder.build()));
         }
         else
         {
