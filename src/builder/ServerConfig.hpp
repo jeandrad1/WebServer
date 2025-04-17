@@ -31,33 +31,36 @@ struct ServerReturnValues
     int code;
 };
 
-
-class ServerConfig
-{
-    public:
-    ServerConfig()
+    class ServerConfig
     {
-        listen->port = DEFAULT_PORT;
-        _return->code = DEFAULT_HTTP_CODE;
-        built = false;       
-    }
+    public:
+        ServerConfig()
+            : listen(new ListenValues()), _return(new ServerReturnValues()), autoindex(new bool(false)), built(false)
+        {
+            listen->port = DEFAULT_PORT;
+            _return->code = DEFAULT_HTTP_CODE;
+        }
 
-    ~ServerConfig() {}
-    
-        std::vector<LocationConfig *>   locations;
-        ListenValues                    *listen;
-        std::string                     serverName;
-        std::string                     root;
-        std::vector<std::string>        index;
-        std::string                     clientMaxBodySize;
-        bool                            *autoindex;
-		std::vector<t_ServerErrorPage>        errorPages;
-        ServerReturnValues              *_return;
-        long long					    clientmaxbodysize;
+        ~ServerConfig()
+        {
+            delete listen;
+            delete _return;
+            delete autoindex;
+        }
+
+        std::vector<LocationConfig *> locations;
+        ListenValues *listen;
+        std::string serverName;
+        std::string root;
+        std::vector<std::string> index;
+        std::string clientMaxBodySize;
+        bool *autoindex;
+        std::vector<t_ServerErrorPage> errorPages;
+        ServerReturnValues *_return;
+        long long clientmaxbodysize;
 
     private:
-        bool    built;
-
-};
+        bool built;
+    };
 
 #endif
