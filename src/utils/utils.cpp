@@ -117,41 +117,41 @@ std::vector<std::string> split_str(const std::string &str, const std::string &de
 #include "../builder/ServerConfig.hpp"
 #include "../builder/LocationConfig.hpp"
 
-void printLocationConfig(LocationConfig *locationConfig, int indent = 0)
+void printLocation(LocationConfig *location, int indent = 0)
 {
     std::string spaces(indent * 2, ' ');
-    std::cout << spaces << "LocationConfig:" << std::endl;
-    std::cout << spaces << "  Root: " << locationConfig->root << std::endl;
+    std::cout << spaces << "Location:" << std::endl;
+    std::cout << spaces << "  Root: " << location->root << std::endl;
     std::cout << spaces << "  Index: ";
-    for (size_t i = 0; i < locationConfig->index.size(); ++i)
-        std::cout << locationConfig->index[i] << " ";
+    for (size_t i = 0; i < location->index.size(); ++i)
+        std::cout << location->index[i] << " ";
     std::cout << std::endl;
-    std::cout << spaces << "  Autoindex: " << (*locationConfig->autoindex ? "on" : "off") << std::endl;
-    std::cout << spaces << "  Client Max Body Size: " << locationConfig->clientmaxbodysize << std::endl;
-    std::cout << spaces << "  Return Code: " << locationConfig->_return->code << std::endl;
-    std::cout << spaces << "  Return HTTP: " << locationConfig->_return->http << std::endl;
+    std::cout << spaces << "  Autoindex: " << (location->autoindex ? "on" : "off") << std::endl;
+    std::cout << spaces << "  Client Max Body Size: " << location->clientMaxBodySize << std::endl;
+    std::cout << spaces << "  Return Code: " << location->_return->code << std::endl;
+    std::cout << spaces << "  Return HTTP: " << location->_return->http << std::endl;
 }
 
-void printServerConfig(ServerConfig *serverConfig, int indent = 0)
+void printServer(ServerConfig *server, int indent = 0)
 {
     std::string spaces(indent * 2, ' ');
-    std::cout << spaces << "ServerConfig:" << std::endl;
-    std::cout << spaces << "  Listen IP: " << serverConfig->listen->ip << std::endl;
-    std::cout << spaces << "  Listen Port: " << serverConfig->listen->port << std::endl;
-    std::cout << spaces << "  Server Name: " << serverConfig->serverName << std::endl;
-    std::cout << spaces << "  Root: " << serverConfig->root << std::endl;
+    std::cout << spaces << "Server:" << std::endl;
+    std::cout << spaces << "  Listen IP: " << server->listen->ip << std::endl;
+    std::cout << spaces << "  Listen Port: " << server->listen->port << std::endl;
+    std::cout << spaces << "  Server Name: " << server->serverNames[0] << std::endl;
+    std::cout << spaces << "  Root: " << server->root << std::endl;
     std::cout << spaces << "  Index: ";
-    for (size_t i = 0; i < serverConfig->index.size(); ++i)
-        std::cout << serverConfig->index[i] << " ";
+    for (size_t i = 0; i < server->index.size(); ++i)
+        std::cout << server->index[i] << " ";
     std::cout << std::endl;
-    std::cout << spaces << "  Autoindex: " << (*serverConfig->autoindex ? "on" : "off") << std::endl;
-    std::cout << spaces << "  Client Max Body Size: " << serverConfig->clientmaxbodysize << std::endl;
-    std::cout << spaces << "  Return Code: " << serverConfig->_return->code << std::endl;
-    std::cout << spaces << "  Return HTTP: " << serverConfig->_return->http << std::endl;
+    std::cout << spaces << "  Autoindex: " << (server->autoindex ? "on" : "off") << std::endl;
+    std::cout << spaces << "  Client Max Body Size: " << server->clientMaxBodySize << std::endl;
+    std::cout << spaces << "  Return Code: " << server->_return->code << std::endl;
+    std::cout << spaces << "  Return HTTP: " << server->_return->http << std::endl;
 
-    for (size_t i = 0; i < serverConfig->locations.size(); ++i)
+    for (size_t i = 0; i < server->locations.size(); ++i)
     {
-        printLocationConfig(serverConfig->locations[i], indent + 1);
+        printLocation(server->locations[i], indent + 1);
     }
 }
 
@@ -163,7 +163,7 @@ void printHttpConfig(HttpConfig *httpConfig, int indent = 0)
 
     for (size_t i = 0; i < httpConfig->servers.size(); ++i)
     {
-        printServerConfig(httpConfig->servers[i], indent + 1);
+        printServer(httpConfig->servers[i], indent + 1);
     }
 }
 
@@ -178,17 +178,17 @@ void printBuiltConfigs(const std::vector<void *> &builtConfigs)
             continue;
         }
 
-        ServerConfig *serverConfig = dynamic_cast<ServerConfig *>(static_cast<ServerConfig *>(builtConfigs[i]));
-        if (serverConfig)
+        ServerConfig *server = dynamic_cast<ServerConfig *>(static_cast<ServerConfig *>(builtConfigs[i]));
+        if (server)
         {
-            printServerConfig(serverConfig);
+            printServer(server);
             continue;
         }
 
-        LocationConfig *locationConfig = dynamic_cast<LocationConfig *>(static_cast<LocationConfig *>(builtConfigs[i]));
-        if (locationConfig)
+        LocationConfig *location = dynamic_cast<LocationConfig *>(static_cast<LocationConfig *>(builtConfigs[i]));
+        if (location)
         {
-            printLocationConfig(locationConfig);
+            printLocation(location);
             continue;
         }
 
