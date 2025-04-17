@@ -21,9 +21,9 @@ class LocationBuilder : public IConfigBuilder, public DirectiveProcessor<Locatio
 
 		void handleRoot(std::string const &value);
 		void handleIndex(std::string const &value);
-		void handleClient_max_body_size(std::string const &value);
+		void handleClientMaxBodySize(std::string const &value);
 		void handleAutoindex(std::string const &value);
-		void handleError_page(std::string const &value);
+		void handleErrorPage(std::string const &value);
 		void handleReturn(std::string const &value);
 };
 

@@ -15,7 +15,7 @@ struct ReturnValues
 typedef struct s_errorPage
 {
     std::string         target;
-    std::vector<int> statusCodes;
+    std::vector<int> 	statusCodes;
     bool                isEqualModifier;
     int                 equalModifier;            
 }   t_errorPage;
@@ -25,8 +25,8 @@ class LocationConfig
 	public:
 		std::string					root;
 		std::vector<std::string>	index;
-		bool						*autoindex;
-		long long					clientmaxbodysize;
+		bool						*autoIndex;
+		long long					clientMaxBodySize;
 		ReturnValues				*_return;
 		std::vector<t_errorPage>    errorPages;
 };

@@ -7,14 +7,14 @@ std::vector<std::string> split_str(const std::string &str, const std::string &de
 /*                     Constructors & Destructor                       */
 /***********************************************************************/
 
-LocationBuilder::LocationBuilder() : built(false), locationConfig(new LocationConfig())
+LocationBuilder::LocationBuilder() : built(false), location(new LocationConfig())
 {
-	this->locationConfig->_return = new ReturnValues;
+	this->location->_return = new ReturnValues;
     this->registerHandler("root", &LocationBuilder::handleRoot);
     this->registerHandler("index", &LocationBuilder::handleIndex);
-    this->registerHandler("client_max_body_size", &LocationBuilder::handleClient_max_body_size);
+    this->registerHandler("client_max_body_size", &LocationBuilder::handleClientMaxBodySize);
     this->registerHandler("autoindex", &LocationBuilder::handleAutoindex);
-    this->registerHandler("error_page", &LocationBuilder::handleError_page);
+    this->registerHandler("error_page", &LocationBuilder::handleErrorPage);
     this->registerHandler("return", &LocationBuilder::handleReturn);
 }
 
@@ -33,10 +33,10 @@ void *LocationBuilder::build(void)
 		this->location->root = "/";
 	if(this->location->index.empty())
         this->location->index.push_back("index.html");
-	if (!this->location->clientmaxbodysize)
-		this->location->clientmaxbodysize = 1048576;
-	if (this->location->autoindex == NULL)
-		this->location->autoindex = 0;
+	if (!this->location->clientMaxBodySize)
+		this->location->clientMaxBodySize = 1048576;
+	if (this->location->autoIndex == NULL)
+		this->location->autoIndex = 0;
 	if (this->location->_return->code == -1)
 		this->location->_return->code = 200;
 	if (this->location->_return->http.empty())
@@ -68,7 +68,7 @@ void LocationBuilder::handleIndex(std::string const &value)
     this->location->index = index;
 }
 
-void LocationBuilder::handleClient_max_body_size(std::string const &value)
+void LocationBuilder::handleClientMaxBodySize(std::string const &value)
 {
 	if (value.empty())
 		return ;
@@ -82,16 +82,16 @@ void LocationBuilder::handleClient_max_body_size(std::string const &value)
 	switch (tolower(suffix))
 	{
 		case 'k':
-			this->location->clientmaxbodysize = maxBodySize * 1024;
+			this->location->clientMaxBodySize = maxBodySize * 1024;
 			break ;
 		case 'm':
-			this->location->clientmaxbodysize = maxBodySize * 1024 * 1024;
+			this->location->clientMaxBodySize = maxBodySize * 1024 * 1024;
 			break ;
 		case 'g':
-			this->location->clientmaxbodysize = maxBodySize * 1024 * 1024 * 1024;
+			this->location->clientMaxBodySize = maxBodySize * 1024 * 1024 * 1024;
 			break ;
 		case '\0':
-			this->location->clientmaxbodysize = maxBodySize;
+			this->location->clientMaxBodySize = maxBodySize;
 	}
 }
 
@@ -99,17 +99,17 @@ void    LocationBuilder::handleAutoindex(const std::string &value)
 {
     std::string real_value = value.substr(0, value.size() - 1);
     if (real_value == "off")
-    *(this->location->autoindex) = false;
+    *(this->location->autoIndex) = false;
     else
-        *(this->location->autoindex) = true;
+        *(this->location->autoIndex) = true;
 }
 
-void    LocationBuilder::handleError_page(const std::string &value)
+void    LocationBuilder::handleErrorPage(const std::string &value)
 {
     std::istringstream iss(value);
     std::vector<std::string> values;
     std::string info;
-    t_errorPage errorPage;
+    t_errorPage *errorPage = new t_errorPage;
     
     if (value.empty())
     return ;
@@ -124,21 +124,21 @@ void    LocationBuilder::handleError_page(const std::string &value)
     ite--;
     std::string target = *ite;
 
-    errorPage.target = target.substr(0, target.size() - 1);
-    errorPage.isEqualModifier = false;
-    errorPage.equalModifier = 0;
+    errorPage->target = target.substr(0, target.size() - 1);
+    errorPage->isEqualModifier = false;
+    errorPage->equalModifier = 0;
 
     for (std::vector<std::string>::iterator it = values.begin(); it != ite; it++)
     {
         if ((*it).find('='))
         {
-            errorPage.isEqualModifier = true;
-            errorPage.equalModifier = std::atol((*it).substr(1, (*it).size()).c_str());
+            errorPage->isEqualModifier = true;
+            errorPage->equalModifier = std::atol((*it).substr(1, (*it).size()).c_str());
             break ;
         }
-        errorPage.statusCodes.push_back(std::atol((*it).c_str()));
+        errorPage->statusCodes.push_back(std::atol((*it).c_str()));
     }
-    this->location->errorPages.push_back(errorPage);
+    this->location->errorPages.push_back(*errorPage);
 }
 
 void    LocationBuilder::handleReturn(const std::string &value)
