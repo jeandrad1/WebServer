@@ -10,9 +10,10 @@ class LocationBuilder : public IConfigBuilder, public DirectiveProcessor<Locatio
 	private:
 	LocationConfig	*locationConfig;
 	bool			built;
+	LocationBuilder();
 
 	public:
-	LocationBuilder();
+	LocationBuilder(std::string const &value);
 	~LocationBuilder(){};
 
 	void setDirective(const std::string &key,const std::string &value);

@@ -8,8 +8,16 @@ void    LocationBuilder::setDirective(const std::string &name, const std::string
     dispatchDirective(name, value);
 }
 
-LocationBuilder::LocationBuilder() : built(false), locationConfig(new LocationConfig())
+static std::string valueConstructor(std::string const &value)
 {
+	std::string newValue = value.substr(8, value.size());
+	return(newValue);
+}
+
+LocationBuilder::LocationBuilder(std::string const &value) : built(false), locationConfig(new LocationConfig())
+{
+	this->locationConfig->value = valueConstructor(value);
+	std::cout << "-" << this->locationConfig->value << "-\n";
 	this->locationConfig->_return = new ReturnValues;
     this->registerHandler("root", &LocationBuilder::handleRoot);
     this->registerHandler("index", &LocationBuilder::handleIndex);

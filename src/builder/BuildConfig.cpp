@@ -65,7 +65,7 @@ std::vector<AConfigBlock *> BuildConfig(AConfigBlock *config_ptr)
                     serverBuilder.dispatchDirective(directive->getName(), directive->getValue());
                 else
                 {
-                    LocationBuilder *locationBuilder = new LocationBuilder();
+                    LocationBuilder *locationBuilder = new LocationBuilder((*blockIt)->getName());
                     serverBuilder.addNestedBuilder(locationBuilder);
                     delete locationBuilder;
                 }
@@ -73,8 +73,8 @@ std::vector<AConfigBlock *> BuildConfig(AConfigBlock *config_ptr)
             builtConfigs.push_back(static_cast<AConfigBlock *>(serverBuilder.build()));
         }
         else if (locationBlock)
-        {
-            LocationBuilder locationBuilder;
+		{
+			LocationBuilder locationBuilder(locationBlock->getName());
 			AConfigBlock::iterator blockItEnd = locationBlock->end();
 			for (AConfigBlock::iterator blockIt = locationBlock->begin(); blockIt != blockItEnd; blockIt++)
 			{
