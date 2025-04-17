@@ -5,13 +5,13 @@
 # include <vector>
 
 
-typedef struct s_locationErrorPage
+typedef struct s_errorPage
 {
     std::string         target;
-    std::vector<int> statusCodes;
+    std::vector<int>    statusCodes;
     bool                isEqualModifier;
     int                 equalModifier;            
-}   t_locationErrorPage;
+}   t_errorPage;
 
 
 #endif

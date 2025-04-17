@@ -68,7 +68,7 @@ void    HttpBuilder::handleErrorPage(const std::string &value)
     std::istringstream iss(value);
     std::vector<std::string> values;
     std::string info;
-    t_locationErrorPage errorPage;
+    t_errorPage *errorPage = new t_errorPage;
     
     if (value.empty())
     return ;
@@ -83,21 +83,21 @@ void    HttpBuilder::handleErrorPage(const std::string &value)
     ite--;
     std::string target = *ite;
 
-    errorPage.target = target.substr(0, target.size() - 1);
-    errorPage.isEqualModifier = false;
-    errorPage.equalModifier = 0;
+    errorPage->target = target.substr(0, target.size() - 1);
+    errorPage->isEqualModifier = false;
+    errorPage->equalModifier = 0;
 
     for (std::vector<std::string>::iterator it = values.begin(); it != ite; it++)
     {
         if ((*it).find('='))
         {
-            errorPage.isEqualModifier = true;
-            errorPage.equalModifier = std::atol((*it).substr(1, (*it).size()).c_str());
+            errorPage->isEqualModifier = true;
+            errorPage->equalModifier = std::atol((*it).substr(1, (*it).size()).c_str());
             break ;
         }
-        errorPage.statusCodes.push_back(std::atol((*it).c_str()));
+        errorPage->statusCodes.push_back(std::atol((*it).c_str()));
     }
-    this->http->errorPages.push_back(errorPage);
+    this->http->errorPages.push_back(*errorPage);
 }
 
 /***********************************************************************/
