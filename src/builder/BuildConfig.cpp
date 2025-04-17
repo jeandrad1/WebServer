@@ -67,7 +67,7 @@ std::vector<AConfigBlock *> BuildConfig(AConfigBlock *config_ptr)
                 {
                     LocationBuilder *locationBuilder = new LocationBuilder();
                     serverBuilder.addNestedBuilder(locationBuilder);
-                    delete locationBuilder; // Liberar memoria después de usar
+                    delete locationBuilder;
                 }
             }
             builtConfigs.push_back(static_cast<AConfigBlock *>(serverBuilder.build()));
@@ -82,11 +82,11 @@ std::vector<AConfigBlock *> BuildConfig(AConfigBlock *config_ptr)
 					locationBuilder.dispatchDirective(directive->getName(), directive->getValue());
 			}
 			builtConfigs.push_back(static_cast<AConfigBlock *>(locationBuilder.build()));
-        }
-        else
-        {
-            std::cout << "Error: Unknown block type encountered." << std::endl;
-        }
-    }
-    return builtConfigs;
+		}
+		else
+		{
+			std::cout << "Error: Unknown block type encountered." << std::endl;
+		}
+	}
+	return builtConfigs;
 }
