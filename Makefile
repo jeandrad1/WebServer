@@ -29,7 +29,7 @@ FILES = main \
 		strategy/LocationBlockStrategy \
 		strategy/ServerBlockStrategy \
 		manager/WebservManager \
-		builder/BuildConfig \
+		builder/buildConfig \
 		builder/HttpBuilder \
 		builder/LocationBuilder \
 		builder/ServerBuilder \
