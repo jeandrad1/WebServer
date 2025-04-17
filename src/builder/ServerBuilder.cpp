@@ -7,16 +7,9 @@
 // this function is in utils
 std::vector<std::string> split_str(const std::string &str, const std::string &delimiter);
 
-void    ServerBuilder::setDirective(const std::string &name, const std::string &value)
-{
-    dispatchDirective(name, value);
-}
-
-void    ServerBuilder::addNestedBuilder(IConfigBuilder *child)
-{
-    LocationConfig *newLocation = static_cast<LocationConfig *>(child->build());
-    this->serverConfig->locations.push_back(newLocation);
-}
+/***********************************************************************/
+/*                     Constructors & Destructor                       */
+/***********************************************************************/
 
 ServerBuilder::ServerBuilder() : built(false), serverConfig(new ServerConfig())
 {
@@ -34,6 +27,21 @@ ServerBuilder::~ServerBuilder()
 {
     if (this->serverConfig)
         delete this->serverConfig;
+}
+
+/***********************************************************************/
+/*                          Public Functions                           */
+/***********************************************************************/
+
+void    ServerBuilder::setDirective(const std::string &name, const std::string &value)
+{
+    dispatchDirective(name, value);
+}
+
+void    ServerBuilder::addNestedBuilder(IConfigBuilder *child)
+{
+    LocationConfig *newLocation = static_cast<LocationConfig *>(child->build());
+    this->serverConfig->locations.push_back(newLocation);
 }
 
 void *ServerBuilder::build()
@@ -68,6 +76,10 @@ void *ServerBuilder::build()
     this->built = true;
     return this->serverConfig;
 }
+
+/***********************************************************************/
+/*                          Handle Functions                           */
+/***********************************************************************/
 
 void    ServerBuilder::handleListen(const std::string &value)
 {
@@ -197,4 +209,3 @@ void ServerBuilder::handleClientMaxBodySize(std::string const &value)
 			this->serverConfig->clientmaxbodysize = maxBodySize;
 	}
 }
-
