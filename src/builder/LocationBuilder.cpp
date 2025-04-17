@@ -8,7 +8,7 @@ void    LocationBuilder::setDirective(const std::string &name, const std::string
     dispatchDirective(name, value);
 }
 
-LocationBuilder::LocationBuilder() : built(false), locationConfig(NULL)
+LocationBuilder::LocationBuilder() : built(false), locationConfig(new LocationConfig())
 {
     this->registerHandler("root", &LocationBuilder::handleRoot);
     this->registerHandler("index", &LocationBuilder::handleIndex);

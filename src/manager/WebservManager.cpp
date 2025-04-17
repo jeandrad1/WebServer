@@ -42,16 +42,16 @@ WebservManager::~WebservManager(void)
 
 void WebservManager::run(void)
 {
-    ServerBlock		config("Config");
+	ServerBlock		config("Config");
 	this->_rootBlock = createBlock(this->_configFile, config);
 
-    this->_rootBlock->getBlock(0)->printConfig(0);
+	this->_rootBlock->getBlock(0)->printConfig(0);
 
-    int error = factoryCheck((*this->_rootBlock));
+	int error = factoryCheck((*this->_rootBlock));
 
-    std::cout << "Passes factory"<< std::endl;
-    //std::vector<AConfigBlock *> builtConfigs = BuildConfig(this->_rootBlock);
-   // std::cout << "Passes builder"<< std::endl;
+	std::cout << "Passes factory"<< std::endl;
+	std::vector<AConfigBlock *> builtConfigs = BuildConfig(this->_rootBlock);
+	std::cout << "Passes builder"<< std::endl;
 
 
 }
