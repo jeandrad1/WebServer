@@ -4,17 +4,25 @@
 # include "IConfigBuilder.hpp"
 # include "DirectiveProcessor.hpp"
 # include "ServerConfig.hpp"
+# include "../composite/AConfigBlock.hpp"
+# include "../composite/Directive.hpp"
+# include "LocationBuilder.hpp"
 
 class ServerBuilder : public IConfigBuilder, public DirectiveProcessor<ServerBuilder>
 {
+    private:
+        bool            built;
+        ServerConfig    *server;
+
     public:
         // The constructor lacks the handle for location
         ServerBuilder();
         ~ServerBuilder();
 
         void    setDirective(const std::string &key,const std::string &value);
-        void    addNestedBuilder(IConfigBuilder *child);
-        void    *build(void); // checks the server values and if they are not set it sets them with default values
+        void    addNestedBuilder(IConfigBuilder *child, AConfigBlock *newBlock);
+        void    *build(AConfigBlock *serverBlock); // checks the server values and if they are not set it sets them with default values
+        void    setDefaultValues();
 
         void    handleListen(const std::string &value); 
         void    handleServerName(const std::string &value);
@@ -24,11 +32,6 @@ class ServerBuilder : public IConfigBuilder, public DirectiveProcessor<ServerBui
         void    handleAutoindex(const std::string &value);
         void    handleErrorPage(const std::string &value);
         void    handleReturn(const std::string &value);
-        
-    private:
-        bool            built;
-        ServerConfig    *serverConfig; 
-
 };
 
 #endif

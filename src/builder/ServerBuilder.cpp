@@ -1,8 +1,4 @@
 #include "ServerBuilder.hpp"
-#include <algorithm>
-#include <string>
-#include <sstream>
-#include <vector>
 
 // this function is in utils
 std::vector<std::string> split_str(const std::string &str, const std::string &delimiter);
@@ -11,8 +7,10 @@ std::vector<std::string> split_str(const std::string &str, const std::string &de
 /*                     Constructors & Destructor                       */
 /***********************************************************************/
 
-ServerBuilder::ServerBuilder() : built(false), serverConfig(new ServerConfig())
+ServerBuilder::ServerBuilder() : built(false), server(new ServerConfig())
 {
+    setDefaultValues();
+
     registerHandler("listen", &ServerBuilder::handleListen);
     registerHandler("server_name", &ServerBuilder::handleServerName);
     registerHandler("root", &ServerBuilder::handleRoot);
@@ -25,8 +23,15 @@ ServerBuilder::ServerBuilder() : built(false), serverConfig(new ServerConfig())
 
 ServerBuilder::~ServerBuilder()
 {
-    if (this->serverConfig)
-        delete this->serverConfig;
+    if (this->server->errorPages.size() != 0)
+    {
+        for (size_t i = 0; i < this->server->errorPages.size(); ++i)
+            delete this->server->errorPages[i];
+    }
+    delete this->server->listen;
+    delete this->server->_return;
+    if (this->server)
+        delete this->server;
 }
 
 /***********************************************************************/
@@ -38,43 +43,53 @@ void    ServerBuilder::setDirective(const std::string &name, const std::string &
     dispatchDirective(name, value);
 }
 
-void    ServerBuilder::addNestedBuilder(IConfigBuilder *child)
+void    ServerBuilder::addNestedBuilder(IConfigBuilder *child, AConfigBlock *newBlock)
 {
-    LocationConfig *newLocation = static_cast<LocationConfig *>(child->build());
-    this->serverConfig->locations.push_back(newLocation);
+    LocationConfig *newLocation = static_cast<LocationConfig *>(child->build(newBlock));
+    this->server->locations.push_back(newLocation);
 }
 
-void *ServerBuilder::build()
+void *ServerBuilder::build(AConfigBlock *serverBlock)
 {
-    if (this->serverConfig->listen->ip.empty())
-        this->serverConfig->listen->ip = "42.42.42.42";
-    
-    if (this->serverConfig->listen->port == -1)
-        this->serverConfig->listen->port = 42;
-    
-    if (this->serverConfig->serverName.empty())
-        this->serverConfig->serverName = "http://example.com";
-    
-    if (this->serverConfig->root.empty())
-        this->serverConfig->root = "/";
+    if (this->built == true)
+        return (NULL);
 
-    if (this->serverConfig->index.empty())
-        this->serverConfig->index.push_back("index.html");
-    
-    if (this->serverConfig->listen->port == -1)
-        this->serverConfig->listen->port = 42;
-    
-    if (this->serverConfig->autoindex == NULL)
-        this->serverConfig->autoindex = 0;
-    
-    if (this->serverConfig->_return->code == -1)
-        this->serverConfig->_return->code = 200;
-    
-    if (this->serverConfig->_return->http.empty())
-        this->serverConfig->_return->http = "example.com";
-    
+    for (AConfigBlock::iterator blockIt = serverBlock->begin(); blockIt != serverBlock->end(); ++blockIt)
+    {
+        if (Directive *directive = dynamic_cast<Directive *>(*blockIt))
+            this->dispatchDirective(directive->getName(), directive->getValue());
+        else
+        {
+            LocationBuilder *locationBuilder = new LocationBuilder((*blockIt)->getName());
+            this->addNestedBuilder(locationBuilder, *blockIt);
+            delete locationBuilder;
+        }
+    }
     this->built = true;
-    return this->serverConfig;
+    return (this->server);
+}
+
+void    ServerBuilder::setDefaultValues()
+{
+    this->server->listen = new t_listen();
+    this->server->_return = new t_return();
+
+    this->server->listen->port = DEFAULT_LISTEN_PORT;
+    this->server->listen->ip = DEFAULT_LISTEN_IP;
+
+    this->server->serverNames.push_back("");
+
+    if (this->server->root.empty())
+        this->server->root = "/";
+
+    if (this->server->index.empty())
+        this->server->index.push_back("index.html");
+
+    if (this->server->_return->code == -1)
+        this->server->_return->code = 200;
+
+    if (this->server->_return->http.empty())
+        this->server->_return->http = "example.com";
 }
 
 /***********************************************************************/
@@ -89,36 +104,36 @@ void    ServerBuilder::handleListen(const std::string &value)
 
     if(colon_pos != std::string::npos)
     {
-        this->serverConfig->listen->ip = real_value.substr(0, colon_pos);
+        this->server->listen->ip = real_value.substr(0, colon_pos);
         std::string port_str = real_value.substr(colon_pos + 1);
-        this->serverConfig->listen->port = std::atoi(port_str.c_str());
+        this->server->listen->port = std::atoi(port_str.c_str());
     }
     else
     {
-        this->serverConfig->listen->ip = "";
-        this->serverConfig->listen->port = std::atoi(real_value.c_str());
+        this->server->listen->ip = "";
+        this->server->listen->port = std::atoi(real_value.c_str());
     }
 }
 
 void    ServerBuilder::handleServerName(const std::string &value)
 {
     std::string real_value = value.substr(0, value.size() - 1);
-    this->serverConfig->serverName = real_value;
+    this->server->serverNames.push_back(real_value);
 }
 
 void    ServerBuilder::handleRoot(const std::string &value)
 {
     std::string real_value = value.substr(0, value.size() - 1);
-    this->serverConfig->root = real_value;
+    this->server->root = real_value;
 }
 
 void    ServerBuilder::handleAutoindex(const std::string &value)
 {
     std::string real_value = value.substr(0, value.size() - 1);
     if (real_value == "off")
-        *(this->serverConfig->autoindex) = false;
+        this->server->autoindex = false;
     else
-       *(this->serverConfig->autoindex) = true;
+        this->server->autoindex = true;
 }
 
 void    ServerBuilder::handleReturn(const std::string &value)
@@ -128,14 +143,14 @@ void    ServerBuilder::handleReturn(const std::string &value)
 
     if(http_pos != std::string::npos)
     {
-        this->serverConfig->_return->http = real_value.substr(http_pos, value.size());
+        this->server->_return->http = real_value.substr(http_pos, value.size());
         std::string port_str = real_value.substr(0, http_pos);
-        this->serverConfig->_return->code = std::atoi(port_str.c_str());
+        this->server->_return->code = std::atoi(port_str.c_str());
     }
     else
     {
         std::string true_value = real_value.substr(0, std::string::npos);
-        this->serverConfig->_return->code = std::atoi(true_value.c_str());
+        this->server->_return->code = std::atoi(true_value.c_str());
     }
 }
 
@@ -143,7 +158,7 @@ void    ServerBuilder::handleIndex(const std::string &value)
 {
     std::string real_value = value.substr(0, value.size() - 1);
     std::vector<std::string> index = split_str(real_value, " ");
-    this->serverConfig->index = index;
+    this->server->index = index;
 }
 
 void    ServerBuilder::handleErrorPage(const std::string &value)
@@ -151,7 +166,7 @@ void    ServerBuilder::handleErrorPage(const std::string &value)
     std::istringstream iss(value);
     std::vector<std::string> values;
     std::string info;
-    t_ServerErrorPage errorPage;
+    t_errorPage *errorPage = new t_errorPage;
     
     if (value.empty())
     return ;
@@ -166,21 +181,21 @@ void    ServerBuilder::handleErrorPage(const std::string &value)
     ite--;
     std::string target = *ite;
 
-    errorPage.target = target.substr(0, target.size() - 1);
-    errorPage.isEqualModifier = false;
-    errorPage.equalModifier = 0;
+    errorPage->target = target.substr(0, target.size() - 1);
+    errorPage->isEqualModifier = false;
+    errorPage->equalModifier = 0;
 
     for (std::vector<std::string>::iterator it = values.begin(); it != ite; it++)
     {
         if ((*it).find('='))
         {
-            errorPage.isEqualModifier = true;
-            errorPage.equalModifier = std::atol((*it).substr(1, (*it).size()).c_str());
+            errorPage->isEqualModifier = true;
+            errorPage->equalModifier = std::atol((*it).substr(1, (*it).size()).c_str());
             break ;
         }
-        errorPage.statusCodes.push_back(std::atol((*it).c_str()));
+        errorPage->statusCodes.push_back(std::atol((*it).c_str()));
     }
-    this->serverConfig->errorPages.push_back(errorPage);
+    this->server->errorPages.push_back(errorPage);
 }
 
 void ServerBuilder::handleClientMaxBodySize(std::string const &value)
@@ -197,15 +212,15 @@ void ServerBuilder::handleClientMaxBodySize(std::string const &value)
 	switch (tolower(suffix))
 	{
 		case 'k':
-			this->serverConfig->clientmaxbodysize = maxBodySize * 1024;
+			this->server->clientMaxBodySize = maxBodySize * 1024;
 			break ;
 		case 'm':
-			this->serverConfig->clientmaxbodysize = maxBodySize * 1024 * 1024;
+			this->server->clientMaxBodySize = maxBodySize * 1024 * 1024;
 			break ;
 		case 'g':
-			this->serverConfig->clientmaxbodysize = maxBodySize * 1024 * 1024 * 1024;
+			this->server->clientMaxBodySize = maxBodySize * 1024 * 1024 * 1024;
 			break ;
 		case '\0':
-			this->serverConfig->clientmaxbodysize = maxBodySize;
+			this->server->clientMaxBodySize = maxBodySize;
 	}
 }

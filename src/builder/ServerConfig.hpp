@@ -3,64 +3,30 @@
 
 # include "IConfigBuilder.hpp"
 # include "DirectiveProcessor.hpp"
-# include <vector>
+# include "LocationConfig.hpp"
 
-typedef struct s_ServerErrorPage
-{
-    std::string         target;
-    std::vector<int> statusCodes;
-    bool                isEqualModifier;
-    int                 equalModifier;            
-}   t_ServerErrorPage;
-
-
-class LocationConfig;
-
-const int DEFAULT_PORT = -1;
-const int DEFAULT_HTTP_CODE = -1;
-
-struct ListenValues
+typedef struct s_listen
 {
     std::string ip;
     int port;
-};
+}   t_listen;
 
-struct ServerReturnValues
-{
-    std::string http;
-    int code;
-};
-
-    class ServerConfig
-    {
+class ServerConfig {
+    
     public:
-        ServerConfig()
-            : listen(new ListenValues()), _return(new ServerReturnValues()), autoindex(new bool(false)), built(false)
-        {
-            listen->port = DEFAULT_PORT;
-            _return->code = DEFAULT_HTTP_CODE;
-        }
-
-        ~ServerConfig()
-        {
-            delete listen;
-            delete _return;
-            delete autoindex;
-        }
-
         std::vector<LocationConfig *> locations;
-        ListenValues *listen;
-        std::string serverName;
+        
+        t_listen *listen;
+        t_return *_return;
+        long long clientMaxBodySize;
+        bool autoindex;
         std::string root;
+        std::vector<t_errorPage *> errorPages;
+        std::vector<std::string> serverNames;
         std::vector<std::string> index;
-        std::string clientMaxBodySize;
-        bool *autoindex;
-        std::vector<t_ServerErrorPage> errorPages;
-        ServerReturnValues *_return;
-        long long clientmaxbodysize;
 
-    private:
-        bool built;
-    };
+        int         getListenPort(void);
+        std::string getListenIP(void);
+};
 
 #endif
