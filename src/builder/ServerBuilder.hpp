@@ -1,5 +1,5 @@
 #ifndef SERVERBUILDER_HPP
-# define SERSERVERBUILDER_HPP
+# define SERVERBUILDER_HPP
 
 # include "IConfigBuilder.hpp"
 # include "DirectiveProcessor.hpp"

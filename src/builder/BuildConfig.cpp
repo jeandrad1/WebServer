@@ -18,7 +18,8 @@ std::vector<AConfigBlock *> BuildConfig(AConfigBlock *config_ptr)
 {
     std::vector<AConfigBlock *> builtConfigs;
 
-    if (!config_ptr) {
+    if (!config_ptr)
+    {
         std::cerr << "Error: config_ptr is null." << std::endl;
         return builtConfigs;
     }
@@ -69,6 +70,7 @@ std::vector<AConfigBlock *> BuildConfig(AConfigBlock *config_ptr)
         else if (LocationBlock *locationBlock = dynamic_cast<LocationBlock *>(*it))
         {
             LocationBuilder locationBuilder;
+            std::cout << "Building Location block..." << std::endl;
             for (AConfigBlock::iterator blockIt = locationBlock->begin(); blockIt != locationBlock->end(); ++blockIt)
             {
                 if (Directive *directive = dynamic_cast<Directive *>(*blockIt))

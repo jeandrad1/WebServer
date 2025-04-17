@@ -50,8 +50,8 @@ void WebservManager::run(void)
     int error = factoryCheck((*this->_rootBlock));
 
     std::cout << "Passes factory"<< std::endl;
-    //std::vector<AConfigBlock *> builtConfigs = BuildConfig(this->_rootBlock);
-   // std::cout << "Passes builder"<< std::endl;
+    std::vector<AConfigBlock *> builtConfigs = BuildConfig(this->_rootBlock);
+    std::cout << "Passes builder"<< std::endl;
 
 
 }
