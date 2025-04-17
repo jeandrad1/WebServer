@@ -11,13 +11,14 @@ void    LocationBuilder::setDirective(const std::string &name, const std::string
 static std::string valueConstructor(std::string const &value)
 {
 	std::string newValue = value.substr(8, value.size());
+    newValue.erase(0, newValue.find_first_not_of(" \t"));
+	newValue.erase(newValue.find_last_not_of(" \t") + 1);
 	return(newValue);
 }
 
 LocationBuilder::LocationBuilder(std::string const &value) : built(false), locationConfig(new LocationConfig())
 {
 	this->locationConfig->value = valueConstructor(value);
-	std::cout << "-" << this->locationConfig->value << "-\n";
 	this->locationConfig->_return = new ReturnValues;
     this->registerHandler("root", &LocationBuilder::handleRoot);
     this->registerHandler("index", &LocationBuilder::handleIndex);
