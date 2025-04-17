@@ -12,7 +12,7 @@ class LocationBuilder : public IConfigBuilder, public DirectiveProcessor<Locatio
 		bool			built;
 
 	public:
-		LocationBuilder();
+		LocationBuilder(const std::string &path);
 		~LocationBuilder(){};
 
 		void setDirective(const std::string &key,const std::string &value);

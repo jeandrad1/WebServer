@@ -23,6 +23,7 @@ typedef struct s_errorPage
 class LocationConfig
 {
 	public:
+		std::string					locationPath;
 		std::string					root;
 		std::vector<std::string>	index;
 		bool						*autoIndex;
