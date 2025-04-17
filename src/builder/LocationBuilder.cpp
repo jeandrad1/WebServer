@@ -9,9 +9,13 @@ std::vector<std::string> split_str(const std::string &str, const std::string &de
 
 LocationBuilder::LocationBuilder(const std::string &path) : built(false), location(new LocationConfig())
 {
-    this->location->locationPath = path;
+    std::string newPath = path.substr(8, path.size());
+    newPath.erase(0, newPath.find_first_not_of(" \t"));
+	newPath.erase(newPath.find_last_not_of(" \t") + 1);
+    this->location->locationPath = newPath;
     setDefaultValues();
     
+
     this->registerHandler("root", &LocationBuilder::handleRoot);
     this->registerHandler("index", &LocationBuilder::handleIndex);
     this->registerHandler("client_max_body_size", &LocationBuilder::handleClientMaxBodySize);
