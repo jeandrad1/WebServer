@@ -5,6 +5,9 @@
 #include "IConfigBuilder.hpp"
 #include "DirectiveProcessor.hpp"
 
+# define DEFAULT_CLIENT_MAX_BODY_SIZE (1024 * 1024)
+# define DEFAULT_AUTOINDEX false
+
 class LocationBuilder : public IConfigBuilder, public DirectiveProcessor<LocationBuilder>
 {
 	private:
@@ -13,11 +16,12 @@ class LocationBuilder : public IConfigBuilder, public DirectiveProcessor<Locatio
 
 	public:
 		LocationBuilder(const std::string &path);
-		~LocationBuilder(){};
+		~LocationBuilder();
 
 		void setDirective(const std::string &key,const std::string &value);
-		void addNestedBuilder(IConfigBuilder *child){};
-		void *build(void);
+		void addNestedBuilder(IConfigBuilder *child, AConfigBlock *newBlock);
+		void *build(AConfigBlock *locationBlock);
+		void setDefaultValues(void);
 
 		void handleRoot(std::string const &value);
 		void handleIndex(std::string const &value);

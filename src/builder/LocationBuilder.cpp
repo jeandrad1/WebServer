@@ -9,14 +9,26 @@ std::vector<std::string> split_str(const std::string &str, const std::string &de
 
 LocationBuilder::LocationBuilder(const std::string &path) : built(false), location(new LocationConfig())
 {
-	this->location->_return = new ReturnValues;
     this->location->locationPath = path;
+    setDefaultValues();
+    
     this->registerHandler("root", &LocationBuilder::handleRoot);
     this->registerHandler("index", &LocationBuilder::handleIndex);
     this->registerHandler("client_max_body_size", &LocationBuilder::handleClientMaxBodySize);
     this->registerHandler("autoindex", &LocationBuilder::handleAutoindex);
     this->registerHandler("error_page", &LocationBuilder::handleErrorPage);
     this->registerHandler("return", &LocationBuilder::handleReturn);
+}
+
+LocationBuilder::~LocationBuilder()
+{
+    if (this->location->errorPages.size() != 0)
+    {
+        for (size_t i = 0; i < this->location->errorPages.size(); ++i)
+            delete this->location->errorPages[i];
+    }
+    delete this->location->_return;
+    delete this->location;
 }
 
 /***********************************************************************/
@@ -28,20 +40,38 @@ void    LocationBuilder::setDirective(const std::string &name, const std::string
     dispatchDirective(name, value);
 }
 
-void *LocationBuilder::build(void)
+void    LocationBuilder::addNestedBuilder(IConfigBuilder *child, AConfigBlock *newBlock)
 {
-	if(this->location->root.empty())
-		this->location->root = "/";
-	if(this->location->index.empty())
-        this->location->index.push_back("index.html");
-	if (!this->location->clientMaxBodySize)
-		this->location->clientMaxBodySize = 1048576;
-	if (this->location->autoIndex == NULL)
-		this->location->autoIndex = 0;
-	if (this->location->_return->code == -1)
-		this->location->_return->code = 200;
-	if (this->location->_return->http.empty())
-		this->location->_return->http = "example.com";
+    LocationConfig *newLocation = static_cast<LocationConfig *>(child->build(newBlock));
+    this->built = false;
+}
+
+void *LocationBuilder::build(AConfigBlock *locationBlock)
+{
+    AConfigBlock::iterator blockItEnd = locationBlock->end();
+    for (AConfigBlock::iterator blockIt = locationBlock->begin(); blockIt != blockItEnd; blockIt++)
+    {
+        if (Directive *directive = dynamic_cast<Directive *>(*blockIt))
+        this->dispatchDirective(directive->getName(), directive->getValue());
+    }
+    return (this->location);
+}
+
+void    LocationBuilder::setDefaultValues(void)
+{
+    this->location->_return = new t_return;
+
+    this->location->autoindex = DEFAULT_AUTOINDEX;
+	this->location->clientMaxBodySize = DEFAULT_CLIENT_MAX_BODY_SIZE;
+
+    this->location->root = "/";
+    
+    this->location->index.push_back("index.html");
+	
+    this->location->_return->code = 200;
+    
+	this->location->_return->http = "example.com";
+    
 	if (this->location->errorPages.empty())
 	{
 		t_errorPage error;
@@ -49,7 +79,6 @@ void *LocationBuilder::build(void)
 		error.isEqualModifier = false;
 		error.equalModifier = 0;
 	}
-    return this->location;
 }
 
 /***********************************************************************/
@@ -100,9 +129,9 @@ void    LocationBuilder::handleAutoindex(const std::string &value)
 {
     std::string real_value = value.substr(0, value.size() - 1);
     if (real_value == "off")
-    *(this->location->autoIndex) = false;
+        this->location->autoindex = false;
     else
-        *(this->location->autoIndex) = true;
+        this->location->autoindex = true;
 }
 
 void    LocationBuilder::handleErrorPage(const std::string &value)
@@ -139,7 +168,7 @@ void    LocationBuilder::handleErrorPage(const std::string &value)
         }
         errorPage->statusCodes.push_back(std::atol((*it).c_str()));
     }
-    this->location->errorPages.push_back(*errorPage);
+    this->location->errorPages.push_back(errorPage);
 }
 
 void    LocationBuilder::handleReturn(const std::string &value)
