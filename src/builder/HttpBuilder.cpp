@@ -1,4 +1,5 @@
 #include "HttpBuilder.hpp"
+#include <cstdlib>
 
 /***********************************************************************/
 /*                     Constructors & Destructor                       */
@@ -67,7 +68,7 @@ void    HttpBuilder::handleErrorPage(const std::string &value)
     std::istringstream iss(value);
     std::vector<std::string> values;
     std::string info;
-    t_errorPage errorPage;
+    t_locationErrorPage errorPage;
     
     if (value.empty())
     return ;
@@ -91,10 +92,10 @@ void    HttpBuilder::handleErrorPage(const std::string &value)
         if ((*it).find('='))
         {
             errorPage.isEqualModifier = true;
-            errorPage.equalModifier = std::stoi((*it).substr(1, (*it).size()));
+            errorPage.equalModifier = std::atol((*it).substr(1, (*it).size()).c_str());
             break ;
         }
-        errorPage.statusCodes.push_back(std::stoi(*it));
+        errorPage.statusCodes.push_back(std::atol((*it).c_str()));
     }
     this->http->errorPages.push_back(errorPage);
 }

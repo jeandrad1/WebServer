@@ -25,7 +25,7 @@ class LocationConfig
 	public:
 		std::string					root;
 		std::vector<std::string>	index;
-		bool						autoindex;
+		bool						*autoindex;
 		long long					clientmaxbodysize;
 		ReturnValues				*_return;
 		std::vector<t_errorPage>    errorPages;

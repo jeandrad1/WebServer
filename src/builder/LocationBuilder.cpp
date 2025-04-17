@@ -1,8 +1,14 @@
 #include "LocationBuilder.hpp"
+#include <cstdlib>
 
 std::vector<std::string> split_str(const std::string &str, const std::string &delimiter);
 
-LocationBuilder::LocationBuilder() : built(false), LocationConfig(NULL)
+void    LocationBuilder::setDirective(const std::string &name, const std::string &value)
+{
+    dispatchDirective(name, value);
+}
+
+LocationBuilder::LocationBuilder() : built(false), locationConfig(NULL)
 {
     this->registerHandler("root", &LocationBuilder::handleRoot);
     this->registerHandler("index", &LocationBuilder::handleIndex);
@@ -14,38 +20,39 @@ LocationBuilder::LocationBuilder() : built(false), LocationConfig(NULL)
 
 void *LocationBuilder::build(void)
 {
-	if(this->LocationConfig->root.empty())
-		this->LocationConfig->root = "/";
-	if(this->LocationConfig->index.empty())
-		this->LocationConfig->index = {"index.html"};
-	if (!this->LocationConfig->clientmaxbodysize)
-		this->LocationConfig->clientmaxbodysize = 1048576;
-	if (this->LocationConfig->autoindex == NULL)
-		this->LocationConfig->autoindex = false;
-	if (this->LocationConfig->_return->code == NULL)
-		this->LocationConfig->_return->code = 200;
-	if (this->LocationConfig->_return->http.empty())
-		this->LocationConfig->_return->http = "example.com";
-	if (this->LocationConfig->errorPages.empty())
+	if(this->locationConfig->root.empty())
+		this->locationConfig->root = "/";
+	if(this->locationConfig->index.empty())
+        this->locationConfig->index.push_back("index.html");
+	if (!this->locationConfig->clientmaxbodysize)
+		this->locationConfig->clientmaxbodysize = 1048576;
+	if (this->locationConfig->autoindex == NULL)
+		this->locationConfig->autoindex = 0;
+	if (this->locationConfig->_return->code == -1)
+		this->locationConfig->_return->code = 200;
+	if (this->locationConfig->_return->http.empty())
+		this->locationConfig->_return->http = "example.com";
+	if (this->locationConfig->errorPages.empty())
 	{
 		t_errorPage error;
 		error.target = "";
 		error.isEqualModifier = false;
 		error.equalModifier = 0;
 	}
+    return this->locationConfig;
 }
 
 void    LocationBuilder::handleRoot(const std::string &value)
 {
 	std::string real_value = value.substr(0, value.size() - 1);
-	this->LocationConfig->root = real_value;
+	this->locationConfig->root = real_value;
 }
 
 void LocationBuilder::handleIndex(std::string const &value)
 {
 	std::string real_value = value.substr(0, value.size() - 1);
     std::vector<std::string> index = split_str(real_value, " ");
-    this->LocationConfig->index = index;
+    this->locationConfig->index = index;
 }
 
 void LocationBuilder::handleClient_max_body_size(std::string const &value)
@@ -62,16 +69,16 @@ void LocationBuilder::handleClient_max_body_size(std::string const &value)
 	switch (tolower(suffix))
 	{
 		case 'k':
-			this->LocationConfig->clientmaxbodysize = maxBodySize * 1024;
+			this->locationConfig->clientmaxbodysize = maxBodySize * 1024;
 			break ;
 		case 'm':
-			this->LocationConfig->clientmaxbodysize = maxBodySize * 1024 * 1024;
+			this->locationConfig->clientmaxbodysize = maxBodySize * 1024 * 1024;
 			break ;
 		case 'g':
-			this->LocationConfig->clientmaxbodysize = maxBodySize * 1024 * 1024 * 1024;
+			this->locationConfig->clientmaxbodysize = maxBodySize * 1024 * 1024 * 1024;
 			break ;
 		case '\0':
-			this->LocationConfig->clientmaxbodysize = maxBodySize;
+			this->locationConfig->clientmaxbodysize = maxBodySize;
 	}
 }
 
@@ -79,9 +86,9 @@ void    LocationBuilder::handleAutoindex(const std::string &value)
 {
     std::string real_value = value.substr(0, value.size() - 1);
     if (real_value == "off")
-        this->LocationConfig->autoindex = false;
+    *(this->locationConfig->autoindex) = false;
     else
-        this->LocationConfig->autoindex = true;
+        *(this->locationConfig->autoindex) = true;
 }
 
 void    LocationBuilder::handleError_page(const std::string &value)
@@ -113,12 +120,12 @@ void    LocationBuilder::handleError_page(const std::string &value)
         if ((*it).find('='))
         {
             errorPage.isEqualModifier = true;
-            errorPage.equalModifier = std::stoi((*it).substr(1, (*it).size()));
+            errorPage.equalModifier = std::atol((*it).substr(1, (*it).size()).c_str());
             break ;
         }
-        errorPage.statusCodes.push_back(std::stoi(*it));
+        errorPage.statusCodes.push_back(std::atol((*it).c_str()));
     }
-    this->LocationConfig->errorPages.push_back(errorPage);
+    this->locationConfig->errorPages.push_back(errorPage);
 }
 
 void    LocationBuilder::handleReturn(const std::string &value)
@@ -128,13 +135,13 @@ void    LocationBuilder::handleReturn(const std::string &value)
 
     if(http_pos != std::string::npos)
     {
-        this->LocationConfig->_return->http = real_value.substr(http_pos, value.size());
+        this->locationConfig->_return->http = real_value.substr(http_pos, value.size());
         std::string port_str = real_value.substr(0, http_pos);
-        this->LocationConfig->_return->code = std::atoi(port_str.c_str());
+        this->locationConfig->_return->code = std::atoi(port_str.c_str());
     }
     else
     {
         std::string true_value = real_value.substr(0, std::string::npos);
-        this->LocationConfig->_return->code = std::atoi(true_value.c_str());
+        this->locationConfig->_return->code = std::atoi(true_value.c_str());
     }
 }

@@ -3,8 +3,21 @@
 
 # include "IConfigBuilder.hpp"
 # include "DirectiveProcessor.hpp"
-# include "LocationConfig.hpp"
 # include <vector>
+
+typedef struct s_ServerErrorPage
+{
+    std::string         target;
+    std::vector<int> statusCodes;
+    bool                isEqualModifier;
+    int                 equalModifier;            
+}   t_ServerErrorPage;
+
+
+class LocationConfig;
+
+const int DEFAULT_PORT = -1;
+const int DEFAULT_HTTP_CODE = -1;
 
 struct ListenValues
 {
@@ -12,7 +25,7 @@ struct ListenValues
     int port;
 };
 
-struct ReturnValues
+struct ServerReturnValues
 {
     std::string http;
     int code;
@@ -22,18 +35,25 @@ struct ReturnValues
 class ServerConfig
 {
     public:
-        ServerConfig();
-        ~ServerConfig() {}
+    ServerConfig()
+    {
+        listen->port = DEFAULT_PORT;
+        _return->code = DEFAULT_HTTP_CODE;
+        built = false;       
+    }
 
+    ~ServerConfig() {}
+    
         std::vector<LocationConfig *>   locations;
         ListenValues                    *listen;
         std::string                     serverName;
         std::string                     root;
         std::vector<std::string>        index;
         std::string                     clientMaxBodySize;
-        bool                            autoindex;
-        std::string                     errorPage;
-        ReturnValues                    *_return;
+        bool                            *autoindex;
+		std::vector<t_ServerErrorPage>        errorPages;
+        ServerReturnValues              *_return;
+        long long					    clientmaxbodysize;
 
     private:
         bool    built;

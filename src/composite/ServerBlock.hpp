@@ -3,7 +3,8 @@
 
 # include "AConfigBlock.hpp"
 
-class	ServerBlock : public AConfigBlock {
+class	ServerBlock : public AConfigBlock 
+{
 
 	private:
 		ServerBlock(void);
