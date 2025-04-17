@@ -11,75 +11,71 @@
 #include "ServerBuilder.hpp"
 #include "HttpBuilder.hpp"
 #include "../composite/Directive.hpp"
+#include "../utils/colors.hpp"
 
 class LocationConfig;
 
-std::vector<AConfigBlock *> BuildConfig(AConfigBlock *config_ptr)
+std::vector<void *> BuildConfig(AConfigBlock *config_ptr)
 {
-    std::vector<AConfigBlock *> builtConfigs;
+    std::vector<void *> builtConfigs;
 
-    if (!config_ptr) {
+    if (!config_ptr)
+    {
         std::cerr << "Error: config_ptr is null." << std::endl;
         return builtConfigs;
     }
-    std::cout << "Building configuration..." << std::endl;
     for (AConfigBlock::iterator it = config_ptr->begin(); it != config_ptr->end(); ++it)
     {
-        std::cout << "Processing block..." << std::endl;
-        if (HttpBlock *httpBlock = dynamic_cast<HttpBlock *>(*it))
-        {
+		HttpBlock *httpBlock = dynamic_cast<HttpBlock *>(*it);
+		ServerBlock *serverBlock = dynamic_cast<ServerBlock *>(*it);
+		LocationBlock *locationBlock = dynamic_cast<LocationBlock *>(*it);
+
+		if (httpBlock)
+		{
             HttpBuilder httpBuilder;
-            std::cout << "Building HTTP block..." << std::endl;
             for (AConfigBlock::iterator blockIt = httpBlock->begin(); blockIt != httpBlock->end(); ++blockIt)
             {
                 if (Directive *directive = dynamic_cast<Directive *>(*blockIt))
                     httpBuilder.dispatchDirective(directive->getName(), directive->getValue());
                 else
                 {
-                    std::cout << "Building Server block..." << std::endl;
                     ServerBuilder *serverBuilder = new ServerBuilder();
-                    std::cout << "new ServerBuilder done..." << std::endl;
                     httpBuilder.addNestedBuilder(serverBuilder);
-                    std::cout << "addNestedBuilder done..." << std::endl;
-                    delete serverBuilder;
                 }
             }
             builtConfigs.push_back(static_cast<AConfigBlock *>(httpBuilder.build()));
         }
-
-        else if (ServerBlock *serverBlock = dynamic_cast<ServerBlock *>(*it))
+        else if (serverBlock)
         {
             ServerBuilder serverBuilder;
-            std::cout << "Building Server block..." << std::endl;
             for (AConfigBlock::iterator blockIt = serverBlock->begin(); blockIt != serverBlock->end(); ++blockIt)
             {
-                std::cout << "Processing Server block..." << std::endl;
                 if (Directive *directive = dynamic_cast<Directive *>(*blockIt))
                     serverBuilder.dispatchDirective(directive->getName(), directive->getValue());
                 else
                 {
                     LocationBuilder *locationBuilder = new LocationBuilder();
                     serverBuilder.addNestedBuilder(locationBuilder);
-                    delete locationBuilder; // Liberar memoria después de usar
+                    delete locationBuilder;
                 }
             }
             builtConfigs.push_back(static_cast<AConfigBlock *>(serverBuilder.build()));
         }
-
-        else if (LocationBlock *locationBlock = dynamic_cast<LocationBlock *>(*it))
+        else if (locationBlock)
         {
             LocationBuilder locationBuilder;
-            for (AConfigBlock::iterator blockIt = locationBlock->begin(); blockIt != locationBlock->end(); ++blockIt)
-            {
-                if (Directive *directive = dynamic_cast<Directive *>(*blockIt))
-                    locationBuilder.dispatchDirective(directive->getName(), directive->getValue());
-            }
-            builtConfigs.push_back(static_cast<AConfigBlock *>(locationBuilder.build()));
-        }
-        else
-        {
-            std::cout << "Error: Unknown block type encountered." << std::endl;
-        }
-    }
-    return builtConfigs;
+			AConfigBlock::iterator blockItEnd = locationBlock->end();
+			for (AConfigBlock::iterator blockIt = locationBlock->begin(); blockIt != blockItEnd; blockIt++)
+			{
+				if (Directive *directive = dynamic_cast<Directive *>(*blockIt))
+					locationBuilder.dispatchDirective(directive->getName(), directive->getValue());
+			}
+			builtConfigs.push_back(static_cast<AConfigBlock *>(locationBuilder.build()));
+		}
+		else
+		{
+			std::cout << "Error: Unknown block type encountered." << std::endl;
+		}
+	}
+	return builtConfigs;
 }

@@ -7,8 +7,9 @@ std::vector<std::string> split_str(const std::string &str, const std::string &de
 /*                     Constructors & Destructor                       */
 /***********************************************************************/
 
-LocationBuilder::LocationBuilder() : built(false), location(NULL)
+LocationBuilder::LocationBuilder() : built(false), locationConfig(new LocationConfig())
 {
+	this->locationConfig->_return = new ReturnValues;
     this->registerHandler("root", &LocationBuilder::handleRoot);
     this->registerHandler("index", &LocationBuilder::handleIndex);
     this->registerHandler("client_max_body_size", &LocationBuilder::handleClient_max_body_size);
