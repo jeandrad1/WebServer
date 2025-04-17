@@ -29,9 +29,10 @@ void    HttpBuilder::addNestedBuilder(IConfigBuilder *child)
     http->servers.push_back(newServer);
 }
 
-void    HttpBuilder::build(void)
+void    *HttpBuilder::build(void)
 {
-    this->build = true;
+    this->built = true;
+    return (this);
 }
 
 void    HttpBuilder::handleClientMaxBodySize(const std::string &value)
