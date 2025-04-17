@@ -4,8 +4,6 @@
 # include <string>
 # include <map>
 
-#include <iostream>
-
 template <typename Derived>
 class DirectiveProcessor {
     
