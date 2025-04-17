@@ -29,7 +29,7 @@ void *LocationBuilder::build(void)
 		this->locationConfig->clientmaxbodysize = 1048576;
 	if (this->locationConfig->autoindex == NULL)
 		this->locationConfig->autoindex = 0;
-	if (this->locationConfig->_return->code == -1) //peta
+	if (this->locationConfig->_return->code == -1)
 		this->locationConfig->_return->code = 200;
 	if (this->locationConfig->_return->http.empty())
 		this->locationConfig->_return->http = "example.com";
