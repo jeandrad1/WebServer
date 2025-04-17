@@ -1,11 +1,10 @@
 #ifndef HTTPBUILDER_HPP
 # define HTTPBUILDER_HPP
 
-# include <sstream>
 # include "IConfigBuilder.hpp"
 # include "DirectiveProcessor.hpp"
+# include "../composite/Directive.hpp"
 # include "HttpConfig.hpp"
-# include "structs.hpp"
 
 class HttpBuilder : public IConfigBuilder, public DirectiveProcessor<HttpBuilder> {
 
@@ -15,11 +14,12 @@ class HttpBuilder : public IConfigBuilder, public DirectiveProcessor<HttpBuilder
 
     public:
         HttpBuilder();
-        ~HttpBuilder(){};
+        ~HttpBuilder();
 
         void setDirective(const std::string &name, const std::string &value);
-        void addNestedBuilder(IConfigBuilder *child);
-        void *build();
+        void addNestedBuilder(IConfigBuilder *child, AConfigBlock *newConfig);
+        void *build(AConfigBlock *httpBlock);
+        void setDefaultValues(void);
 
         void handleErrorPage(const std::string &value);
         void handleClientMaxBodySize(const std::string &value);

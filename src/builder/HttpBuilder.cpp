@@ -7,8 +7,20 @@
 
 HttpBuilder::HttpBuilder() : built(false), http(new HttpConfig())
 {
+    setDefaultValues();
+
     registerHandler("client_max_body_size", &HttpBuilder::handleClientMaxBodySize);
     registerHandler("error_page", &HttpBuilder::handleErrorPage);
+}
+
+HttpBuilder::~HttpBuilder()
+{
+    if (this->http->errorPages.size() != 0)
+    {
+        for (size_t i = 0; i < this->http->errorPages.size(); ++i)
+            delete this->http->errorPages[i];
+    }
+    delete this->http;
 }
 
 /***********************************************************************/
@@ -20,16 +32,32 @@ void    HttpBuilder::setDirective(const std::string &name, const std::string &va
     dispatchDirective(name, value);
 }
 
-void    HttpBuilder::addNestedBuilder(IConfigBuilder *child)
+void    HttpBuilder::addNestedBuilder(IConfigBuilder *child, AConfigBlock *newBlock)
 {
-    ServerConfig *newServer = static_cast<ServerConfig *>(child->build());
+    ServerConfig *newServer = static_cast<ServerConfig *>(child->build(newBlock));
     http->servers.push_back(newServer);
 }
 
-void    *HttpBuilder::build(void)
+void    *HttpBuilder::build(AConfigBlock *httpBlock)
 {
+    for (AConfigBlock::iterator blockIt = httpBlock->begin(); blockIt != httpBlock->end(); ++blockIt)
+    {
+        if (Directive *directive = dynamic_cast<Directive *>(*blockIt))
+            this->dispatchDirective(directive->getName(), directive->getValue());
+        else
+        {
+            ServerBuilder *serverBuilder = new ServerBuilder();
+            this->addNestedBuilder(serverBuilder, *blockIt);
+            delete serverBuilder;
+        }
+    }
     this->built = true;
-    return (this);
+    return (this->http);
+}
+
+void    HttpBuilder::setDefaultValues(void)
+{
+    this->http->clientMaxBodySize = DEFAULT_CLIENT_MAX_BODY_SIZE;
 }
 
 /***********************************************************************/
@@ -97,7 +125,7 @@ void    HttpBuilder::handleErrorPage(const std::string &value)
         }
         errorPage->statusCodes.push_back(std::atol((*it).c_str()));
     }
-    this->http->errorPages.push_back(*errorPage);
+    this->http->errorPages.push_back(errorPage);
 }
 
 /***********************************************************************/
