@@ -110,3 +110,88 @@ std::vector<std::string> split_str(const std::string &str, const std::string &de
     tokens.push_back(str.substr(start));
     return tokens;
 }
+
+//Printers
+#include <iostream>
+#include "../builder/HttpBuilder.hpp"
+#include "../builder/ServerConfig.hpp"
+#include "../builder/LocationConfig.hpp"
+
+void printLocationConfig(LocationConfig *locationConfig, int indent = 0)
+{
+    std::string spaces(indent * 2, ' ');
+    std::cout << spaces << "LocationConfig:" << std::endl;
+    std::cout << spaces << "  Root: " << locationConfig->root << std::endl;
+    std::cout << spaces << "  Index: ";
+    for (size_t i = 0; i < locationConfig->index.size(); ++i)
+        std::cout << locationConfig->index[i] << " ";
+    std::cout << std::endl;
+    std::cout << spaces << "  Autoindex: " << (*locationConfig->autoindex ? "on" : "off") << std::endl;
+    std::cout << spaces << "  Client Max Body Size: " << locationConfig->clientmaxbodysize << std::endl;
+    std::cout << spaces << "  Return Code: " << locationConfig->_return->code << std::endl;
+    std::cout << spaces << "  Return HTTP: " << locationConfig->_return->http << std::endl;
+}
+
+void printServerConfig(ServerConfig *serverConfig, int indent = 0)
+{
+    std::string spaces(indent * 2, ' ');
+    std::cout << spaces << "ServerConfig:" << std::endl;
+    std::cout << spaces << "  Listen IP: " << serverConfig->listen->ip << std::endl;
+    std::cout << spaces << "  Listen Port: " << serverConfig->listen->port << std::endl;
+    std::cout << spaces << "  Server Name: " << serverConfig->serverName << std::endl;
+    std::cout << spaces << "  Root: " << serverConfig->root << std::endl;
+    std::cout << spaces << "  Index: ";
+    for (size_t i = 0; i < serverConfig->index.size(); ++i)
+        std::cout << serverConfig->index[i] << " ";
+    std::cout << std::endl;
+    std::cout << spaces << "  Autoindex: " << (*serverConfig->autoindex ? "on" : "off") << std::endl;
+    std::cout << spaces << "  Client Max Body Size: " << serverConfig->clientmaxbodysize << std::endl;
+    std::cout << spaces << "  Return Code: " << serverConfig->_return->code << std::endl;
+    std::cout << spaces << "  Return HTTP: " << serverConfig->_return->http << std::endl;
+
+    for (size_t i = 0; i < serverConfig->locations.size(); ++i)
+    {
+        printLocationConfig(serverConfig->locations[i], indent + 1);
+    }
+}
+
+void printHttpConfig(HttpConfig *httpConfig, int indent = 0)
+{
+    std::string spaces(indent * 2, ' ');
+    std::cout << spaces << "HttpConfig:" << std::endl;
+    std::cout << spaces << "  Client Max Body Size: " << httpConfig->clientMaxBodySize << std::endl;
+
+    for (size_t i = 0; i < httpConfig->servers.size(); ++i)
+    {
+        printServerConfig(httpConfig->servers[i], indent + 1);
+    }
+}
+
+void printBuiltConfigs(const std::vector<void *> &builtConfigs)
+{
+    for (size_t i = 0; i < builtConfigs.size(); ++i)
+    {
+        HttpConfig *httpConfig = dynamic_cast<HttpConfig *>(static_cast<HttpConfig *>(builtConfigs[i]));
+        if (httpConfig)
+        {
+            printHttpConfig(httpConfig);
+            continue;
+        }
+
+        ServerConfig *serverConfig = dynamic_cast<ServerConfig *>(static_cast<ServerConfig *>(builtConfigs[i]));
+        if (serverConfig)
+        {
+            printServerConfig(serverConfig);
+            continue;
+        }
+
+        LocationConfig *locationConfig = dynamic_cast<LocationConfig *>(static_cast<LocationConfig *>(builtConfigs[i]));
+        if (locationConfig)
+        {
+            printLocationConfig(locationConfig);
+            continue;
+        }
+
+        std::cout << "Unknown configuration type." << std::endl;
+    }
+}

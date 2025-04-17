@@ -15,53 +15,41 @@
 
 class LocationConfig;
 
-std::vector<AConfigBlock *> BuildConfig(AConfigBlock *config_ptr)
+std::vector<void *> BuildConfig(AConfigBlock *config_ptr)
 {
-    std::vector<AConfigBlock *> builtConfigs;
+    std::vector<void *> builtConfigs;
 
     if (!config_ptr)
     {
         std::cerr << "Error: config_ptr is null." << std::endl;
         return builtConfigs;
     }
-    std::cout << "Building configuration..." << std::endl;
     for (AConfigBlock::iterator it = config_ptr->begin(); it != config_ptr->end(); ++it)
     {
-		std::cout << CYAN"Processing block..." << WHITE << std::endl;
-
 		HttpBlock *httpBlock = dynamic_cast<HttpBlock *>(*it);
 		ServerBlock *serverBlock = dynamic_cast<ServerBlock *>(*it);
 		LocationBlock *locationBlock = dynamic_cast<LocationBlock *>(*it);
 
 		if (httpBlock)
 		{
-			std::cout << GREEN"ENTRA EN HTTP\n" << WHITE;
             HttpBuilder httpBuilder;
-            std::cout << "Building HTTP block..." << std::endl;
             for (AConfigBlock::iterator blockIt = httpBlock->begin(); blockIt != httpBlock->end(); ++blockIt)
             {
                 if (Directive *directive = dynamic_cast<Directive *>(*blockIt))
                     httpBuilder.dispatchDirective(directive->getName(), directive->getValue());
                 else
                 {
-                    std::cout << "Building Server block..." << std::endl;
                     ServerBuilder *serverBuilder = new ServerBuilder();
-                    std::cout << "new ServerBuilder done..." << std::endl;
                     httpBuilder.addNestedBuilder(serverBuilder);
-                    std::cout << "addNestedBuilder done..." << std::endl;
-                    delete serverBuilder;
                 }
             }
             builtConfigs.push_back(static_cast<AConfigBlock *>(httpBuilder.build()));
         }
         else if (serverBlock)
         {
-			std::cout << RED"Entra en server\n" << WHITE;
             ServerBuilder serverBuilder;
-            std::cout << "Building Server block..." << std::endl;
             for (AConfigBlock::iterator blockIt = serverBlock->begin(); blockIt != serverBlock->end(); ++blockIt)
             {
-                std::cout << "Processing Server block..." << std::endl;
                 if (Directive *directive = dynamic_cast<Directive *>(*blockIt))
                     serverBuilder.dispatchDirective(directive->getName(), directive->getValue());
                 else
