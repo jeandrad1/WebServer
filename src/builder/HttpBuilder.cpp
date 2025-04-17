@@ -5,15 +5,11 @@
 /*                     Constructors & Destructor                       */
 /***********************************************************************/
 
-HttpBuilder::HttpBuilder() : built(false)
+HttpBuilder::HttpBuilder() : built(false), http(new HttpConfig())
 {
     registerHandler("client_max_body_size", &HttpBuilder::handleClientMaxBodySize);
     registerHandler("error_page", &HttpBuilder::handleErrorPage);
 }
-
-/***********************************************************************/
-/*                         Operator Overload                           */
-/***********************************************************************/
 
 /***********************************************************************/
 /*                          Public Functions                           */
@@ -35,6 +31,10 @@ void    *HttpBuilder::build(void)
     this->built = true;
     return (this);
 }
+
+/***********************************************************************/
+/*                         Operator Overload                           */
+/***********************************************************************/
 
 void    HttpBuilder::handleClientMaxBodySize(const std::string &value)
 {
