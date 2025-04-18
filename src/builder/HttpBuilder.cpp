@@ -98,6 +98,8 @@ void    HttpBuilder::handleErrorPage(const std::string &value)
     std::string info;
     t_errorPage *errorPage = new t_errorPage;
     
+    this->http->errorPageDirective = true;
+
     if (value.empty())
     return ;
     
@@ -111,21 +113,22 @@ void    HttpBuilder::handleErrorPage(const std::string &value)
     ite--;
     std::string target = *ite;
 
-    errorPage->target = target.substr(0, target.size() - 1);
+    errorPage->targetPage = target.substr(0, target.size() - 1);
     errorPage->isEqualModifier = false;
     errorPage->equalModifier = 0;
 
+    ite--;
+    if (!(*ite).find('='))
+    {
+        errorPage->isEqualModifier = true;
+        errorPage->equalModifier = std::atol((*ite).substr(1, (*ite).size()).c_str());
+        ite--;
+    }
+    ite++;
     for (std::vector<std::string>::iterator it = values.begin(); it != ite; it++)
     {
-        if ((*it).find('='))
-        {
-            errorPage->isEqualModifier = true;
-            errorPage->equalModifier = std::atol((*it).substr(1, (*it).size()).c_str());
-            break ;
-        }
-        errorPage->statusCodes.push_back(std::atol((*it).c_str()));
+        this->http->errorPages[std::atol((*it).c_str())] = errorPage;
     }
-    this->http->errorPages.push_back(errorPage);
 }
 
 /***********************************************************************/
