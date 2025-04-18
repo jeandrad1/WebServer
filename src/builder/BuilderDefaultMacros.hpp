@@ -5,5 +5,6 @@
 # define DEFAULT_AUTOINDEX false
 # define DEFAULT_LISTEN_PORT 80
 # define DEFAULT_LISTEN_IP "0.0.0.0"
+# define DEFAULT_ROOT "./www"
 
 #endif
