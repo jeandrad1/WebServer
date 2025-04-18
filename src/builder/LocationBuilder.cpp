@@ -26,10 +26,11 @@ LocationBuilder::LocationBuilder(const std::string &path) : built(false), locati
 
 LocationBuilder::~LocationBuilder()
 {
-    if (this->location->errorPages.size() != 0)
+    for (std::map<int, t_errorPage *>::iterator it = this->location->errorPages.begin(); it != this->location->errorPages.end(); ++it)
     {
-        for (size_t i = 0; i < this->location->errorPages.size(); ++i)
-            delete this->location->errorPages[i];
+        it->second->referencesCount--;
+        if (it->second->referencesCount == 0)
+            delete it->second;
     }
     delete this->location->_return;
     delete this->location;
@@ -67,22 +68,13 @@ void    LocationBuilder::setDefaultValues(void)
 
     this->location->autoindex = DEFAULT_AUTOINDEX;
 	this->location->clientMaxBodySize = DEFAULT_CLIENT_MAX_BODY_SIZE;
+    this->location->root = DEFAULT_ROOT;
 
-    this->location->root = "/";
-    
     this->location->index.push_back("index.html");
-	
-    this->location->_return->code = 200;
-    
-	this->location->_return->http = "example.com";
-    
-	if (this->location->errorPages.empty())
-	{
-		t_errorPage error;
-		error.target = "";
-		error.isEqualModifier = false;
-		error.equalModifier = 0;
-	}
+    this->location->index.push_back("index.htm");
+
+    this->location->_return->returnDirective = false;
+    this->location->errorPageDirective = false;
 }
 
 /***********************************************************************/
@@ -145,6 +137,8 @@ void    LocationBuilder::handleErrorPage(const std::string &value)
     std::string info;
     t_errorPage *errorPage = new t_errorPage;
     
+    this->location->errorPageDirective = true;
+
     if (value.empty())
     return ;
     
@@ -158,25 +152,36 @@ void    LocationBuilder::handleErrorPage(const std::string &value)
     ite--;
     std::string target = *ite;
 
-    errorPage->target = target.substr(0, target.size() - 1);
+    errorPage->targetPage = target.substr(0, target.size() - 1);
     errorPage->isEqualModifier = false;
     errorPage->equalModifier = 0;
+    errorPage->referencesCount = 0;
 
+    ite--;
+    if (!(*ite).find('='))
+    {
+        errorPage->isEqualModifier = true;
+        errorPage->equalModifier = std::atol((*ite).substr(1, (*ite).size()).c_str());
+        ite--;
+    }
+    ite++;
     for (std::vector<std::string>::iterator it = values.begin(); it != ite; it++)
     {
-        if ((*it).find('='))
-        {
-            errorPage->isEqualModifier = true;
-            errorPage->equalModifier = std::atol((*it).substr(1, (*it).size()).c_str());
-            break ;
-        }
-        errorPage->statusCodes.push_back(std::atol((*it).c_str()));
+        errorPage->referencesCount++;
+        this->location->errorPages[std::atol((*it).c_str())] = errorPage;
     }
-    this->location->errorPages.push_back(errorPage);
 }
 
 void    LocationBuilder::handleReturn(const std::string &value)
 {
+    if (this->location->_return->returnDirective == true)
+    {
+        std::cout << "Error in builder because of Return encountered twice, should throw exception?";
+        return ;
+    }
+
+    this->location->_return->returnDirective = true;
+
     std::string real_value = value.substr(0, value.size() - 1);
     int http_pos = real_value.find("h");
 
