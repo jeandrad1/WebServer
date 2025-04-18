@@ -12,6 +12,7 @@ typedef struct s_errorPage
     std::string         targetPage;
     bool                isEqualModifier;
     int                 equalModifier;
+	int					referencesCount;
 }   t_errorPage;
 
 typedef struct s_return
