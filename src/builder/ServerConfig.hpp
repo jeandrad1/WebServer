@@ -16,17 +16,16 @@ class ServerConfig {
     public:
         std::vector<LocationConfig *> locations;
         
-        t_listen *listen;
-        t_return *_return;
-        long long clientMaxBodySize;
-        bool autoindex;
-        std::string root;
-        std::vector<t_errorPage *> errorPages;
-        std::vector<std::string> serverNames;
-        std::vector<std::string> index;
-
-        int         getListenPort(void);
-        std::string getListenIP(void);
+        std::vector<t_listen *>     listen;
+        bool                        listenDirective;
+        t_return                    *_return;
+        long long                   clientMaxBodySize;
+        bool                        autoindex;
+        std::string                 root;
+        bool				        errorPageDirective;
+        std::map<int, t_errorPage *>  errorPages;
+        std::vector<std::string>    serverNames;
+        std::vector<std::string>    index;
 };
 
 #endif

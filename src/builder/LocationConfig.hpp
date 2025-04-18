@@ -1,23 +1,24 @@
 #ifndef LOCATIONCONFIG_HPP
 # define LOCATIONCONFIG_HPP
 
-#include <string>
-#include <vector>
-#include <cstdlib>
-#include <sstream>
+# include <string>
+# include <vector>
+# include <cstdlib>
+# include <sstream>
+# include <map>
 
 typedef struct s_errorPage
 {
-    std::string         target;
-    std::vector<int>    statusCodes;
+    std::string         targetPage;
     bool                isEqualModifier;
-    int                 equalModifier;            
+    int                 equalModifier;
 }   t_errorPage;
 
 typedef struct s_return
 {
     std::string http;
-    int code;
+    int			code;
+	bool 		returnDirective;
 }   t_return;
 
 class LocationConfig {
@@ -29,7 +30,8 @@ class LocationConfig {
 		bool						autoindex;
 		long long					clientMaxBodySize;
 		t_return					*_return;
-		std::vector<t_errorPage *>    errorPages;
+        std::map<int, t_errorPage *>  errorPages;
+		bool						errorPageDirective;
 };
 
 #endif
