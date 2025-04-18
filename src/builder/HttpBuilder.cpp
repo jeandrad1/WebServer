@@ -15,10 +15,11 @@ HttpBuilder::HttpBuilder() : built(false), http(new HttpConfig())
 
 HttpBuilder::~HttpBuilder()
 {
-    if (this->http->errorPages.size() != 0)
+    for (std::map<int, t_errorPage *>::iterator it = this->http->errorPages.begin(); it != this->http->errorPages.end(); ++it)
     {
-        for (size_t i = 0; i < this->http->errorPages.size(); ++i)
-            delete this->http->errorPages[i];
+        it->second->referencesCount--;
+        if (it->second->referencesCount == 0)
+            delete it->second;
     }
     delete this->http;
 }
@@ -116,6 +117,7 @@ void    HttpBuilder::handleErrorPage(const std::string &value)
     errorPage->targetPage = target.substr(0, target.size() - 1);
     errorPage->isEqualModifier = false;
     errorPage->equalModifier = 0;
+    errorPage->referencesCount = 0;
 
     ite--;
     if (!(*ite).find('='))
@@ -127,6 +129,7 @@ void    HttpBuilder::handleErrorPage(const std::string &value)
     ite++;
     for (std::vector<std::string>::iterator it = values.begin(); it != ite; it++)
     {
+        errorPage->referencesCount++;
         this->http->errorPages[std::atol((*it).c_str())] = errorPage;
     }
 }
