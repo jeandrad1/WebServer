@@ -23,12 +23,19 @@ ServerBuilder::ServerBuilder() : built(false), server(new ServerConfig())
 
 ServerBuilder::~ServerBuilder()
 {
-    if (this->server->errorPages.size() != 0)
+    for (std::map<int, t_errorPage *>::iterator it = this->server->errorPages.begin(); it != this->server->errorPages.end(); ++it)
     {
-        for (size_t i = 0; i < this->server->errorPages.size(); ++i)
-            delete this->server->errorPages[i];
+        it->second->referencesCount--;
+        if (it->second->referencesCount == 0)
+            delete it->second;
     }
-    delete this->server->listen;
+    if (this->server->listen.size() != 0)
+    {
+        for (std::vector<t_listen *>::iterator it = this->server->listen.begin(); it < this->server->listen.end(); ++it)
+        {
+            delete (*it);
+        }
+    }
     delete this->server->_return;
     if (this->server)
         delete this->server;
@@ -71,25 +78,25 @@ void *ServerBuilder::build(AConfigBlock *serverBlock)
 
 void    ServerBuilder::setDefaultValues()
 {
-    this->server->listen = new t_listen();
-    this->server->_return = new t_return();
+    this->server->_return = new t_return;
 
-    this->server->listen->port = DEFAULT_LISTEN_PORT;
-    this->server->listen->ip = DEFAULT_LISTEN_IP;
+    t_listen *listen = new t_listen;
+    listen->port = DEFAULT_LISTEN_PORT;
+    listen->ip = DEFAULT_LISTEN_IP;
+    this->server->listen.push_back(listen);
+    this->server->listenDirective = false;
+
+    this->server->root = DEFAULT_ROOT;
+    this->server->autoindex = DEFAULT_AUTOINDEX;
+	this->server->clientMaxBodySize = DEFAULT_CLIENT_MAX_BODY_SIZE;
 
     this->server->serverNames.push_back("");
 
-    if (this->server->root.empty())
-        this->server->root = "/";
+    this->server->index.push_back("index.html");
+    this->server->index.push_back("index.htm");
 
-    if (this->server->index.empty())
-        this->server->index.push_back("index.html");
-
-    if (this->server->_return->code == -1)
-        this->server->_return->code = 200;
-
-    if (this->server->_return->http.empty())
-        this->server->_return->http = "example.com";
+    this->server->_return->returnDirective = false;
+    this->server->errorPageDirective = false;
 }
 
 /***********************************************************************/
@@ -98,25 +105,39 @@ void    ServerBuilder::setDefaultValues()
 
 void    ServerBuilder::handleListen(const std::string &value)
 {
+    if (this->server->listenDirective == false)
+    {
+        delete this->server->listen[0];
+        this->server->listen.clear();
+    }
+
+    this->server->listenDirective = true;
+
+    t_listen    *listen = new t_listen;
+
     std::string real_value = value.substr(0, value.size() - 1);
 
     int colon_pos = real_value.find(":");
 
     if(colon_pos != std::string::npos)
     {
-        this->server->listen->ip = real_value.substr(0, colon_pos);
+        listen->ip = real_value.substr(0, colon_pos);
         std::string port_str = real_value.substr(colon_pos + 1);
-        this->server->listen->port = std::atoi(port_str.c_str());
+        listen->port = std::atoi(port_str.c_str());
     }
     else
     {
-        this->server->listen->ip = "";
-        this->server->listen->port = std::atoi(real_value.c_str());
+        listen->ip = DEFAULT_LISTEN_IP;
+        listen->port = std::atoi(real_value.c_str());
     }
+    this->server->listen.push_back(listen);
 }
 
 void    ServerBuilder::handleServerName(const std::string &value)
 {
+    if (this->server->serverNames.size() == 1 && this->server->serverNames[0] == "")
+        this->server->serverNames.pop_back();
+
     std::string real_value = value.substr(0, value.size() - 1);
     this->server->serverNames.push_back(real_value);
 }
@@ -138,6 +159,14 @@ void    ServerBuilder::handleAutoindex(const std::string &value)
 
 void    ServerBuilder::handleReturn(const std::string &value)
 {
+    if (this->server->_return->returnDirective == true)
+    {
+        std::cout << "Error in builder because of Return encountered twice, should throw exception?";
+        return ;
+    }
+    
+    this->server->_return->returnDirective = true;
+
     std::string real_value = value.substr(0, value.size() - 1);
     int http_pos = real_value.find("h");
 
@@ -168,6 +197,8 @@ void    ServerBuilder::handleErrorPage(const std::string &value)
     std::string info;
     t_errorPage *errorPage = new t_errorPage;
     
+    this->server->errorPageDirective = true;
+
     if (value.empty())
     return ;
     
@@ -181,21 +212,24 @@ void    ServerBuilder::handleErrorPage(const std::string &value)
     ite--;
     std::string target = *ite;
 
-    errorPage->target = target.substr(0, target.size() - 1);
+    errorPage->targetPage = target.substr(0, target.size() - 1);
     errorPage->isEqualModifier = false;
     errorPage->equalModifier = 0;
+    errorPage->referencesCount = 0;
 
+    ite--;
+    if (!(*ite).find('='))
+    {
+        errorPage->isEqualModifier = true;
+        errorPage->equalModifier = std::atol((*ite).substr(1, (*ite).size()).c_str());
+        ite--;
+    }
+    ite++;
     for (std::vector<std::string>::iterator it = values.begin(); it != ite; it++)
     {
-        if ((*it).find('='))
-        {
-            errorPage->isEqualModifier = true;
-            errorPage->equalModifier = std::atol((*it).substr(1, (*it).size()).c_str());
-            break ;
-        }
-        errorPage->statusCodes.push_back(std::atol((*it).c_str()));
+        errorPage->referencesCount++;
+        this->server->errorPages[std::atol((*it).c_str())] = errorPage;
     }
-    this->server->errorPages.push_back(errorPage);
 }
 
 void ServerBuilder::handleClientMaxBodySize(std::string const &value)
