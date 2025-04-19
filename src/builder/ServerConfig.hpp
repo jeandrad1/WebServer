@@ -28,6 +28,8 @@ class ServerConfig : public IConfig
         std::map<int, t_errorPage *>  errorPages;
         std::vector<std::string>    serverNames;
         std::vector<std::string>    index;
+
+        void printValues() const;
 };
 
 #endif
