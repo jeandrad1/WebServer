@@ -35,6 +35,7 @@ class LocationConfig : public IConfig
 		t_return					*_return;
         std::map<int, t_errorPage *>  errorPages;
 		bool						errorPageDirective;
+		void printValues() const;
 };
 
 #endif
