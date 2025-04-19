@@ -23,13 +23,14 @@ ServerBuilder::ServerBuilder() : built(false), server(new ServerConfig())
 
 ServerBuilder::~ServerBuilder()
 {
+    for (size_t i = 0; i < this->server->listen.size(); ++i)
+        delete this->server->listen[i];
+
     if (this->server->errorPages.size() != 0)
     {
         for (size_t i = 0; i < this->server->errorPages.size(); ++i)
             delete this->server->errorPages[i];
     }
-    delete this->server->listen;
-    delete this->server->_return;
     if (this->server)
         delete this->server;
 }
@@ -71,11 +72,12 @@ void *ServerBuilder::build(AConfigBlock *serverBlock)
 
 void    ServerBuilder::setDefaultValues()
 {
-    this->server->listen = new t_listen();
     this->server->_return = new t_return();
 
-    this->server->listen->port = DEFAULT_LISTEN_PORT;
-    this->server->listen->ip = DEFAULT_LISTEN_IP;
+    t_listen *defaultListen = new t_listen();
+    defaultListen->ip = "0.0.0.0";
+    defaultListen->port = 80;
+    this->server->listen.push_back(defaultListen);
 
     this->server->serverNames.push_back("");
 
@@ -102,16 +104,18 @@ void    ServerBuilder::handleListen(const std::string &value)
 
     int colon_pos = real_value.find(":");
 
+    t_listen *newListen = new t_listen();
+
     if(colon_pos != std::string::npos)
     {
-        this->server->listen->ip = real_value.substr(0, colon_pos);
+        newListen->ip = real_value.substr(0, colon_pos);
         std::string port_str = real_value.substr(colon_pos + 1);
-        this->server->listen->port = std::atoi(port_str.c_str());
+        newListen->port = std::atoi(port_str.c_str());
     }
     else
     {
-        this->server->listen->ip = "";
-        this->server->listen->port = std::atoi(real_value.c_str());
+        newListen->ip = "";
+        newListen->port = std::atoi(real_value.c_str());
     }
 }
 
@@ -181,7 +185,7 @@ void    ServerBuilder::handleErrorPage(const std::string &value)
     ite--;
     std::string target = *ite;
 
-    errorPage->target = target.substr(0, target.size() - 1);
+    errorPage->targetPage = target.substr(0, target.size() - 1);
     errorPage->isEqualModifier = false;
     errorPage->equalModifier = 0;
 
@@ -193,9 +197,9 @@ void    ServerBuilder::handleErrorPage(const std::string &value)
             errorPage->equalModifier = std::atol((*it).substr(1, (*it).size()).c_str());
             break ;
         }
-        errorPage->statusCodes.push_back(std::atol((*it).c_str()));
+        int errorCode = std::atoi((*it).c_str());
+        this->server->errorPages[errorCode] = errorPage;
     }
-    this->server->errorPages.push_back(errorPage);
 }
 
 void ServerBuilder::handleClientMaxBodySize(std::string const &value)
