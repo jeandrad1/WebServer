@@ -6,6 +6,7 @@
 # include <cstdlib>
 # include <sstream>
 # include <map>
+# include "IConfig.hpp"
 
 typedef struct s_errorPage
 {
@@ -22,7 +23,8 @@ typedef struct s_return
 	bool 		returnDirective;
 }   t_return;
 
-class LocationConfig {
+class LocationConfig : public IConfig
+{
 
 	public:
 		std::string					locationPath;
