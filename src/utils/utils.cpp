@@ -175,32 +175,34 @@ void printHttpConfig(HttpConfig *httpConfig, int indent = 0)
         printServer(httpConfig->servers[i], indent + 1);
     }
 }
-
-void printBuiltConfigs(const std::vector<void *> &builtConfigs)
+*/
+void printBuiltConfigs(const std::vector<IConfig *> &builtConfigs)
 {
-    for (size_t i = 0; i < builtConfigs.size(); ++i)
+    std::vector<IConfig * >::const_iterator ite = builtConfigs.end();
+    
+    for (std::vector<IConfig * >::const_iterator it = builtConfigs.begin(); it != ite; it++)
     {
-        HttpConfig *httpConfig = dynamic_cast<HttpConfig *>(static_cast<HttpConfig *>(builtConfigs[i]));
-        if (httpConfig)
+        std::cout<<"Entra"<<std::endl;
+        if (ServerConfig* server = static_cast<ServerConfig*>(*it))
         {
-            printHttpConfig(httpConfig);
-            continue;
+            std::cout<<"Entra en server"<<std::endl;
+            server->ServerConfig::printValues();
+            std::cout<<"Sale"<<std::endl;
+        }
+        else if (HttpConfig* http = static_cast<HttpConfig*>(*it))
+        {
+            std::cout<<"Entra en server"<<std::endl;
+            http->HttpConfig::printValues();
+            std::cout<<"Sale"<<std::endl;
+        }
+        else if (LocationConfig* location = static_cast<LocationConfig*>(*it))
+        {
+            std::cout<<"Entra en server"<<std::endl;
+            location->LocationConfig::printValues();
+            std::cout<<"Sale"<<std::endl;
         }
 
-        ServerConfig *server = dynamic_cast<ServerConfig *>(static_cast<ServerConfig *>(builtConfigs[i]));
-        if (server)
-        {
-            printServer(server);
-            continue;
-        }
-
-        LocationConfig *location = dynamic_cast<LocationConfig *>(static_cast<LocationConfig *>(builtConfigs[i]));
-        if (location)
-        {
-            printLocation(location);
-            continue;
-        }
-
-        std::cout << "Unknown configuration type." << std::endl;
+        else
+            std::cout<<"No entra"<<std::endl;
     }
-}*/
+}

@@ -59,7 +59,7 @@ void    LocationBuilder::addNestedBuilder(IConfigBuilder *child, AConfigBlock *n
     this->built = false;
 }
 
-void *LocationBuilder::build(AConfigBlock *locationBlock)
+IConfig *LocationBuilder::build(AConfigBlock *locationBlock)
 {
     AConfigBlock::iterator blockItEnd = locationBlock->end();
     for (AConfigBlock::iterator blockIt = locationBlock->begin(); blockIt != blockItEnd; blockIt++)

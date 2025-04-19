@@ -3,8 +3,8 @@
 
 # include "IConfigBuilder.hpp"
 # include "DirectiveProcessor.hpp"
-# include "LocationConfig.hpp"
 # include "IConfig.hpp"
+# include "LocationConfig.hpp"
 
 typedef struct s_listen
 {
@@ -29,7 +29,8 @@ class ServerConfig : public IConfig
         std::vector<std::string>    serverNames;
         std::vector<std::string>    index;
 
-        void printValues() const;
+        virtual ~ServerConfig() {}
+        void printValues();
 };
 
 #endif

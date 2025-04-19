@@ -15,9 +15,9 @@
 
 class LocationConfig;
 
-std::vector<void *> buildConfig(AConfigBlock *rawConfig)
+std::vector<IConfig *> buildConfig(AConfigBlock *rawConfig)
 {
-    std::vector<void *> builtConfigs;
+    std::vector<IConfig *> builtConfigs;
 
     if (!rawConfig)
     {

@@ -39,7 +39,7 @@ void    HttpBuilder::addNestedBuilder(IConfigBuilder *child, AConfigBlock *newBl
     http->servers.push_back(newServer);
 }
 
-void    *HttpBuilder::build(AConfigBlock *httpBlock)
+IConfig    *HttpBuilder::build(AConfigBlock *httpBlock)
 {
     for (AConfigBlock::iterator blockIt = httpBlock->begin(); blockIt != httpBlock->end(); ++blockIt)
     {

@@ -1,6 +1,6 @@
 #include "HttpConfig.hpp"
 
-void HttpConfig::printValues() const
+void HttpConfig::printValues()
 {
     std::cout << "HttpConfig:\n";
     std::cout << "  clientMaxBodySize: " << clientMaxBodySize << "\n";

@@ -56,7 +56,7 @@ void    ServerBuilder::addNestedBuilder(IConfigBuilder *child, AConfigBlock *new
     this->server->locations.push_back(newLocation);
 }
 
-void *ServerBuilder::build(AConfigBlock *serverBlock)
+IConfig *ServerBuilder::build(AConfigBlock *serverBlock)
 {
     if (this->built == true)
         return (NULL);
@@ -138,9 +138,13 @@ void    ServerBuilder::handleListen(const std::string &value)
 void    ServerBuilder::handleServerName(const std::string &value)
 {
     if (this->server->serverNames.size() == 1 && this->server->serverNames[0] == "")
+    {
         this->server->serverNames.pop_back();
+        this->server->serverNames.clear();
+    }
 
     std::string real_value = value.substr(0, value.size() - 1);
+    std::cout << real_value << "\n";
     this->server->serverNames.push_back(real_value);
 }
 

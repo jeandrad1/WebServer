@@ -20,7 +20,7 @@ class LocationBuilder : public IConfigBuilder, public DirectiveProcessor<Locatio
 
 		void setDirective(const std::string &key,const std::string &value);
 		void addNestedBuilder(IConfigBuilder *child, AConfigBlock *newBlock);
-		void *build(AConfigBlock *locationBlock);
+		IConfig *build(AConfigBlock *locationBlock);
 		void setDefaultValues(void);
 
 		void handleRoot(std::string const &value);
