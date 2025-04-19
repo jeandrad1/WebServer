@@ -13,6 +13,7 @@ class HttpConfig : public IConfig
         unsigned long               clientMaxBodySize;
         std::map<int, t_errorPage *>  errorPages;
         bool				        errorPageDirective;
+        void printValues() const;
 };
 
 #endif
