@@ -119,6 +119,8 @@ void    ServerBuilder::handleListen(const std::string &value)
 
     int colon_pos = real_value.find(":");
 
+    t_listen *newListen = new t_listen();
+
     if(colon_pos != std::string::npos)
     {
         listen->ip = real_value.substr(0, colon_pos);
@@ -212,6 +214,7 @@ void    ServerBuilder::handleErrorPage(const std::string &value)
     ite--;
     std::string target = *ite;
 
+    errorPage->targetPage = target.substr(0, target.size() - 1);
     errorPage->targetPage = target.substr(0, target.size() - 1);
     errorPage->isEqualModifier = false;
     errorPage->equalModifier = 0;

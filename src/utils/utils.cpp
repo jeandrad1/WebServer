@@ -135,8 +135,18 @@ void printServer(ServerConfig *server, int indent = 0)
 {
     std::string spaces(indent * 2, ' ');
     std::cout << spaces << "Server:" << std::endl;
-    std::cout << spaces << "  Listen IP: " << server->listen->ip << std::endl;
-    std::cout << spaces << "  Listen Port: " << server->listen->port << std::endl;
+    
+    for (size_t i = 0; i < server->listen.size(); ++i)
+    {
+        std::cout << spaces << "  Listen IP: " << server->listen[i]->ip << std::endl;
+        std::cout << spaces << "  Listen Port: " << server->listen[i]->port << std::endl;
+    }
+
+    if (!server->serverNames.empty())
+        std::cout << spaces << "  Server Name: " << server->serverNames[0] << std::endl;
+    else
+        std::cout << spaces << "  Server Name: (none)" << std::endl;
+
     std::cout << spaces << "  Server Name: " << server->serverNames[0] << std::endl;
     std::cout << spaces << "  Root: " << server->root << std::endl;
     std::cout << spaces << "  Index: ";
