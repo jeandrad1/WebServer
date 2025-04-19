@@ -3,7 +3,6 @@
 #include <vector>
 #include <sstream>
 
-
 bool	isInteger(std::string value)
 {
 	if (value.empty())
@@ -117,7 +116,7 @@ std::vector<std::string> split_str(const std::string &str, const std::string &de
 #include "../builder/ServerConfig.hpp"
 #include "../builder/LocationConfig.hpp"
 
-void printLocation(LocationConfig *location, int indent = 0)
+/*void printLocation(LocationConfig *location, int indent = 0)
 {
     std::string spaces(indent * 2, ' ');
     std::cout << spaces << "Location:" << std::endl;
@@ -194,4 +193,4 @@ void printBuiltConfigs(const std::vector<void *> &builtConfigs)
 
         std::cout << "Unknown configuration type." << std::endl;
     }
-}
+}*/
