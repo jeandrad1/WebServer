@@ -185,7 +185,7 @@ void    ServerBuilder::handleErrorPage(const std::string &value)
     ite--;
     std::string target = *ite;
 
-    errorPage->target = target.substr(0, target.size() - 1);
+    errorPage->targetPage = target.substr(0, target.size() - 1);
     errorPage->isEqualModifier = false;
     errorPage->equalModifier = 0;
 
@@ -197,9 +197,9 @@ void    ServerBuilder::handleErrorPage(const std::string &value)
             errorPage->equalModifier = std::atol((*it).substr(1, (*it).size()).c_str());
             break ;
         }
-        errorPage->statusCodes.push_back(std::atol((*it).c_str()));
+        int errorCode = std::atoi((*it).c_str());
+        this->server->errorPages[errorCode] = errorPage;
     }
-    this->server->errorPages.push_back(errorPage);
 }
 
 void ServerBuilder::handleClientMaxBodySize(std::string const &value)
