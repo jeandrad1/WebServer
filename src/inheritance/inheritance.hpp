@@ -10,6 +10,7 @@ class inheritance : public HttpConfig, public ServerConfig, public LocationConfi
 {
 	private:
 		void takeHttpValues();
+		void takeServerValues();
 	public:
 		inheritance();
 		~inheritance();
