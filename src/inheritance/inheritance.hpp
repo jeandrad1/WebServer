@@ -8,5 +8,11 @@
 
 class inheritance : public HttpConfig, public ServerConfig, public LocationConfig
 {
-    void takeHttpValues();
+	private:
+		void takeHttpValues();
+	public:
+		inheritance();
+		~inheritance();
+
+        void runInheritance();
 };
