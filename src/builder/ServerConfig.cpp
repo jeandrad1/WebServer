@@ -32,6 +32,14 @@ void ServerConfig::printValues(int indent)
 {
     std::string	spaces(indent * 2, ' ');
     std::cout << spaces << "ServerConfig:\n";
+    std::cout << "  listen values:" << std::endl;
+    for (size_t i = 0; i < listen.size(); ++i)
+    {
+        if (listen[i])
+            std::cout << "  IP: " << listen[i]->ip << ", Port: " << listen[i]->port << std::endl;
+        else
+            std::cout << "  Null listen entry encountered." << std::endl;
+    }
     std::cout << spaces << "  root: " << root << "\n";
     std::cout << spaces << "  autoindex: " << (autoindex ? "on" : "off") << "\n";
     std::cout << spaces << "  serverNames: ";
