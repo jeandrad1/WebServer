@@ -5,7 +5,7 @@ class IConfig
 {
     public:
         virtual ~IConfig() {}
-        virtual void printValues() = 0;
+        virtual void printValues(int indent) = 0;
 };
 
 #endif
