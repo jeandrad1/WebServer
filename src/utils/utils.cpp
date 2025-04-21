@@ -179,30 +179,20 @@ void printHttpConfig(HttpConfig *httpConfig, int indent = 0)
 void printBuiltConfigs(const std::vector<IConfig *> &builtConfigs)
 {
     std::vector<IConfig * >::const_iterator ite = builtConfigs.end();
-    
-    for (std::vector<IConfig * >::const_iterator it = builtConfigs.begin(); it != ite; it++)
-    {
-        std::cout<<"Entra"<<std::endl;
-        if (ServerConfig* server = static_cast<ServerConfig*>(*it))
+    for (std::vector<IConfig *>::const_iterator it = builtConfigs.begin(); it != ite; ++it) {
+        if (HttpConfig *http = dynamic_cast<HttpConfig *>(*it))
         {
-            std::cout<<"Entra en server"<<std::endl;
-            server->ServerConfig::printValues();
-            std::cout<<"Sale"<<std::endl;
+            std::cout << "HttpConfig detected\n\n";
+            http->printValues(0);
         }
-        else if (HttpConfig* http = static_cast<HttpConfig*>(*it))
+        else if (ServerConfig *server = dynamic_cast<ServerConfig *>(*it))
         {
-            std::cout<<"Entra en server"<<std::endl;
-            http->HttpConfig::printValues();
-            std::cout<<"Sale"<<std::endl;
+            std::cout << "ServerConfig detected\n\n";
+            server->printValues(0);
         }
-        else if (LocationConfig* location = static_cast<LocationConfig*>(*it))
-        {
-            std::cout<<"Entra en server"<<std::endl;
-            location->LocationConfig::printValues();
-            std::cout<<"Sale"<<std::endl;
-        }
-
         else
-            std::cout<<"No entra"<<std::endl;
+        {
+            std::cerr << "Error: Unknown config type\n\n";
+        }
     }
 }
