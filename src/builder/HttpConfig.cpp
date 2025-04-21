@@ -1,8 +1,32 @@
 #include "HttpConfig.hpp"
 
-void HttpConfig::printValues()
+/***********************************************************************/
+/*                     Constructors & Destructor                       */
+/***********************************************************************/
+
+HttpConfig::~HttpConfig()
 {
-    std::cout << "HttpConfig:\n";
-    std::cout << "  clientMaxBodySize: " << clientMaxBodySize << "\n";
-    std::cout << "  errorPages: " << errorPages.size() << "\n";
+    for (std::map<int, t_errorPage *>::iterator it = this->errorPages.begin(); it != this->errorPages.end(); ++it)
+    {
+        it->second->referencesCount--;
+        if (it->second->referencesCount == 0)
+            delete it->second;
+    }
+    for (std::vector<ServerConfig *>::iterator it = this->servers.begin(); it != this->servers.end(); ++it)
+        delete (*it);
+}
+
+/***********************************************************************/
+/*                          Public Functions                           */
+/***********************************************************************/
+
+void HttpConfig::printValues(int indent) 
+{
+    std::string	spaces(indent * 2, ' ');
+    std::cout << spaces << "HttpConfig:\n";
+    std::cout << spaces << "  clientMaxBodySize: " << clientMaxBodySize << "\n";
+    std::cout << spaces << "  errorPages: " << errorPages.size() << "\n\n";
+    for (size_t i = 0; i < this->servers.size(); i++)
+    this->servers[i]->ServerConfig::printValues(indent + 2);
+    std::cout << "\n";
 }
