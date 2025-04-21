@@ -3,8 +3,8 @@
 
 # include "IValidationStrategy.hpp"
 
-class LimitExceptStrategy : public IValidationStrategy {
-
+class LimitExceptStrategy : public IValidationStrategy
+{
 	public:
 		bool	validate(const std::string &value) const;
 };
