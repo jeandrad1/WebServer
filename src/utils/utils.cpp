@@ -182,12 +182,10 @@ void printBuiltConfigs(const std::vector<IConfig *> &builtConfigs)
     for (std::vector<IConfig *>::const_iterator it = builtConfigs.begin(); it != ite; ++it) {
         if (HttpConfig *http = dynamic_cast<HttpConfig *>(*it))
         {
-            std::cout << "HttpConfig detected\n\n";
             http->printValues(0);
         }
         else if (ServerConfig *server = dynamic_cast<ServerConfig *>(*it))
         {
-            std::cout << "ServerConfig detected\n\n";
             server->printValues(0);
         }
         else

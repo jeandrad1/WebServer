@@ -54,5 +54,4 @@ void ServerConfig::printValues(int indent)
     std::cout << "\n\n";
     for (size_t i = 0; i < this->locations.size(); i++)
         this->locations[i]->LocationConfig::printValues(indent + 2);
-    std::cout << "\n";
 }
