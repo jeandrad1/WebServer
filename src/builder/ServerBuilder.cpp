@@ -156,7 +156,7 @@ void    ServerBuilder::handleReturn(const std::string &value)
     this->server->_return->returnDirective = true;
 
     std::string real_value = value.substr(0, value.size() - 1);
-    int http_pos = real_value.find("h");
+    int http_pos = real_value.find("http");
 
     if(http_pos != std::string::npos)
     {
