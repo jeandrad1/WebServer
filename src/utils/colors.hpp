@@ -27,3 +27,6 @@
 #define BG_MAGENTA  "\033[45m"
 #define BG_CYAN     "\033[46m"
 #define BG_WHITE    "\033[47m"
+
+#define DIM_YELLOW  "\033[2;33m"
+#define FAINT_YELLOW "\033[2;93m"

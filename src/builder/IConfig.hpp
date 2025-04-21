@@ -1,6 +1,8 @@
 #ifndef ICONFIG_HPP
 #define ICONFIG_HPP
 
+# include "../utils/colors.hpp"
+
 class IConfig
 {
     public:

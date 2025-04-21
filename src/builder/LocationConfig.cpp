@@ -23,11 +23,12 @@ LocationConfig::~LocationConfig(void)
 void LocationConfig::printValues(int indent) 
 {
     std::string	spaces(indent * 2, ' ');
-    std::cout << spaces << "LocationConfig:\n";
-    std::cout << spaces << "  locationPath: " << locationPath << "\n";
-    std::cout << spaces << "  root: " << root << "\n";
-    std::cout << spaces << "  index: ";
-    // for (size_t i = 0; i < index.size(); ++i)
-    //     std::cout << index[i] << " ";
+    std::cout << spaces << BLUE "LocationConfig:\n" RESET;
+    std::cout << spaces << YELLOW "  locationPath: " RESET << locationPath << "\n";
+    std::cout << spaces << YELLOW "  root: " RESET << root << "\n";
+    std::cout << spaces << YELLOW "  index: " RESET;
+    for (size_t i = 0; i < index.size(); ++i)
+        std::cout << index[i] << " ";
     std::cout << "\n";
+    std::cout << spaces << YELLOW "  clientMaxBodySize: " RESET << clientMaxBodySize << "\n";
 }
