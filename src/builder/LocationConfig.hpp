@@ -36,8 +36,8 @@ class LocationConfig : public IConfig
         std::map<int, t_errorPage *>  errorPages;
 		bool						errorPageDirective;
 
-		virtual ~LocationConfig() {}
-		void printValues();
+		virtual ~LocationConfig();
+		virtual void printValues(int indent = 0);
 };
 
 #endif

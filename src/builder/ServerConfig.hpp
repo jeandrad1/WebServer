@@ -29,8 +29,8 @@ class ServerConfig : public IConfig
         std::vector<std::string>    serverNames;
         std::vector<std::string>    index;
 
-        virtual ~ServerConfig() {}
-        void printValues();
+        virtual ~ServerConfig();
+        virtual void printValues(int indent = 0);
 };
 
 #endif

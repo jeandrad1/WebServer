@@ -14,8 +14,8 @@ class HttpConfig : public IConfig
         std::map<int, t_errorPage *>  errorPages;
         bool				        errorPageDirective;
 
-        virtual ~HttpConfig() {}
-        void printValues();
+        virtual ~HttpConfig();
+        virtual void printValues(int indent = 0);
 };
 
 #endif
