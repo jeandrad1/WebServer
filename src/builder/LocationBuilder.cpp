@@ -120,6 +120,8 @@ void LocationBuilder::handleClientMaxBodySize(std::string const &value)
 		case '\0':
 			this->location->clientMaxBodySize = maxBodySize;
 	}
+    if (this->location->clientMaxBodySize > (1024 * 1024 * 1024))
+        this->location->clientMaxBodySize = (1024 * 1024 * 1024);
 }
 
 void    LocationBuilder::handleAutoindex(const std::string &value)

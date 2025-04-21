@@ -246,4 +246,6 @@ void ServerBuilder::handleClientMaxBodySize(std::string const &value)
 		case '\0':
 			this->server->clientMaxBodySize = maxBodySize;
 	}
+    if (this->server->clientMaxBodySize > (1024 * 1024 * 1024))
+    this->server->clientMaxBodySize = (1024 * 1024 * 1024);
 }

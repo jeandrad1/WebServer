@@ -84,6 +84,8 @@ void    HttpBuilder::handleClientMaxBodySize(const std::string &value)
         case '\0':
             this->http->clientMaxBodySize = maxBodySize;
     }
+    if (this->http->clientMaxBodySize > (1024 * 1024 * 1024))
+    this->http->clientMaxBodySize = (1024 * 1024 * 1024);
 }
 
 void    HttpBuilder::handleErrorPage(const std::string &value)
