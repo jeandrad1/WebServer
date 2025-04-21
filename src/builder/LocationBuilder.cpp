@@ -34,14 +34,7 @@ LocationBuilder::LocationBuilder(const std::string &path) : built(false), locati
 
 LocationBuilder::~LocationBuilder()
 {
-    for (std::map<int, t_errorPage *>::iterator it = this->location->errorPages.begin(); it != this->location->errorPages.end(); ++it)
-    {
-        it->second->referencesCount--;
-        if (it->second->referencesCount == 0)
-            delete it->second;
-    }
-    delete this->location->_return;
-    delete this->location;
+
 }
 
 /***********************************************************************/

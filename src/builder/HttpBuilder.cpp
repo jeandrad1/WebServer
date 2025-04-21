@@ -15,13 +15,7 @@ HttpBuilder::HttpBuilder() : built(false), http(new HttpConfig())
 
 HttpBuilder::~HttpBuilder()
 {
-    for (std::map<int, t_errorPage *>::iterator it = this->http->errorPages.begin(); it != this->http->errorPages.end(); ++it)
-    {
-        it->second->referencesCount--;
-        if (it->second->referencesCount == 0)
-            delete it->second;
-    }
-    delete this->http;
+
 }
 
 /***********************************************************************/

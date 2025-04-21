@@ -23,22 +23,7 @@ ServerBuilder::ServerBuilder() : built(false), server(new ServerConfig())
 
 ServerBuilder::~ServerBuilder()
 {
-    for (std::map<int, t_errorPage *>::iterator it = this->server->errorPages.begin(); it != this->server->errorPages.end(); ++it)
-    {
-        it->second->referencesCount--;
-        if (it->second->referencesCount == 0)
-            delete it->second;
-    }
-    if (this->server->listen.size() != 0)
-    {
-        for (std::vector<t_listen *>::iterator it = this->server->listen.begin(); it < this->server->listen.end(); ++it)
-        {
-            delete (*it);
-        }
-    }
-    delete this->server->_return;
-    if (this->server)
-        delete this->server;
+
 }
 
 /***********************************************************************/
@@ -144,7 +129,6 @@ void    ServerBuilder::handleServerName(const std::string &value)
     }
 
     std::string real_value = value.substr(0, value.size() - 1);
-    std::cout << real_value << "\n";
     this->server->serverNames.push_back(real_value);
 }
 
