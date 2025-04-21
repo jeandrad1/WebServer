@@ -54,6 +54,12 @@ void WebservManager::run(void)
 	std::vector<IConfig *> builtConfigs = buildConfig(this->_rootBlock);
 	std::cout << "Passes builder"<< std::endl;
 	printBuiltConfigs(builtConfigs);
+
+	std::vector<IConfig * >::const_iterator ite = builtConfigs.end();
+    for (std::vector<IConfig *>::const_iterator it = builtConfigs.begin(); it != ite; ++it)
+	{
+		delete (*it);
+	}
 }
 
 /***********************************************************************/
