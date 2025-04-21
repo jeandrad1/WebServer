@@ -26,17 +26,17 @@ void LocationConfig::printValues(int indent)
     std::cout << spaces << BLUE "LocationConfig:\n" RESET;
     std::cout << spaces << YELLOW "  locationPath: " RESET << locationPath << "\n";
     std::cout << spaces << YELLOW "  root: " RESET << root << "\n";
-    std::cout << spaces << YELLOW "  return Directive:" RESET << std::endl;
+    std::cout << spaces << YELLOW "  return:" RESET;
     if (_return)
     {
-        std::cout << spaces << "  HTTP: " << _return->http << std::endl;
-        std::cout << spaces << "  Code: " << _return->code << std::endl;
-        std::cout << spaces << "  Return Directive: " << (_return->returnDirective ? "true" : "false") << std::endl;
+        std::cout << spaces << YELLOW "HTTP: " RESET << _return->http;
+        std::cout << spaces << YELLOW "Code: " RESET << _return->code;
+        std::cout << spaces << YELLOW "return directive: " RESET << (_return->returnDirective ? "true\n" : "false\n");
     }
     else
         std::cout << spaces << "  No return directive configured." << std::endl;
 
-    std::cout << spaces << YELLOW "  Error_page:" RESET << std::endl;
+    std::cout << spaces << YELLOW "  error_page:\n" RESET;
     if (errorPages.empty())
         std::cout << spaces << "  No error_page configured." << std::endl;
     else
@@ -45,11 +45,11 @@ void LocationConfig::printValues(int indent)
         {
             if (it->second)
             {
-                std::cout << spaces << "  Error Code: " << it->first << std::endl;
-                std::cout << spaces << "  Target Page: " << it->second->targetPage << std::endl;
-                std::cout << spaces << "  Is Equal Modifier: " << (it->second->isEqualModifier ? "true" : "false") << std::endl;
-                std::cout << spaces << "  Equal Modifier: " << it->second->equalModifier << std::endl;
-                std::cout << spaces << "  References Count: " << it->second->referencesCount << std::endl;
+                std::cout << spaces << YELLOW "    Error Code: " RESET << it->first;
+                std::cout << spaces << YELLOW "Target Page: " RESET << it->second->targetPage;
+                std::cout << spaces << YELLOW "Is Equal Modifier: " RESET << (it->second->isEqualModifier ? "true" : "false");
+                std::cout << spaces << YELLOW "Equal Modifier: " RESET << it->second->equalModifier;
+                std::cout << "\n";
             }
             else
                 std::cout << spaces << "  Null error page entry encountered for error code: " << it->first << std::endl;
