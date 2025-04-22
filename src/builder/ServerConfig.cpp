@@ -46,9 +46,9 @@ void ServerConfig::printValues(int indent)
     std::cout << spaces << YELLOW "  return:" RESET;
     if (_return)
     {
-        std::cout << spaces << YELLOW "HTTP: " RESET << _return->http;
-        std::cout << spaces << YELLOW "Code: " RESET << _return->code;
-        std::cout << spaces << YELLOW "return directive: " RESET << (_return->returnDirective ? "true\n" : "false\n");
+        std::cout << spaces << YELLOW " HTTP: " RESET << _return->http;
+        std::cout << spaces << YELLOW " Code: " RESET << _return->code;
+        std::cout << spaces << YELLOW " return directive: " RESET << (_return->returnDirective ? "true\n" : "false\n");
     }
     else
         std::cout << spaces << "  No return directive configured." << std::endl;
