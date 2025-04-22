@@ -55,7 +55,6 @@ class LocationConfig : public IConfig
 		bool						errorPageDirective;
 		t_limit_except				*limit_except;
 
-
 		virtual ~LocationConfig();
 		virtual void printValues(int indent = 0);
 };
