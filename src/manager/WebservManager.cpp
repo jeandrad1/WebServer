@@ -4,6 +4,7 @@
 #include <fstream>
 #include "../composite/ServerBlock.hpp"
 #include "../factory/StrategyFactory.hpp"
+#include "../inheritance/inheritance.hpp"
 
 void printBuiltConfigs(const std::vector<IConfig *> &builtConfigs);
 std::vector<IConfig *> buildConfig(AConfigBlock *config_ptr);
@@ -44,6 +45,7 @@ WebservManager::~WebservManager(void)
 void WebservManager::run(void)
 {
 	ServerBlock		config("Config");
+	inheritance		*heritance = new inheritance;
 	this->_rootBlock = createBlock(this->_configFile, config);
 
 	this->_rootBlock->getBlock(0)->printConfig(0);
@@ -53,9 +55,11 @@ void WebservManager::run(void)
 	std::cout << "Passes factory"<< std::endl;
 	std::vector<IConfig *> builtConfigs = buildConfig(this->_rootBlock);
 	std::cout << "Passes builder"<< std::endl;
+	heritance->runInheritance(builtConfigs);
 	printBuiltConfigs(builtConfigs);
 
 	std::vector<IConfig * >::const_iterator ite = builtConfigs.end();
+	int i = 0;
     for (std::vector<IConfig *>::const_iterator it = builtConfigs.begin(); it != ite; ++it)
 	{
 		delete (*it);

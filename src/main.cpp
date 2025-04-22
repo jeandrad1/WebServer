@@ -21,6 +21,5 @@ int	main(int argc, char **argv)
 	
 	//int error = factoryCheck(*config_ptr);
 	//file.close();
-
 	return (0); // No memory leaks since we used `config` (automatic variable)
 }

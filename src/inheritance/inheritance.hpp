@@ -1,19 +1,18 @@
 #include "../builder/HttpConfig.hpp"
-#include "../builder/LocationConfig.hpp"
 #include "../builder/ServerConfig.hpp"
 
 ///////////////////////////////////////////////////
 //             NO REFACTORIZAR                   //
 ///////////////////////////////////////////////////
 
-class inheritance : public HttpConfig, public ServerConfig, public LocationConfig
+class inheritance : public HttpConfig, public ServerConfig
 {
 	private:
-		void takeHttpValues();
-		void takeServerValues();
+		void takeValues(IConfig &builtConfig);
+		void setValues(IConfig &builtConfig);
 	public:
 		inheritance();
 		~inheritance();
 
-        void runInheritance();
+        void runInheritance(std::vector<IConfig *> &builtConfigs);
 };
