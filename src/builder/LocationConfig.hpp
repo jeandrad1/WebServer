@@ -31,16 +31,6 @@ typedef struct s_limit_except
 	bool 		limitDirective;
 }   t_limit_except;
 
-
-typedef struct s_limit_except
-{	
-	bool 		POST;
-	bool 		GET;
-	bool 		DELETE;
-	bool 		limitDirective;
-}   t_limit_except;
-
-
 class LocationConfig : public IConfig
 {
 
