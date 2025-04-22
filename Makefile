@@ -16,6 +16,7 @@ FILES = main \
 		strategy/AutoindexStrategy \
 		strategy/ClientMaxBodySizeStrategy \
 		strategy/ErrorPageStrategy \
+		strategy/LimitExceptStrategy \
 		factory/registerAllStrategies \
 		factory/factoryCheck \
 		factory/createStrategies \

@@ -8,6 +8,7 @@ LocationBlockStrategy::LocationBlockStrategy()
 	this->validDirectives.push_back("autoindex");
 	this->validDirectives.push_back("error_page");
 	this->validDirectives.push_back("return");
+	this->validDirectives.push_back("limit_except");
 }
 
 bool	LocationBlockStrategy::validate(std::vector<AConfigBlock*> const &block) const

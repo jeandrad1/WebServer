@@ -23,6 +23,24 @@ typedef struct s_return
 	bool 		returnDirective;
 }   t_return;
 
+typedef struct s_limit_except
+{	
+	bool 		POST;
+	bool 		GET;
+	bool 		DELETE;
+	bool 		limitDirective;
+}   t_limit_except;
+
+
+typedef struct s_limit_except
+{	
+	bool 		POST;
+	bool 		GET;
+	bool 		DELETE;
+	bool 		limitDirective;
+}   t_limit_except;
+
+
 class LocationConfig : public IConfig
 {
 
@@ -35,6 +53,8 @@ class LocationConfig : public IConfig
 		t_return					*_return;
         std::map<int, t_errorPage *>  errorPages;
 		bool						errorPageDirective;
+		t_limit_except				*limit_except;
+
 
 		virtual ~LocationConfig();
 		virtual void printValues(int indent = 0);
