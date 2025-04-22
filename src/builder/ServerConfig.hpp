@@ -3,6 +3,7 @@
 
 # include "IConfigBuilder.hpp"
 # include "DirectiveProcessor.hpp"
+# include "IConfig.hpp"
 # include "LocationConfig.hpp"
 
 typedef struct s_listen
@@ -11,7 +12,8 @@ typedef struct s_listen
     int port;
 }   t_listen;
 
-class ServerConfig {
+class ServerConfig : public IConfig
+{
     
     public:
         std::vector<LocationConfig *> locations;
@@ -26,6 +28,9 @@ class ServerConfig {
         std::map<int, t_errorPage *>  errorPages;
         std::vector<std::string>    serverNames;
         std::vector<std::string>    index;
+
+        virtual ~ServerConfig();
+        virtual void printValues(int indent = 0);
 };
 
 #endif

@@ -15,13 +15,7 @@ HttpBuilder::HttpBuilder() : built(false), http(new HttpConfig())
 
 HttpBuilder::~HttpBuilder()
 {
-    for (std::map<int, t_errorPage *>::iterator it = this->http->errorPages.begin(); it != this->http->errorPages.end(); ++it)
-    {
-        it->second->referencesCount--;
-        if (it->second->referencesCount == 0)
-            delete it->second;
-    }
-    delete this->http;
+
 }
 
 /***********************************************************************/
@@ -39,7 +33,7 @@ void    HttpBuilder::addNestedBuilder(IConfigBuilder *child, AConfigBlock *newBl
     http->servers.push_back(newServer);
 }
 
-void    *HttpBuilder::build(AConfigBlock *httpBlock)
+IConfig    *HttpBuilder::build(AConfigBlock *httpBlock)
 {
     for (AConfigBlock::iterator blockIt = httpBlock->begin(); blockIt != httpBlock->end(); ++blockIt)
     {
@@ -90,6 +84,8 @@ void    HttpBuilder::handleClientMaxBodySize(const std::string &value)
         case '\0':
             this->http->clientMaxBodySize = maxBodySize;
     }
+    if (this->http->clientMaxBodySize > (1024 * 1024 * 1024))
+    this->http->clientMaxBodySize = (1024 * 1024 * 1024);
 }
 
 void    HttpBuilder::handleErrorPage(const std::string &value)

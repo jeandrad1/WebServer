@@ -15,16 +15,16 @@
 
 class LocationConfig;
 
-std::vector<void *> buildConfig(AConfigBlock *rawConfig)
+std::vector<IConfig *> buildConfig(AConfigBlock *rawConfig)
 {
-    std::vector<void *> builtConfigs;
-
+    std::vector<IConfig *> builtConfigs;
     if (!rawConfig)
     {
         std::cerr << "Error: config_ptr is null." << std::endl;
         return builtConfigs;
     }
-    for (AConfigBlock::iterator it = rawConfig->begin(); it != rawConfig->end(); ++it)
+    AConfigBlock::iterator ite = rawConfig->end();
+    for (AConfigBlock::iterator it = rawConfig->begin(); it != ite; it++)
     {
 		if (HttpBlock *httpBlock = dynamic_cast<HttpBlock *>(*it))
 		{

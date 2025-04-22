@@ -175,32 +175,22 @@ void printHttpConfig(HttpConfig *httpConfig, int indent = 0)
         printServer(httpConfig->servers[i], indent + 1);
     }
 }
-
-void printBuiltConfigs(const std::vector<void *> &builtConfigs)
+*/
+void printBuiltConfigs(const std::vector<IConfig *> &builtConfigs)
 {
-    for (size_t i = 0; i < builtConfigs.size(); ++i)
-    {
-        HttpConfig *httpConfig = dynamic_cast<HttpConfig *>(static_cast<HttpConfig *>(builtConfigs[i]));
-        if (httpConfig)
+    std::vector<IConfig * >::const_iterator ite = builtConfigs.end();
+    for (std::vector<IConfig *>::const_iterator it = builtConfigs.begin(); it != ite; ++it) {
+        if (HttpConfig *http = dynamic_cast<HttpConfig *>(*it))
         {
-            printHttpConfig(httpConfig);
-            continue;
+            http->printValues(0);
         }
-
-        ServerConfig *server = dynamic_cast<ServerConfig *>(static_cast<ServerConfig *>(builtConfigs[i]));
-        if (server)
+        else if (ServerConfig *server = dynamic_cast<ServerConfig *>(*it))
         {
-            printServer(server);
-            continue;
+            server->printValues(0);
         }
-
-        LocationConfig *location = dynamic_cast<LocationConfig *>(static_cast<LocationConfig *>(builtConfigs[i]));
-        if (location)
+        else
         {
-            printLocation(location);
-            continue;
+            std::cerr << "Error: Unknown config type\n\n";
         }
-
-        std::cout << "Unknown configuration type." << std::endl;
     }
-}*/
+}

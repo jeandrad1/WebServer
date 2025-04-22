@@ -21,7 +21,7 @@ class ServerBuilder : public IConfigBuilder, public DirectiveProcessor<ServerBui
 
         void    setDirective(const std::string &key,const std::string &value);
         void    addNestedBuilder(IConfigBuilder *child, AConfigBlock *newBlock);
-        void    *build(AConfigBlock *serverBlock); // checks the server values and if they are not set it sets them with default values
+        IConfig    *build(AConfigBlock *serverBlock); // checks the server values and if they are not set it sets them with default values
         void    setDefaultValues();
 
         void    handleListen(const std::string &value); 

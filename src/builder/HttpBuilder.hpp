@@ -18,7 +18,7 @@ class HttpBuilder : public IConfigBuilder, public DirectiveProcessor<HttpBuilder
 
         void setDirective(const std::string &name, const std::string &value);
         void addNestedBuilder(IConfigBuilder *child, AConfigBlock *newConfig);
-        void *build(AConfigBlock *httpBlock);
+        IConfig *build(AConfigBlock *httpBlock);
         void setDefaultValues(void);
 
         void handleErrorPage(const std::string &value);

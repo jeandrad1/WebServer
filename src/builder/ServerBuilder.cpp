@@ -23,22 +23,7 @@ ServerBuilder::ServerBuilder() : built(false), server(new ServerConfig())
 
 ServerBuilder::~ServerBuilder()
 {
-    for (std::map<int, t_errorPage *>::iterator it = this->server->errorPages.begin(); it != this->server->errorPages.end(); ++it)
-    {
-        it->second->referencesCount--;
-        if (it->second->referencesCount == 0)
-            delete it->second;
-    }
-    if (this->server->listen.size() != 0)
-    {
-        for (std::vector<t_listen *>::iterator it = this->server->listen.begin(); it < this->server->listen.end(); ++it)
-        {
-            delete (*it);
-        }
-    }
-    delete this->server->_return;
-    if (this->server)
-        delete this->server;
+
 }
 
 /***********************************************************************/
@@ -56,7 +41,7 @@ void    ServerBuilder::addNestedBuilder(IConfigBuilder *child, AConfigBlock *new
     this->server->locations.push_back(newLocation);
 }
 
-void *ServerBuilder::build(AConfigBlock *serverBlock)
+IConfig *ServerBuilder::build(AConfigBlock *serverBlock)
 {
     if (this->built == true)
         return (NULL);
@@ -119,8 +104,6 @@ void    ServerBuilder::handleListen(const std::string &value)
 
     int colon_pos = real_value.find(":");
 
-    t_listen *newListen = new t_listen();
-
     if(colon_pos != std::string::npos)
     {
         listen->ip = real_value.substr(0, colon_pos);
@@ -138,7 +121,10 @@ void    ServerBuilder::handleListen(const std::string &value)
 void    ServerBuilder::handleServerName(const std::string &value)
 {
     if (this->server->serverNames.size() == 1 && this->server->serverNames[0] == "")
+    {
         this->server->serverNames.pop_back();
+        this->server->serverNames.clear();
+    }
 
     std::string real_value = value.substr(0, value.size() - 1);
     this->server->serverNames.push_back(real_value);
@@ -170,7 +156,7 @@ void    ServerBuilder::handleReturn(const std::string &value)
     this->server->_return->returnDirective = true;
 
     std::string real_value = value.substr(0, value.size() - 1);
-    int http_pos = real_value.find("h");
+    int http_pos = real_value.find("http");
 
     if(http_pos != std::string::npos)
     {
@@ -260,4 +246,6 @@ void ServerBuilder::handleClientMaxBodySize(std::string const &value)
 		case '\0':
 			this->server->clientMaxBodySize = maxBodySize;
 	}
+    if (this->server->clientMaxBodySize > (1024 * 1024 * 1024))
+    this->server->clientMaxBodySize = (1024 * 1024 * 1024);
 }

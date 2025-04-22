@@ -34,14 +34,7 @@ LocationBuilder::LocationBuilder(const std::string &path) : built(false), locati
 
 LocationBuilder::~LocationBuilder()
 {
-    for (std::map<int, t_errorPage *>::iterator it = this->location->errorPages.begin(); it != this->location->errorPages.end(); ++it)
-    {
-        it->second->referencesCount--;
-        if (it->second->referencesCount == 0)
-            delete it->second;
-    }
-    delete this->location->_return;
-    delete this->location;
+
 }
 
 /***********************************************************************/
@@ -59,7 +52,7 @@ void    LocationBuilder::addNestedBuilder(IConfigBuilder *child, AConfigBlock *n
     this->built = false;
 }
 
-void *LocationBuilder::build(AConfigBlock *locationBlock)
+IConfig *LocationBuilder::build(AConfigBlock *locationBlock)
 {
     AConfigBlock::iterator blockItEnd = locationBlock->end();
     for (AConfigBlock::iterator blockIt = locationBlock->begin(); blockIt != blockItEnd; blockIt++)
@@ -127,6 +120,8 @@ void LocationBuilder::handleClientMaxBodySize(std::string const &value)
 		case '\0':
 			this->location->clientMaxBodySize = maxBodySize;
 	}
+    if (this->location->clientMaxBodySize > (1024 * 1024 * 1024))
+        this->location->clientMaxBodySize = (1024 * 1024 * 1024);
 }
 
 void    LocationBuilder::handleAutoindex(const std::string &value)
@@ -191,7 +186,7 @@ void    LocationBuilder::handleReturn(const std::string &value)
     this->location->_return->returnDirective = true;
 
     std::string real_value = value.substr(0, value.size() - 1);
-    int http_pos = real_value.find("h");
+    int http_pos = real_value.find("http");
 
     if(http_pos != std::string::npos)
     {

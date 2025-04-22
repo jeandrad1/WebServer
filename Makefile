@@ -33,6 +33,9 @@ FILES = main \
 		builder/HttpBuilder \
 		builder/LocationBuilder \
 		builder/ServerBuilder \
+		builder/HttpConfig \
+		builder/ServerConfig\
+		builder/LocationConfig\
 		utils/utils
 
 $(shell mkdir -p ./build)
