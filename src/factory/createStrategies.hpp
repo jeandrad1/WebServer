@@ -27,5 +27,6 @@ IValidationStrategy			*createListenStrategy(void);
 IValidationStrategy			*createRootStrategy(void);
 IValidationStrategy			*createReturnStrategy(void);
 IValidationStrategy			*createServerNameStrategy(void);
+IValidationStrategy			*createLimitExceptStrategy(void);
 
 #endif

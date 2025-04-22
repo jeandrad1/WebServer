@@ -30,6 +30,7 @@ LocationBuilder::LocationBuilder(const std::string &path) : built(false), locati
     this->registerHandler("autoindex", &LocationBuilder::handleAutoindex);
     this->registerHandler("error_page", &LocationBuilder::handleErrorPage);
     this->registerHandler("return", &LocationBuilder::handleReturn);
+    this->registerHandler("limit_except", &LocationBuilder::handleLimitExcept);
 }
 
 LocationBuilder::~LocationBuilder()
@@ -73,6 +74,7 @@ void *LocationBuilder::build(AConfigBlock *locationBlock)
 void    LocationBuilder::setDefaultValues(void)
 {
     this->location->_return = new t_return;
+    this->location->limit_except = new t_limit_except;
 
     this->location->autoindex = DEFAULT_AUTOINDEX;
 	this->location->clientMaxBodySize = DEFAULT_CLIENT_MAX_BODY_SIZE;
@@ -83,6 +85,11 @@ void    LocationBuilder::setDefaultValues(void)
 
     this->location->_return->returnDirective = false;
     this->location->errorPageDirective = false;
+    this->location->limit_except->limitDirective = false;
+    this->location->limit_except->POST = true;
+    this->location->limit_except->GET = true;
+    this->location->limit_except->DELETE = false;
+
 }
 
 /***********************************************************************/
@@ -204,4 +211,34 @@ void    LocationBuilder::handleReturn(const std::string &value)
         std::string true_value = real_value.substr(0, std::string::npos);
         this->location->_return->code = std::atoi(true_value.c_str());
     }
+}
+
+void    LocationBuilder::handleLimitExcept(const std::string &value)
+{
+    if (this->location->limit_except->limitDirective == true)
+    {
+        std::cout << "Error in builder because of limmit_except encountered twice, should throw exception?";
+        return ;
+    }
+    
+    this->location->limit_except->limitDirective = true;
+
+    std::string real_value = value.substr(0, value.size() - 1);
+    std::vector<std::string> values =split_str(real_value," ");
+
+    this->location->limit_except->GET = false;
+    this->location->limit_except->POST = false;
+
+    for (size_t i = 0; i < values.size(); i++)
+    {
+        if(values[i] == "POST" )
+            this->location->limit_except->POST = true;
+        
+        else if(values[i] == "GET" )
+            this->location->limit_except->GET = true;
+        
+        else if(values[i] == "DELETE" )
+            this->location->limit_except->DELETE = true;
+    }
+
 }
