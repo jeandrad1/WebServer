@@ -45,7 +45,7 @@ WebservManager::~WebservManager(void)
 void WebservManager::run(void)
 {
 	ServerBlock		config("Config");
-	inheritance		*heritance = new inheritance;
+	InheritanceEngine		heritance;
 	this->_rootBlock = createBlock(this->_configFile, config);
 
 	this->_rootBlock->getBlock(0)->printConfig(0);
@@ -55,7 +55,7 @@ void WebservManager::run(void)
 	std::cout << "Passes factory"<< std::endl;
 	std::vector<IConfig *> builtConfigs = buildConfig(this->_rootBlock);
 	std::cout << "Passes builder"<< std::endl;
-	heritance->runInheritance(builtConfigs);
+	heritance.runInherit(builtConfigs);
 	printBuiltConfigs(builtConfigs);
 
 	std::vector<IConfig * >::const_iterator ite = builtConfigs.end();

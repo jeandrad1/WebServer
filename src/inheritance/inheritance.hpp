@@ -5,14 +5,15 @@
 //             NO REFACTORIZAR                   //
 ///////////////////////////////////////////////////
 
-class inheritance : public HttpConfig, public ServerConfig
-{
-	private:
-		void takeValues(IConfig &builtConfig);
-		void setValues(IConfig &builtConfig);
+class InheritanceEngine {
 	public:
-		inheritance();
-		~inheritance();
+		void inherit(HttpConfig& http);
+	
+		void inherit(ServerConfig& server);
+	
+		void inheritFromHttp(ServerConfig& server, const HttpConfig& http);
 
-        void runInheritance(std::vector<IConfig *> &builtConfigs);
-};
+		void inheritFromServer(LocationConfig& location, const ServerConfig& server);
+
+		void runInherit(std::vector<IConfig *> &builtConfigs);
+	};

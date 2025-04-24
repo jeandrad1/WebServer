@@ -5,110 +5,75 @@
 //             NO REFACTORIZAR                   //
 ///////////////////////////////////////////////////
 
-inheritance::inheritance()
-{}
-
-inheritance::~inheritance()
-{}
-
-void inheritance::takeValues(IConfig &builtConfig)
+void InheritanceEngine::inherit(HttpConfig &http)
 {
-	if (HttpConfig* http = dynamic_cast<HttpConfig*>(&builtConfig))
+	std::vector<ServerConfig*>::iterator it = http.servers.begin();
+	for (; it != http.servers.end(); ++it)
 	{
-		if (http->clientMaxBodySize != DEFAULT_CLIENT_MAX_BODY_SIZE)
-		{
-			this->HttpConfig::clientMaxBodySize = http->clientMaxBodySize;
-		}
-		if (http->errorPageDirective == true)
-		{
-			this->HttpConfig::errorPageDirective = http->errorPageDirective;
-			this->HttpConfig::errorPages = http->errorPages;
-		}
-	}
-
-    if (ServerConfig* server = dynamic_cast<ServerConfig*>(&builtConfig))
-    {
-		if(server->clientMaxBodySize != DEFAULT_CLIENT_MAX_BODY_SIZE)
-		{
-			this->ServerConfig::clientMaxBodySize = server->clientMaxBodySize;
-		}
-		if(server->errorPageDirective == true)
-		{
-			this->ServerConfig::errorPageDirective = server->listenDirective;
-			this->ServerConfig::errorPages = server->errorPages;
-		}
-		if(!server->root.empty())
-		{
-			this->ServerConfig::root = server->root;
-		}
-		if(!server->index.empty())
-		{
-			this->ServerConfig::index = server->index;
-		}
-    }
-}
-
-void inheritance::setValues(IConfig &builtConfig)
-{
-	if (ServerConfig* server = dynamic_cast<ServerConfig*>(&builtConfig))
-	{
-		if (server->clientMaxBodySize == DEFAULT_CLIENT_MAX_BODY_SIZE)
-		{
-			server->clientMaxBodySize = this->HttpConfig::clientMaxBodySize;
-		}
-		if (server->errorPageDirective == false)
-		{
-			server->errorPageDirective = this->HttpConfig::errorPageDirective;
-			server->errorPages = this->HttpConfig::errorPages;
-		}
-	}
-	if (LocationConfig* location = dynamic_cast<LocationConfig*>(&builtConfig))
-	{
-		if(location->clientMaxBodySize == DEFAULT_CLIENT_MAX_BODY_SIZE)
-		{
-			location->clientMaxBodySize = ServerConfig::clientMaxBodySize;
-		}
-		if(location->errorPageDirective == true)
-		{
-			location->errorPageDirective = this->ServerConfig::errorPageDirective;
-			location->errorPages = this->ServerConfig::errorPages;
-		}
-		if(location->root.empty())
-		{
-			location->root = this->ServerConfig::root;
-		}
-		if(location->index.empty())
-		{
-			location->index = this->ServerConfig::index;
-		}
+		inheritFromHttp(**it, http);
+		inherit(**it);
 	}
 }
 
-void inheritance::runInheritance(std::vector<IConfig *> &builtConfigs)
+void InheritanceEngine::inherit(ServerConfig& server) 
 {
-	std::vector<IConfig *>::iterator ite = builtConfigs.end();
-	for(std::vector<IConfig *>::iterator it = builtConfigs.begin(); it != ite; it++)
+	std::vector<LocationConfig*>::iterator it = server.locations.begin();
+	for (; it != server.locations.end(); ++it) 
 	{
-		if (HttpConfig *http = dynamic_cast<HttpConfig *>(*it))
+		inheritFromServer(**it, server);
+	}
+}
+
+void InheritanceEngine::inheritFromHttp(ServerConfig& server, const HttpConfig& http) 
+{
+	if (server.clientMaxBodySize == DEFAULT_CLIENT_MAX_BODY_SIZE && http.clientMaxBodySize != DEFAULT_CLIENT_MAX_BODY_SIZE)
+	{
+		server.clientMaxBodySize = http.clientMaxBodySize;
+	}
+	if (http.errorPageDirective == true && server.errorPageDirective == false)
+	{
+		server.errorPageDirective = http.errorPageDirective;
+		server.errorPages = http.errorPages;
+	}
+}
+
+void InheritanceEngine::inheritFromServer(LocationConfig& location, const ServerConfig& server) 
+{
+	if(location.clientMaxBodySize == DEFAULT_CLIENT_MAX_BODY_SIZE && location.clientMaxBodySize == DEFAULT_CLIENT_MAX_BODY_SIZE)
+	{
+		location.clientMaxBodySize = server.clientMaxBodySize;
+	}
+	if(server.errorPageDirective == true && location.errorPageDirective == false)
+	{
+		location.errorPageDirective = server.errorPageDirective;
+		location.errorPages = server.errorPages;
+	}
+	if(location.root.empty())
+	{
+		location.root = server.root;
+	}
+	if(location.index.empty())
+	{
+		location.index = server.index;
+	}
+}
+
+void InheritanceEngine::runInherit(std::vector<IConfig *> &builtConfigs)
+{
+	std::vector<IConfig*>::iterator it = builtConfigs.begin();
+	for (; it != builtConfigs.end(); ++it)
+	{
+		HttpConfig* http = dynamic_cast<HttpConfig*>(*it);
+		if (http)
 		{
-			takeValues(*http);
-			std::vector<IConfig*> convertedServers;
-			for (std::vector<ServerConfig*>::iterator it = http->servers.begin(); it != http->servers.end(); ++it)
-				convertedServers.push_back(static_cast<IConfig*>(*it));
-			this->runInheritance(convertedServers);
+			inherit(*http);
+			continue;
 		}
-		if (ServerConfig *server = dynamic_cast<ServerConfig *>(*it))
+		ServerConfig* server = dynamic_cast<ServerConfig*>(*it);
+		if (server)
 		{
-			takeValues(*server);
-			setValues(*server);
-			std::vector<IConfig*> convertedLocations;
-			for (std::vector<LocationConfig*>::iterator it = server->locations.begin(); it != server->locations.end(); ++it)
-				convertedLocations.push_back(static_cast<IConfig*>(*it));
-			this->runInheritance(convertedLocations);
-		}
-		if (LocationConfig *location = dynamic_cast<LocationConfig *>(*it))
-		{
-			setValues(*location);
+			inherit(*server);
+			continue;
 		}
 	}
 }
