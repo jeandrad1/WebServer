@@ -71,14 +71,13 @@ void	ServerBuilder::setDefaultValues()
 	this->server->listen.push_back(listen);
 	this->server->listenDirective = false;
 
-	this->server->root = DEFAULT_ROOT;
-	this->server->autoindex = DEFAULT_AUTOINDEX;
-	this->server->clientMaxBodySize = DEFAULT_CLIENT_MAX_BODY_SIZE;
+    this->server->root = "-1";
+    this->server->autoindex = DEFAULT_AUTOINDEX;
+	this->server->clientMaxBodySize = -1;
 
 	this->server->serverNames.push_back("");
 
-	this->server->index.push_back("index.html");
-	this->server->index.push_back("index.htm");
+    this->server->index.push_back(" ");
 
 	this->server->_return->returnDirective = false;
 	this->server->errorPageDirective = false;
