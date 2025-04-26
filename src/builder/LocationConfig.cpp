@@ -61,11 +61,11 @@ void LocationConfig::printValues(int indent)
     std::cout << "\n";
     std::cout << spaces << YELLOW "  clientMaxBodySize: " RESET << clientMaxBodySize << "\n";
     if (limit_except) {
-        std::cout << spaces << YELLOW "limit_except: " RESET << std::endl;
-        std::cout << spaces << YELLOW"  POST: " RESET<< (limit_except->POST ? "true" : "false") << std::endl;
-        std::cout << spaces << YELLOW"  GET: " RESET<< (limit_except->GET ? "true" : "false") << std::endl;
-        std::cout << spaces << YELLOW"  DELETE: " RESET << (limit_except->DELETE ? "true" : "false") << std::endl;
-        std::cout << spaces << YELLOW"  Limit Directive: " RESET<< (limit_except->limitDirective ? "true" : "false") << std::endl;
+        std::cout << spaces << YELLOW "  limit_except: " RESET;
+        std::cout << YELLOW"  POST: " RESET<< (limit_except->POST ? "true" : "false");
+        std::cout << YELLOW"  GET: " RESET<< (limit_except->GET ? "true" : "false");
+        std::cout << YELLOW"  DELETE: " RESET << (limit_except->DELETE ? "true" : "false");
+        std::cout << YELLOW"  Limit Directive: " RESET<< (limit_except->limitDirective ? "true" : "false") << std::endl;
     } else {
         std::cout << spaces << "Limit Except: Not set" << std::endl;
     }
