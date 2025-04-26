@@ -54,3 +54,15 @@ void ServerToLocationInheritance::configureIndex(LocationConfig &location, Serve
 		server.index.push_back("index.htm");
 	}
 }
+
+void ServerToLocationInheritance::noLocations(ServerConfig &server)
+{
+	if(server.root == "-1")
+		server.root = DEFAULT_ROOT;
+	if (server.index[0] == " ")
+	{
+		server.index.clear();
+		server.index.push_back("index.html");
+		server.index.push_back("index.htm");
+	}
+}

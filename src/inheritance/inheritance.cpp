@@ -22,6 +22,8 @@ void InheritanceEngine::inherit(ServerConfig& server)
 		LocationConfig *location = *it;
 		serverToLocation.inherit(*location, server);
 	}
+	if (server.locations.empty())
+		serverToLocation.noLocations(server);
 }
 
 void InheritanceEngine::runInherit(std::vector<IConfig *> &builtConfigs)

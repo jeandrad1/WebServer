@@ -9,4 +9,6 @@ class ServerToLocationInheritance {
 		void configureErrorPage(LocationConfig &location, const ServerConfig &server);
 		void configureRoot(LocationConfig &location, ServerConfig &server);
 		void configureIndex(LocationConfig &location, ServerConfig &server);
+
+		void noLocations(ServerConfig &server);
 	};
