@@ -35,9 +35,12 @@ FILES = main \
 		builder/LocationBuilder \
 		builder/ServerBuilder \
 		builder/HttpConfig \
-		builder/ServerConfig\
-		builder/LocationConfig\
-		utils/utils
+		builder/ServerConfig \
+		builder/LocationConfig \
+		utils/utils \
+		inheritance/inheritance \
+		inheritance/HttpToServerInheritance \
+		inheritance/ServerToLocationInheritance
 
 $(shell mkdir -p ./build)
 $(shell mkdir -p ./build/composite)
@@ -47,6 +50,7 @@ $(shell mkdir -p ./build/builder)
 $(shell mkdir -p ./build/utils)
 $(shell mkdir -p ./build/manager)
 $(shell mkdir -p ./build/charge_flag_makefile)
+$(shell mkdir -p ./build/inheritance)
 
 SRCS_DIR = ./src/
 OBJS_DIR = ./build/
@@ -88,6 +92,7 @@ setup:
 	$(shell mkdir -p ./build/utils)
 	$(shell mkdir -p ./build/manager)
 	$(shell mkdir -p ./build/charge_flag_makefile)
+	$(shell mkdir -p ./build/inheritance)
 
 PHONY: clean fclean all re setup
 

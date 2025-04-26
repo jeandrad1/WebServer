@@ -52,6 +52,7 @@ IConfig	*HttpBuilder::build(AConfigBlock *httpBlock)
 void	HttpBuilder::setDefaultValues(void)
 {
 	this->http->clientMaxBodySize = DEFAULT_CLIENT_MAX_BODY_SIZE;
+    this->http->clientMaxBodySize = -1;
 }
 
 /***********************************************************************/
