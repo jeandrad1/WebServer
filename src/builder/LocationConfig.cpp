@@ -40,7 +40,7 @@ void	LocationConfig::printValues(int indent)
 		std::cout << spaces << "  No error_page configured.\n";
 	else
 	{
-		for (std::map<int, t_errorPage *>::const_iterator it = errorPages.begin(); it != errorPages.end(); ++it)
+		for (std::map<int, t_errorPage *>::const_iterator	it = errorPages.begin(); it != errorPages.end(); ++it)
 		{
 			if (it->second)
 			{
