@@ -5,6 +5,7 @@
 # include <vector>
 # include <cstdlib>
 # include <sstream>
+# include <iostream>
 # include <map>
 # include "IConfig.hpp"
 
