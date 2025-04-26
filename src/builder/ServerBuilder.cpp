@@ -226,13 +226,15 @@ void ServerBuilder::handleClientMaxBodySize(std::string const &value)
 	if (value.empty())
 		return ;
 
-	std::istringstream	iss(value);
+    std::string real_value = value.substr(0, value.size() - 1);
+	std::istringstream	iss(real_value);
 	unsigned long		maxBodySize = 0;
 	char				suffix = '\0';
 
 	iss >> maxBodySize;
 	iss >> suffix;
-	switch (tolower(suffix))
+
+    switch (tolower(suffix))
 	{
 		case 'k':
 			this->server->clientMaxBodySize = maxBodySize * 1024;
@@ -245,7 +247,12 @@ void ServerBuilder::handleClientMaxBodySize(std::string const &value)
 			break ;
 		case '\0':
 			this->server->clientMaxBodySize = maxBodySize;
+            break ;
+        default :
+            std::cout<<"Impossible value found"<<std::endl;
+            return ;
+    
 	}
     if (this->server->clientMaxBodySize > (1024 * 1024 * 1024))
-    this->server->clientMaxBodySize = (1024 * 1024 * 1024);
+        this->server->clientMaxBodySize = (1024 * 1024 * 1024);
 }
