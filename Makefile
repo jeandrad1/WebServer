@@ -30,7 +30,7 @@ FILES = main \
 		strategy/LocationBlockStrategy \
 		strategy/ServerBlockStrategy \
 		manager/WebservManager \
-		builder/buildConfig \
+		builder/createConfigClasses \
 		builder/HttpBuilder \
 		builder/LocationBuilder \
 		builder/ServerBuilder \

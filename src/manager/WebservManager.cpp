@@ -6,7 +6,7 @@
 #include "../factory/StrategyFactory.hpp"
 
 void printBuiltConfigs(const std::vector<IConfig *> &builtConfigs);
-std::vector<IConfig *> buildConfig(AConfigBlock *config_ptr);
+std::vector<IConfig *> createConfigClasses(AConfigBlock *config_ptr);
 
 
 AConfigBlock	*createBlock(std::ifstream &filename, AConfigBlock &block);
@@ -51,7 +51,7 @@ void WebservManager::run(void)
 	int error = factoryCheck((*this->_rootBlock));
 
 	std::cout << "Passes factory"<< std::endl;
-	std::vector<IConfig *> builtConfigs = buildConfig(this->_rootBlock);
+	std::vector<IConfig *> builtConfigs = createConfigClasses(this->_rootBlock);
 	std::cout << "Passes builder"<< std::endl;
 	printBuiltConfigs(builtConfigs);
 
