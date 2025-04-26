@@ -4,10 +4,10 @@ void HttpToServerInheritance::inherit(ServerConfig &server, HttpConfig &http) {
 
 	this->configureClientMaxBodySize(server, http);
 
-    if (http.errorPageDirective && !server.errorPageDirective) {
-        server.errorPageDirective = true;
-        server.errorPages = http.errorPages;
-    }
+	if (http.errorPageDirective && !server.errorPageDirective) {
+		server.errorPageDirective = true;
+		server.errorPages = http.errorPages;
+	}
 }
 
 void HttpToServerInheritance::configureClientMaxBodySize(ServerConfig &server, HttpConfig &http)

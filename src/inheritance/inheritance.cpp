@@ -1,10 +1,6 @@
 #include "inheritance.hpp"
 #include "../utils/colors.hpp"
 
-///////////////////////////////////////////////////
-//             NO REFACTORIZAR                   //
-///////////////////////////////////////////////////
-
 void InheritanceEngine::inherit(HttpConfig &http)
 {
 	HttpToServerInheritance httpToServer;

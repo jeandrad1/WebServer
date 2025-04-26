@@ -4,10 +4,6 @@
 #include "HttpToServerInheritance.hpp"
 #include "ServerToLocationInheritance.hpp"
 
-///////////////////////////////////////////////////
-//             NO REFACTORIZAR                   //
-///////////////////////////////////////////////////
-
 class InheritanceEngine {
 	public:
 		void inherit(HttpConfig& http);
