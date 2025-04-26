@@ -7,54 +7,24 @@
 
 void InheritanceEngine::inherit(HttpConfig &http)
 {
+	HttpToServerInheritance httpToServer;
 	std::vector<ServerConfig*>::iterator it = http.servers.begin();
 	for (; it != http.servers.end(); ++it)
 	{
-		inheritFromHttp(**it, http);
-		inherit(**it);
+		ServerConfig *server = *it;
+		httpToServer.inherit(*server, http);
+		inherit(*server);
 	}
 }
 
 void InheritanceEngine::inherit(ServerConfig& server) 
 {
+	ServerToLocationInheritance serverToLocation;
 	std::vector<LocationConfig*>::iterator it = server.locations.begin();
 	for (; it != server.locations.end(); ++it) 
 	{
-		inheritFromServer(**it, server);
-	}
-}
-
-void InheritanceEngine::inheritFromHttp(ServerConfig& server, const HttpConfig& http) 
-{
-	if (server.clientMaxBodySize == DEFAULT_CLIENT_MAX_BODY_SIZE && http.clientMaxBodySize != DEFAULT_CLIENT_MAX_BODY_SIZE)
-	{
-		server.clientMaxBodySize = http.clientMaxBodySize;
-	}
-	if (http.errorPageDirective == true && server.errorPageDirective == false)
-	{
-		server.errorPageDirective = http.errorPageDirective;
-		server.errorPages = http.errorPages;
-	}
-}
-
-void InheritanceEngine::inheritFromServer(LocationConfig& location, const ServerConfig& server) 
-{
-	if(location.clientMaxBodySize == DEFAULT_CLIENT_MAX_BODY_SIZE && location.clientMaxBodySize == DEFAULT_CLIENT_MAX_BODY_SIZE)
-	{
-		location.clientMaxBodySize = server.clientMaxBodySize;
-	}
-	if(server.errorPageDirective == true && location.errorPageDirective == false)
-	{
-		location.errorPageDirective = server.errorPageDirective;
-		location.errorPages = server.errorPages;
-	}
-	if(location.root.empty())
-	{
-		location.root = server.root;
-	}
-	if(location.index.empty())
-	{
-		location.index = server.index;
+		LocationConfig *location = *it;
+		serverToLocation.inherit(*location, server);
 	}
 }
 

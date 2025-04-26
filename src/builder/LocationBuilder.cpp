@@ -68,11 +68,10 @@ void    LocationBuilder::setDefaultValues(void)
     this->location->_return = new t_return;
 
     this->location->autoindex = DEFAULT_AUTOINDEX;
-	this->location->clientMaxBodySize = DEFAULT_CLIENT_MAX_BODY_SIZE;
-    this->location->root = DEFAULT_ROOT;
+	this->location->clientMaxBodySize = -1;
+    this->location->root = "-1";
 
-    this->location->index.push_back("index.html");
-    this->location->index.push_back("index.htm");
+    this->location->index.push_back(" ");
 
     this->location->_return->returnDirective = false;
     this->location->errorPageDirective = false;

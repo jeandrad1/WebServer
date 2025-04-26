@@ -34,10 +34,12 @@ FILES = main \
 		builder/LocationBuilder \
 		builder/ServerBuilder \
 		builder/HttpConfig \
-		builder/ServerConfig\
-		builder/LocationConfig\
+		builder/ServerConfig \
+		builder/LocationConfig \
 		utils/utils \
-		inheritance/inheritance
+		inheritance/inheritance \
+		inheritance/HttpToServerInheritance \
+		inheritance/ServerToLocationInheritance
 
 $(shell mkdir -p ./build)
 $(shell mkdir -p ./build/composite)
