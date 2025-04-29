@@ -16,6 +16,7 @@ FILES = main \
 		strategy/AutoindexStrategy \
 		strategy/ClientMaxBodySizeStrategy \
 		strategy/ErrorPageStrategy \
+		strategy/LimitExceptStrategy \
 		factory/registerAllStrategies \
 		factory/factoryCheck \
 		factory/createStrategies \
@@ -29,7 +30,7 @@ FILES = main \
 		strategy/LocationBlockStrategy \
 		strategy/ServerBlockStrategy \
 		manager/WebservManager \
-		builder/buildConfig \
+		builder/createConfigClasses \
 		builder/HttpBuilder \
 		builder/LocationBuilder \
 		builder/ServerBuilder \

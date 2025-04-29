@@ -63,3 +63,8 @@ IValidationStrategy	*createServerNameStrategy(void)
 {
 	return (new ServerNameStrategy());
 }
+
+IValidationStrategy	*createLimitExceptStrategy(void)
+{
+	return (new LimitExceptStrategy());
+}

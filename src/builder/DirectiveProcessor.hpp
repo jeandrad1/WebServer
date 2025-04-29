@@ -6,22 +6,22 @@
 
 template <typename Derived>
 class DirectiveProcessor {
-    
-    public:
-        typedef void (Derived::*HandlerFunc)(const std::string &);
 
-    protected:
-        std::map<std::string, HandlerFunc> directiveHandlers;
+	public:
+		typedef void (Derived::*HandlerFunc)(const std::string &);
 
-    public:
-        virtual  ~DirectiveProcessor() {}
+	protected:
+		std::map<std::string, HandlerFunc> directiveHandlers;
 
-        void    registerHandler(const std::string &name, HandlerFunc handler)
-        {
-            directiveHandlers[name] = handler;
-        }
+	public:
+		virtual	~DirectiveProcessor() {}
 
-		void    dispatchDirective(const std::string &name, const std::string &value)
+		void	registerHandler(const std::string &name, HandlerFunc handler)
+		{
+			directiveHandlers[name] = handler;
+		}
+
+		void	dispatchDirective(const std::string &name, const std::string &value)
 		{
 			typename std::map<std::string, HandlerFunc>::iterator it = directiveHandlers.find(name);
 			if (it != directiveHandlers.end())

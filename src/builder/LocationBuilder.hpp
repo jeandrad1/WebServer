@@ -18,17 +18,18 @@ class LocationBuilder : public IConfigBuilder, public DirectiveProcessor<Locatio
 		LocationBuilder(const std::string &path);
 		~LocationBuilder();
 
-		void setDirective(const std::string &key,const std::string &value);
-		void addNestedBuilder(IConfigBuilder *child, AConfigBlock *newBlock);
-		IConfig *build(AConfigBlock *locationBlock);
-		void setDefaultValues(void);
+		void	setDirective(const std::string &key,const std::string &value);
+		void	addNestedBuilder(IConfigBuilder *child, AConfigBlock *newBlock);
+		IConfig	*build(AConfigBlock *locationBlock);
+		void	setDefaultValues(void);
 
-		void handleRoot(std::string const &value);
-		void handleIndex(std::string const &value);
-		void handleClientMaxBodySize(std::string const &value);
-		void handleAutoindex(std::string const &value);
-		void handleErrorPage(std::string const &value);
-		void handleReturn(std::string const &value);
+		void	handleRoot(std::string const &value);
+		void	handleIndex(std::string const &value);
+		void	handleClientMaxBodySize(std::string const &value);
+		void	handleAutoindex(std::string const &value);
+		void	handleErrorPage(std::string const &value);
+		void	handleReturn(std::string const &value);
+		void	handleLimitExcept(std::string const &value);
 };
 
 #endif

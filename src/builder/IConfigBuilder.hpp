@@ -8,14 +8,14 @@
 #include "IConfig.hpp"
 
 class IConfigBuilder {
-    
-    public:
-        virtual             ~IConfigBuilder() {}
 
-        virtual void        setDirective(const std::string &key,const std::string &value) = 0;
-        virtual void        addNestedBuilder(IConfigBuilder *child, AConfigBlock *newBlock) = 0;
-        virtual IConfig    *build(AConfigBlock *block) = 0;
-        virtual void        setDefaultValues(void) = 0;
+	public:
+		virtual				~IConfigBuilder() {}
+
+		virtual void		setDirective(const std::string &key,const std::string &value) = 0;
+		virtual void		addNestedBuilder(IConfigBuilder *child, AConfigBlock *newBlock) = 0;
+		virtual IConfig		*build(AConfigBlock *block) = 0;
+		virtual void		setDefaultValues(void) = 0;
 };
 
 #endif
