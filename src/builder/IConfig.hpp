@@ -15,7 +15,7 @@ class IConfig
 		/////////////
 
 		virtual void	inherance(void) = 0;
-		virtual void	defaultInheritValues(void) = 0;
+		virtual void	defaultInheritedValues(void) = 0;
 };
 
 #endif

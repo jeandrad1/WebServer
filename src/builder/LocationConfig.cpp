@@ -76,7 +76,7 @@ void	LocationConfig::printValues(int indent)
 
 void	LocationConfig::inherance(void)
 {
-	this->defaultInheritValues();
+	this->defaultInheritedValues();
 }
 
 void	LocationConfig::inheritFromServer(const ServerConfig &server)
@@ -98,7 +98,7 @@ void	LocationConfig::inheritFromServer(const ServerConfig &server)
 }
 
 
-void	LocationConfig::defaultInheritValues(void)
+void	LocationConfig::defaultInheritedValues(void)
 {
 	if (clientMaxBodySize == -1)
 		clientMaxBodySize = DEFAULT_CLIENT_MAX_BODY_SIZE;

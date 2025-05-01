@@ -95,7 +95,7 @@ void	ServerConfig::inherance(void)
 		location->inheritFromServer(*this);
 		location->inherance();
 	}
-	this->defaultInheritValues();
+	this->defaultInheritedValues();
 }
 
 void	ServerConfig::inheritFromHttp(const HttpConfig &http)
@@ -109,7 +109,7 @@ void	ServerConfig::inheritFromHttp(const HttpConfig &http)
 	}
 }
 
-void	ServerConfig::defaultInheritValues(void)
+void	ServerConfig::defaultInheritedValues(void)
 {
 	if (clientMaxBodySize == -1)
 		clientMaxBodySize = DEFAULT_CLIENT_MAX_BODY_SIZE;

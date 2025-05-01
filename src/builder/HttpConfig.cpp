@@ -59,10 +59,10 @@ void	HttpConfig::inherance(void)
 		server->inheritFromHttp(*this);
 		server->inherance();
 	}
-	this->defaultInheritValues();
+	this->defaultInheritedValues();
 }
 
-void	HttpConfig::defaultInheritValues(void)
+void	HttpConfig::defaultInheritedValues(void)
 {
 	if (clientMaxBodySize == -1)
 		clientMaxBodySize = DEFAULT_CLIENT_MAX_BODY_SIZE;

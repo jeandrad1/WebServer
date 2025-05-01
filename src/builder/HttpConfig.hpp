@@ -21,8 +21,8 @@ class HttpConfig : public IConfig {
 		//inherance//
 		/////////////
 
-		virtual void	inherance(void);
-		virtual void	defaultInheritValues(void);
+		void	inherance(void);
+		void	defaultInheritedValues(void);
 };
 
 #endif
