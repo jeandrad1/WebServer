@@ -1,6 +1,7 @@
 #ifndef HTTPCONFIG_HPP
 # define HTTPCONFIG_HPP
 
+# include "LocationConfig.hpp"
 # include "ServerBuilder.hpp"
 # include "IConfig.hpp"
 
@@ -15,6 +16,13 @@ class HttpConfig : public IConfig {
 
 		virtual			~HttpConfig();
 		virtual void	printValues(int indent = 0);
+
+		/////////////
+		//inherance//
+		/////////////
+
+		virtual void	inherance(void);
+		virtual void	defaultInheritValues(void);
 };
 
 #endif

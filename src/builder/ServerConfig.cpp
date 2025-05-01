@@ -1,4 +1,5 @@
 #include "ServerConfig.hpp"
+#include "HttpConfig.hpp"
 
 /***********************************************************************/
 /*                     Constructors & Destructor                       */
@@ -82,4 +83,42 @@ void	ServerConfig::printValues(int indent)
 	std::cout << "\n\n";
 	for (size_t i = 0; i < this->locations.size(); i++)
 		this->locations[i]->LocationConfig::printValues(indent + 2);
+}
+
+
+void	ServerConfig::inherance(void)
+{
+	std::vector<LocationConfig *>::iterator it = locations.begin();
+	for (; it != locations.end(); it++)
+	{
+		LocationConfig *location = *it;
+		location->inheritFromServer(*this);
+		location->inherance();
+	}
+	this->defaultInheritValues();
+}
+
+void	ServerConfig::inheritFromHttp(const HttpConfig &http)
+{
+	if (this->clientMaxBodySize == -1 && http.clientMaxBodySize != -1)
+		this->clientMaxBodySize = http.clientMaxBodySize;
+	if (http.errorPageDirective && !errorPageDirective) 
+	{
+		errorPageDirective = true;
+		errorPages = http.errorPages;
+	}
+}
+
+void	ServerConfig::defaultInheritValues(void)
+{
+	if (clientMaxBodySize == -1)
+		clientMaxBodySize = DEFAULT_CLIENT_MAX_BODY_SIZE;
+	if(this->root == "-1")
+		this->root = DEFAULT_ROOT;
+	if (this->index[0] == " ")
+	{
+		this->index.clear();
+		this->index.push_back("index.html");
+		this->index.push_back("index.htm");
+	}
 }

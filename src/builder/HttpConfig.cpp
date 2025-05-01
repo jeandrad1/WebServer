@@ -1,4 +1,5 @@
 #include "HttpConfig.hpp"
+#include "ServerConfig.hpp"
 
 /***********************************************************************/
 /*                     Constructors & Destructor                       */
@@ -47,4 +48,22 @@ void	HttpConfig::printValues(int indent)
 	for (size_t	i = 0; i < this->servers.size(); i++)
 		this->servers[i]->ServerConfig::printValues(indent + 2);
 	std::cout << "\n";
+}
+
+void	HttpConfig::inherance(void)
+{
+	std::vector<ServerConfig *>::iterator it = servers.begin();
+	for(; it != servers.end(); it++)
+	{
+		ServerConfig *server = *it;
+		server->inheritFromHttp(*this);
+		server->inherance();
+	}
+	this->defaultInheritValues();
+}
+
+void	HttpConfig::defaultInheritValues(void)
+{
+	if (clientMaxBodySize == -1)
+		clientMaxBodySize = DEFAULT_CLIENT_MAX_BODY_SIZE;
 }

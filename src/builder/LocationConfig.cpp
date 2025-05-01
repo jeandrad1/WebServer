@@ -1,4 +1,5 @@
 #include "LocationConfig.hpp"
+#include "ServerConfig.hpp"
 
 /***********************************************************************/
 /*                     Constructors & Destructor                       */
@@ -71,4 +72,42 @@ void	LocationConfig::printValues(int indent)
 	}
 	else
 		std::cout << spaces << "Limit Except: Not set\n";
+}
+
+void	LocationConfig::inherance(void)
+{
+	this->defaultInheritValues();
+}
+
+void	LocationConfig::inheritFromServer(const ServerConfig &server)
+{
+	if (clientMaxBodySize == -1 && server.clientMaxBodySize != -1)
+		clientMaxBodySize = server.clientMaxBodySize;
+	if (server.errorPageDirective && !errorPageDirective)
+	{
+		errorPageDirective = true;
+		errorPages = server.errorPages;
+	}
+	if (root == "-1" && server.root != "-1")
+		root = server.root;
+	if (index[0] == " " && server.index[0] != " ")
+	{
+		index.clear();
+		index = server.index;
+	}
+}
+
+
+void	LocationConfig::defaultInheritValues(void)
+{
+	if (clientMaxBodySize == -1)
+		clientMaxBodySize = DEFAULT_CLIENT_MAX_BODY_SIZE;
+	if(this->root == "-1")
+		this->root = DEFAULT_ROOT;
+	if (this->index[0] == " ")
+	{
+		this->index.clear();
+		this->index.push_back("index.html");
+		this->index.push_back("index.htm");
+	}
 }

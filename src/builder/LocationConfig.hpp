@@ -9,28 +9,7 @@
 # include <map>
 # include "IConfig.hpp"
 
-typedef struct s_errorPage
-{
-	std::string	targetPage;
-	bool		isEqualModifier;
-	int			equalModifier;
-	int			referencesCount;
-}	t_errorPage;
-
-typedef struct s_return
-{
-	std::string	http;
-	int			code;
-	bool		returnDirective;
-}	t_return;
-
-typedef struct s_limit_except
-{	
-	bool	POST;
-	bool	GET;
-	bool	DELETE;
-	bool	limitDirective;
-}	t_limit_except;
+class ServerConfig;
 
 class LocationConfig : public IConfig
 {
@@ -48,6 +27,14 @@ class LocationConfig : public IConfig
 
 		virtual			~LocationConfig();
 		virtual void	printValues(int indent = 0);
+
+		/////////////
+		//inherance//
+		/////////////
+
+		virtual void	inherance(void);
+		virtual void	defaultInheritValues(void);
+		void			inheritFromServer(const ServerConfig &server);
 };
 
 #endif
