@@ -86,14 +86,13 @@ void	ServerConfig::printValues(int indent)
 }
 
 
-void	ServerConfig::inherance(void)
+void	ServerConfig::applyInheritedConfig(void)
 {
-	std::vector<LocationConfig *>::iterator it = locations.begin();
-	for (; it != locations.end(); it++)
+	for (std::vector<LocationConfig *>::iterator it = locations.begin(); it != locations.end(); it++)
 	{
 		LocationConfig *location = *it;
 		location->inheritFromServer(*this);
-		location->inherance();
+		location->applyInheritedConfig();
 	}
 	this->defaultInheritedValues();
 }

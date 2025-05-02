@@ -50,14 +50,13 @@ void	HttpConfig::printValues(int indent)
 	std::cout << "\n";
 }
 
-void	HttpConfig::inherance(void)
+void	HttpConfig::applyInheritedConfig(void)
 {
-	std::vector<ServerConfig *>::iterator it = servers.begin();
-	for(; it != servers.end(); it++)
+	for(std::vector<ServerConfig *>::iterator it = servers.begin(); it != servers.end(); it++)
 	{
 		ServerConfig *server = *it;
 		server->inheritFromHttp(*this);
-		server->inherance();
+		server->applyInheritedConfig();
 	}
 	this->defaultInheritedValues();
 }

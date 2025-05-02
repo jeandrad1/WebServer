@@ -28,11 +28,7 @@ class LocationConfig : public IConfig
 		virtual			~LocationConfig();
 		virtual void	printValues(int indent = 0);
 
-		/////////////
-		//inherance//
-		/////////////
-
-		void			inherance(void);
+		void			applyInheritedConfig(void);
 		void			defaultInheritedValues(void);
 		void			inheritFromServer(const ServerConfig &server);
 };

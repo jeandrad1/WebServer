@@ -29,11 +29,7 @@ class ServerConfig : public IConfig
 		virtual			~ServerConfig();
 		virtual void	printValues(int indent = 0);
 
-		/////////////
-		//inherance//
-		/////////////
-
-		void			inherance(void);
+		void			applyInheritedConfig(void);
 		void			defaultInheritedValues(void);
 		void			inheritFromHttp(const HttpConfig &http);
 };

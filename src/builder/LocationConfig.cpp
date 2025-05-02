@@ -74,7 +74,7 @@ void	LocationConfig::printValues(int indent)
 		std::cout << spaces << "Limit Except: Not set\n";
 }
 
-void	LocationConfig::inherance(void)
+void	LocationConfig::applyInheritedConfig(void)
 {
 	this->defaultInheritedValues();
 }
@@ -96,7 +96,6 @@ void	LocationConfig::inheritFromServer(const ServerConfig &server)
 		index = server.index;
 	}
 }
-
 
 void	LocationConfig::defaultInheritedValues(void)
 {

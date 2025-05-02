@@ -10,11 +10,7 @@ class IConfig
 		virtual			~IConfig() {}
 		virtual void	printValues(int indent) = 0;
 
-		/////////////
-		//inherance//
-		/////////////
-
-		virtual void	inherance(void) = 0;
+		virtual void	applyInheritedConfig(void) = 0;
 		virtual void	defaultInheritedValues(void) = 0;
 };
 

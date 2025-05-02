@@ -17,11 +17,7 @@ class HttpConfig : public IConfig {
 		virtual			~HttpConfig();
 		virtual void	printValues(int indent = 0);
 
-		/////////////
-		//inherance//
-		/////////////
-
-		void	inherance(void);
+		void	applyInheritedConfig(void);
 		void	defaultInheritedValues(void);
 };
 
