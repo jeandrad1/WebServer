@@ -54,7 +54,7 @@ void WebservManager::run(void)
 	std::vector<IConfig *> builtConfigs = createConfigClasses(this->_rootBlock);
 	std::cout << "Passes builder"<< std::endl;
 	for (size_t i = 0; i < builtConfigs.size(); ++i)
-		builtConfigs[i]->inherance();
+		builtConfigs[i]->applyInheritedConfig();
 	printBuiltConfigs(builtConfigs);
 
 	std::vector<IConfig * >::const_iterator ite = builtConfigs.end();
