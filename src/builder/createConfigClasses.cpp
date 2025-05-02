@@ -37,5 +37,7 @@ std::vector<IConfig *>	createConfigClasses(AConfigBlock *rawConfig)
 			std::cout << RED "Error:" RESET << " Unknown block type encountered.\n";
 		}
 	}
+	for (size_t i = 0; i < builtConfigs.size(); ++i)
+		builtConfigs[i]->applyInheritedConfig();
 	return (builtConfigs);
 }

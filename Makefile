@@ -18,7 +18,7 @@ FILES = main \
 		strategy/ErrorPageStrategy \
 		strategy/LimitExceptStrategy \
 		factory/registerAllStrategies \
-		factory/factoryCheck \
+		factory/validateConfigTreeFactory \
 		factory/createStrategies \
 		factory/StrategyFactory \
 		strategy/IndexStrategy \

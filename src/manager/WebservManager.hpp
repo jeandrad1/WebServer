@@ -10,16 +10,18 @@
 
 class WebservManager {
 
-    public:
-        WebservManager(const std::string &configPath);
-        ~WebservManager();
+	public:
+		WebservManager(const std::string &configPath);
+		~WebservManager();
 
-        void run(void);
+		void	run(void);
 
-    private:
-        std::ifstream _configFile;
-        AConfigBlock *_rootBlock;
-        std::map<int, std::vector<ServerConfig *> > servers;
+	private:
+		std::ifstream								_configFile;
+		AConfigBlock								*_rootBlock;
+		std::vector<IConfig *>						builtConfigs;
+
+        std::map<int, std::vector<ServerConfig *> >	servers;
 };
 
 #endif

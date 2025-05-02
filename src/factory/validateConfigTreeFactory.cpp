@@ -4,10 +4,10 @@
 #include "../composite/Directive.hpp"
 #include "StrategyFactory.hpp"
 
-bool	factoryCheckDirectiveCase(AConfigBlock::iterator it, Directive *directive);
-bool	factoryCheckBlockCase(AConfigBlock::iterator it);
+bool	validateDirectiveCase(AConfigBlock::iterator it, Directive *directive);
+bool	validateBlockCase(AConfigBlock::iterator it);
 
-int	factoryCheck(AConfigBlock &config)
+int	validateConfigTreeFactory(AConfigBlock &config)
 {
 	std::vector<AConfigBlock *>::iterator	ite = config.end();
 
@@ -16,21 +16,21 @@ int	factoryCheck(AConfigBlock &config)
 	{
 		if (Directive *directive = dynamic_cast<Directive *>(*it))
 		{
-			if (!factoryCheckDirectiveCase(it, directive))
+			if (!validateDirectiveCase(it, directive))
 				errorCounter++;
 		}
 		else
 		{
-			if (!factoryCheckBlockCase(it))
+			if (!validateBlockCase(it))
 				errorCounter++;
 
-			errorCounter += factoryCheck(**it);
+			errorCounter += validateConfigTreeFactory(**it);
 		}
 	}
 	return (errorCounter);
 }
 
-bool	factoryCheckDirectiveCase(AConfigBlock::iterator it, Directive *directive)
+bool	validateDirectiveCase(AConfigBlock::iterator it, Directive *directive)
 {
 	IValidationStrategy	*strategy = StrategyFactory::getInstance().chooseStrategy(dynamic_cast<Directive *>(*it)->getName());
 	if (strategy)
@@ -51,7 +51,7 @@ bool	factoryCheckDirectiveCase(AConfigBlock::iterator it, Directive *directive)
 	return (true);
 }
 
-bool	factoryCheckBlockCase(AConfigBlock::iterator it)
+bool	validateBlockCase(AConfigBlock::iterator it)
 {
 	IValidationStrategyBlock	*strategyBlock = StrategyFactory::getInstance().chooseStrategyBlock((*it)->getName());
 	if (strategyBlock)
