@@ -55,15 +55,63 @@ void WebservManager::run(void)
 
 	this->_rootBlock = createBlock(this->_configFile, config);
 
-	this->_rootBlock->getBlock(0)->printConfig(0);
+	//this->_rootBlock->getBlock(0)->printConfig(0);
 
 	int error = validateConfigTreeFactory((*this->_rootBlock));
 
 	this->builtConfigs = createConfigClasses(this->_rootBlock);
 
-	printBuiltConfigs(this->builtConfigs);
+	//printBuiltConfigs(this->builtConfigs);
+
+	serversMapConstructor(builtConfigs);
+
+	impressMapServer(servers);
+
 }
 
 /***********************************************************************/
 /*                          Getters & Setters                          */
 /***********************************************************************/
+
+
+/***********************************************************************/
+/*                          Private Functions                          */
+/***********************************************************************/
+
+#include "../builder/HttpConfig.hpp"
+#include "../builder/ServerConfig.hpp"
+
+void WebservManager::serversMapConstructor(std::vector<ServerConfig *> &builtConfigs)
+{
+	for(std::vector<ServerConfig *>::iterator its = builtConfigs.begin(); its != builtConfigs.end(); its++)
+	{
+		for(std::vector<t_listen *>::iterator itl = (*its)->listen.begin(); itl != (*its)->listen.end(); itl++)
+			this->servers[(*itl)->port].push_back((*its));
+	}
+}
+
+void WebservManager::serversMapConstructor(std::vector<IConfig *> &builtConfigs)
+{
+	for(std::vector<IConfig *>::iterator iti = builtConfigs.begin(); iti != builtConfigs.end(); iti++)
+	{
+		if (HttpConfig *http = dynamic_cast<HttpConfig *>(*iti))
+			serversMapConstructor(http->servers);
+		if (ServerConfig *server = dynamic_cast<ServerConfig *>(*iti))
+		{
+			for(std::vector<t_listen *>::iterator itl = server->listen.begin(); itl != server->listen.end(); itl++)
+				this->servers[(*itl)->port].push_back(server);
+		}
+	}
+}
+
+void WebservManager::impressMapServer(std::map<int, std::vector<ServerConfig *> > &serversMap)
+{
+	for (std::map<int, std::vector<ServerConfig *> >::iterator it = serversMap.begin(); it != serversMap.end(); it++)
+	{
+		std::cout << YELLOW << (*it).first << WHITE << ":\n";
+		for(std::vector<ServerConfig *>::iterator its = (*it).second.begin(); its != (*it).second.end(); its++)
+		{
+			std::cout << GREEN << " CLientMaxBodySize_Server -> [" << BLUE << (*its)->clientMaxBodySize << GREEN "]\n";
+		}
+	}
+}

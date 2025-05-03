@@ -22,6 +22,9 @@ class WebservManager {
 		std::vector<IConfig *>						builtConfigs;
 
         std::map<int, std::vector<ServerConfig *> >	servers;
+		void serversMapConstructor(std::vector<IConfig *> &builtConfigs);
+		void serversMapConstructor(std::vector<ServerConfig *> &builtConfigs);
+		void impressMapServer(std::map<int, std::vector<ServerConfig *> > &serversMap);
 };
 
 #endif
