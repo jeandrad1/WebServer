@@ -52,6 +52,8 @@ IValidationStrategyBlock	*StrategyFactory::chooseStrategyBlock(const std::string
 	}
 	else
 	{
+		if (name.find("location") != std::string::npos)
+			return (strategyBlockMap["location"]());
 		std::cout << "No strategy detected, name: " << name << "\n";
 		return (NULL);
 	}

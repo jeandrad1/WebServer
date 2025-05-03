@@ -63,7 +63,12 @@ AConfigBlock	*createBlock(std::ifstream &filename, AConfigBlock &block)
 		else if (http != std::string::npos && http < line.find(" "))
 			createAndAddBlock("http", block, filename);
 		else if (line.find("location") != std::string::npos)
-			createAndAddBlock(line.substr(0, line.length() - 1), block, filename);
+		{
+			if (line[line.find("{")] != std::string::npos)
+				createAndAddBlock(line.substr(0, line.length() - 1), block, filename);
+ 			else
+				createAndAddBlock(line.substr(0, line.length()), block, filename);
+		}
 		else if (line.find("}") != std::string::npos)
 			return (&block);
 		else

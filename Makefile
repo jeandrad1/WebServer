@@ -16,8 +16,9 @@ FILES = main \
 		strategy/AutoindexStrategy \
 		strategy/ClientMaxBodySizeStrategy \
 		strategy/ErrorPageStrategy \
+		strategy/LimitExceptStrategy \
 		factory/registerAllStrategies \
-		factory/factoryCheck \
+		factory/validateConfigTreeFactory \
 		factory/createStrategies \
 		factory/StrategyFactory \
 		strategy/IndexStrategy \
@@ -28,13 +29,24 @@ FILES = main \
 		strategy/HttpBlockStrategy \
 		strategy/LocationBlockStrategy \
 		strategy/ServerBlockStrategy \
-		utils/utils
+		manager/WebservManager \
+		builder/createConfigClasses \
+		builder/HttpBuilder \
+		builder/LocationBuilder \
+		builder/ServerBuilder \
+		builder/HttpConfig \
+		builder/ServerConfig \
+		builder/LocationConfig \
+		utils/utils \
+
 
 $(shell mkdir -p ./build)
 $(shell mkdir -p ./build/composite)
 $(shell mkdir -p ./build/strategy)
 $(shell mkdir -p ./build/factory)
+$(shell mkdir -p ./build/builder)
 $(shell mkdir -p ./build/utils)
+$(shell mkdir -p ./build/manager)
 $(shell mkdir -p ./build/charge_flag_makefile)
 
 SRCS_DIR = ./src/
@@ -73,7 +85,9 @@ setup:
 	$(shell mkdir -p ./build/composite)
 	$(shell mkdir -p ./build/strategy)
 	$(shell mkdir -p ./build/factory)
+	$(shell mkdir -p ./build/builder)
 	$(shell mkdir -p ./build/utils)
+	$(shell mkdir -p ./build/manager)
 	$(shell mkdir -p ./build/charge_flag_makefile)
 
 PHONY: clean fclean all re setup
