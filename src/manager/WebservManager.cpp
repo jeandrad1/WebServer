@@ -86,7 +86,22 @@ void WebservManager::serversMapConstructor(std::vector<ServerConfig *> &builtCon
 	for(std::vector<ServerConfig *>::iterator its = builtConfigs.begin(); its != builtConfigs.end(); its++)
 	{
 		for(std::vector<t_listen *>::iterator itl = (*its)->listen.begin(); itl != (*its)->listen.end(); itl++)
-			this->servers[(*itl)->port].push_back((*its));
+		{
+			std::vector<ServerConfig *> &vec = this->servers[(*itl)->port];
+
+			bool alreadyExists = false;
+
+			for (std::vector<ServerConfig *>::iterator it = vec.begin(); it != vec.end(); it++)
+			{
+				if (*it == *its)
+				{
+					alreadyExists = true;
+					break;
+				}
+			}
+			if(alreadyExists == false)
+				vec.push_back(*its);
+		}
 	}
 }
 
@@ -99,7 +114,22 @@ void WebservManager::serversMapConstructor(std::vector<IConfig *> &builtConfigs)
 		if (ServerConfig *server = dynamic_cast<ServerConfig *>(*iti))
 		{
 			for(std::vector<t_listen *>::iterator itl = server->listen.begin(); itl != server->listen.end(); itl++)
-				this->servers[(*itl)->port].push_back(server);
+			{
+				std::vector<ServerConfig *> &vec = this->servers[(*itl)->port];
+
+				bool alreadyExists = false;
+
+				for (std::vector<ServerConfig *>::iterator it = vec.begin(); it != vec.end(); it++)
+				{
+					if (*it == server)
+					{
+						alreadyExists = true;
+						break;
+					}
+				}
+				if(alreadyExists == false)
+					vec.push_back(server);
+			}
 		}
 	}
 }
