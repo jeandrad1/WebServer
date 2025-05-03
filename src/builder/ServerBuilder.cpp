@@ -107,6 +107,11 @@ void	ServerBuilder::handleListen(const std::string &value)
 		std::string	port_str = real_value.substr(colon_pos + 1);
 		listen->port = std::atoi(port_str.c_str());
 	}
+	else if (real_value.find("."))
+	{
+		listen->ip = real_value;
+		listen->port = DEFAULT_LISTEN_PORT;
+	}
 	else
 	{
 		listen->ip = DEFAULT_LISTEN_IP;
