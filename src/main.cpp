@@ -2,6 +2,7 @@
 #include "./composite/ServerBlock.hpp"
 #include "./factory/StrategyFactory.hpp"
 #include "./manager/WebservManager.hpp"
+#include "src/execute/execute.hpp"
 
 AConfigBlock	*createBlock(std::ifstream &filename, AConfigBlock &block);
 int				factoryCheck(AConfigBlock &config);
