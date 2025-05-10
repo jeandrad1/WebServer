@@ -38,6 +38,7 @@ FILES = main \
 		builder/ServerConfig \
 		builder/LocationConfig \
 		utils/utils \
+		execute/LaunchSockets
 
 
 $(shell mkdir -p ./build)
@@ -47,6 +48,7 @@ $(shell mkdir -p ./build/factory)
 $(shell mkdir -p ./build/builder)
 $(shell mkdir -p ./build/utils)
 $(shell mkdir -p ./build/manager)
+$(shell mkdir -p ./build/execute)
 $(shell mkdir -p ./build/charge_flag_makefile)
 
 SRCS_DIR = ./src/
@@ -88,6 +90,7 @@ setup:
 	$(shell mkdir -p ./build/builder)
 	$(shell mkdir -p ./build/utils)
 	$(shell mkdir -p ./build/manager)
+	$(shell mkdir -p ./build/execute)
 	$(shell mkdir -p ./build/charge_flag_makefile)
 
 PHONY: clean fclean all re setup
