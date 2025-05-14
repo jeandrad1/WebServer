@@ -1,16 +1,35 @@
 
 #ifndef EXECUTE_HPP
-#define EXECUTE_HPP
+# define EXECUTE_HPP
 
 #include <string>
 #include <netinet/in.h>
 #include <map>
-#include "../builder/ServerConfig.hpp"
 #include <vector>
+#include "../builder/ServerConfig.hpp"
 
 # define BACKLOG 10
 
-int createSocket();
-void setupServer(const std::map<int, std::vector<ServerConfig * > > &servers);
+class Socket
+{
+	private:
+		int socket;
+		Socket();
+	public:
+		Socket(int int_socket);
+		~Socket();
+		
+		void getSocket();
+};
+
+class executer
+{
+	private:
+		std::map< int, int > mapServer;
+    public:
+		int createSocket();
+		void setupServer(const std::map<int, std::vector<ServerConfig * > > &servers);
+		void printMapServer();
+};
 
 #endif

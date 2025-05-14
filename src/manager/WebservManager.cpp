@@ -67,7 +67,11 @@ void WebservManager::run(void)
 
 	impressMapServer(servers);
 
-	setupServer(servers);
+	executer ex;
+
+	ex.setupServer(servers);
+
+	ex.printMapServer();
 }
 
 /***********************************************************************/
