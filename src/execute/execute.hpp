@@ -24,12 +24,11 @@ class Socket
 
 class executer
 {
-	private:
-		std::map< int, int > mapServer;
+    private:
+        std::map<ServerConfig *, std::vector<int> > mapServer;
     public:
-		int createSocket();
-		void setupServer(const std::map<int, std::vector<ServerConfig * > > &servers);
-		void printMapServer();
+        int createSocket();
+        void setupServer(const std::map<int, std::vector<ServerConfig * > > &servers);
+        void printMapServer();
 };
-
 #endif

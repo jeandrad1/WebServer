@@ -55,7 +55,7 @@ void executer::setupServer(const std::map<int, std::vector<ServerConfig * > > &s
 
 		for (std::vector<ServerConfig*>::const_iterator its = serverConfigs.begin(); its != serverConfigs.end(); ++its)
         {
-            mapServer[*its].push_back(server_fd);  // Agregar el FD a ese ServerConfig
+            mapServer[*its].push_back(server_fd);
         }
 	}
 }
@@ -65,7 +65,7 @@ void executer::printMapServer()
 	std::map<ServerConfig *, std::vector<int> >::iterator it = mapServer.begin();
 	for (; it != mapServer.end(); it++)
 	{
-		std::cout << YELLOW << "SERVER SIZE_NUMBER: " << CYAN <<(*it).first->clientMaxBodySize << WHITE"\n" ;
+		std::cout << YELLOW << "SERVER MAXBODYSIZE_NUMBER: " << CYAN <<(*it).first->clientMaxBodySize << WHITE"\n" ;
 		std::vector<int>::iterator itt = (*it).second.begin();
 		for (; itt != (*it).second.end(); itt++)
 		{
