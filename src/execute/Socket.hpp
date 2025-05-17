@@ -1,6 +1,8 @@
 #ifndef SOCKET_HPP
 #define SOCKET_HPP
 
+#include <unistd.h>
+
 class Socket
 {
 	private:
@@ -10,7 +12,9 @@ class Socket
 		Socket(int int_socket);
 		~Socket();
 		
-		void getSocket();
+		int getSocket() const;
+		bool operator<(const Socket& other) const {return getSocket() < other.getSocket();}
+		bool operator==(const Socket& other) const {return getSocket() == other.getSocket();}
 };
 
 #endif

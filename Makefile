@@ -38,7 +38,8 @@ FILES = main \
 		builder/ServerConfig \
 		builder/LocationConfig \
 		utils/utils \
-		execute/LaunchSockets
+		execute/Socket \
+		execute/socketsManager
 
 
 $(shell mkdir -p ./build)
