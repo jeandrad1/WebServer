@@ -70,7 +70,8 @@ void WebservManager::run(void)
 	socketsManager ex;
 
 	ex.setupServer(servers);
-
+	ex.runEpollLoop();        // listen, epoll and serve
+	std::cout << "runEpollLopp done" << std::endl;
 	ex.printMapServer();
 }
 

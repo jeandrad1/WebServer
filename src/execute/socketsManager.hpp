@@ -9,11 +9,15 @@
 #include "Socket.hpp"
 
 #include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <cstring>
 #include <iostream>
+
+#include <sys/epoll.h>
+#include <fcntl.h>
+#include <cstdio>
+#include <errno.h>
 
 class socketsManager
 {
@@ -23,7 +27,12 @@ class socketsManager
         socketsManager();
         int createSocket();
         void setupServer(const std::map<int, std::vector<ServerConfig * > > &servers);
+        void startListening();
+        void registerServersToEpoll(int epoll_fd);
+        void handleConnections(int epoll_fd);
+        void runEpollLoop();
         void printMapServer();
+
 };
 
 #endif
