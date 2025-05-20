@@ -146,19 +146,26 @@ void socketsManager::handleConnections(int epoll_fd)
 			else
 			{
 				char buffer[4096];
-				ssize_t count = read(fd, buffer, sizeof(buffer));
+				ssize_t count = recv(fd, buffer, sizeof(buffer), 0);  // Replaced read with recv
 				if (count <= 0)
 				{
-					if (count < 0) perror("read");
+					if (count < 0) perror("recv");
 					close(fd);
 					epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, NULL);
 				}
 				else
 				{
 					std::cout << "Received (" << fd << "): " << std::string(buffer, count);
-					// test a hardcoded response to see the server is working
-					// tested OK
-					write(fd, "HTTP/1.1 200 OK\r\nContent-Length: 3\r\n\r\nOK\n", 41);
+					
+					// Replace write with send
+					const char *response = "HTTP/1.1 200 OK\r\nContent-Length: 3\r\n\r\nOK\n";
+					ssize_t sent = send(fd, response, 41, 0); // 0 = default flags
+					if (sent == -1)
+					{
+						perror("send");
+						close(fd);
+						epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, NULL);
+					}
 				}
 			}
 		}
