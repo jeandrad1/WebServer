@@ -1,39 +1,15 @@
 #include "socketsManager.hpp"
 
-socketsManager::socketsManager()
-{}
-
-int socketsManager::createSocket()
-{
-	int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
-	int opt = 1;
-
-    if (socket_fd == -1)
-    {
-        std::cout << "Error: Failed to create socket." << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-    if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
-    {
-        std::cout << "Error: Failed to set socket options." << std::endl;
-        close(socket_fd);
-        exit(EXIT_FAILURE);
-    }
-
-    return socket_fd;
-}
+socketsManager::socketsManager(){}
 
 void socketsManager::setupServer(const std::map<int, std::vector<ServerConfig * > > &servers)
 {
 	for (std::map<int, std::vector<ServerConfig * > >::const_iterator it = servers.begin(); it != servers.end(); ++it)
 	{
 		int port = it->first;
-		//const std::vector<ServerConfig *> &serverConfigs = it->second;
 
-		Socket *server_fd = new Socket(createSocket());
+		Socket *server_fd = new Socket(port);
 
-		// Socket binding can be another function
 		struct sockaddr_in server_addr;
 		std::memset(&server_addr, 0, sizeof(server_addr));
 

@@ -25,7 +25,6 @@ class socketsManager
         std::map<Socket *, int > mapServer;
     public:
         socketsManager();
-        int createSocket();
         void setupServer(const std::map<int, std::vector<ServerConfig * > > &servers);
         void startListening();
         void registerServersToEpoll(int epoll_fd);
