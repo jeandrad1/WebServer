@@ -2,11 +2,17 @@
 #define SOCKET_HPP
 
 #include <unistd.h>
+#include <iostream>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <cstring>
+#include <cstdlib>
 
 class Socket
 {
 	private:
-		int socket;
+		int _socket;
 		Socket();
 	public:
 		Socket(int int_socket);
