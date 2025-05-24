@@ -39,7 +39,8 @@ FILES = main \
 		builder/LocationConfig \
 		utils/utils \
 		execute/Socket \
-		execute/socketsManager
+		execute/socketsManager \
+		execute/HttpRequest
 
 
 $(shell mkdir -p ./build)

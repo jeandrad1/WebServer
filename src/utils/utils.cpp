@@ -2,6 +2,28 @@
 #include <iostream>
 #include <vector>
 #include <sstream>
+#include <climits>
+#include <cerrno>
+#include <cstdlib>
+
+bool safe_atoll(const std::string& str, long long& result) {
+    char* end;
+    errno = 0;
+
+    const char* cstr = str.c_str();
+    result = std::strtoll(cstr, &end, 10);
+
+    if (errno == ERANGE)
+        return false;
+    if (end == cstr)
+        return false;
+    while (*end != '\0') {
+        if (!std::isspace(*end))
+            return false;
+        ++end;
+    }
+    return true;
+}
 
 bool	isInteger(std::string value)
 {

@@ -1,0 +1,91 @@
+#include "HttpRequest.hpp"
+
+std::string HttpRequest::getHeader(const std::string& key) const 
+{
+	std::map<std::string, std::string>::const_iterator it = headers.find(key);
+	if (it != headers.end())
+		return it->second;
+	return "";
+}
+
+void HttpRequest::parseRequest(const std::string& raw_request) {
+	std::istringstream stream(raw_request);
+	std::string line;
+
+	std::getline(stream, line);
+	size_t method_end = line.find(' ');
+	size_t path_end = line.find(' ', method_end + 1);
+	method = line.substr(0, method_end);
+	if (method != "GET" && method != "POST" && method != "DELETE")
+		throw std::runtime_error(RED "HTTP method no soported: " YELLOW + method + WHITE);
+	path = line.substr(method_end + 1, path_end - method_end - 1);
+	version = line.substr(path_end + 1);
+
+	while (std::getline(stream, line) && line != "\r") 
+	{
+		size_t colon = line.find(':');
+		if (colon != std::string::npos) 
+		{
+			std::string key = line.substr(0, colon);
+			if (!key.size())
+				throw std::runtime_error(RED "Header error: " YELLOW + line + "\n\t->" + GREEN" KEY EMPTY" + WHITE);
+			std::string value = line.substr(colon + 1);
+			key.erase(key.find_last_not_of(" \r") + 1);
+			value.erase(0, value.find_first_not_of(" "));
+			value.erase(value.find_last_not_of("\r") + 1);
+			headers[key] = value;
+		}
+		else
+			throw std::runtime_error(RED "Header error: " YELLOW + line + "\n\t->" + GREEN" NO SEMICOLON" + WHITE);
+	}
+}
+
+void	HttpRequest::handleContentLength()
+{
+	std::string content_length_str = getHeader("Content-Length");
+	if (!content_length_str.empty()) {
+		safe_atoll(content_length_str, contentLength);
+	}
+}
+
+void	HttpRequest::handleHost()
+{
+	std::string host_str = getHeader("Host");
+}
+
+void	HttpRequest::requestPrinter()
+{
+	std::cout << CYAN"METHOD:\t " << WHITE << method << "\n";
+	std::cout << CYAN"PATH:\t " << WHITE << path << "\n";
+	std::cout << CYAN"VERSION: " << WHITE << version << "\n";
+
+	for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++)
+	{
+		std::cout << (*it).first << YELLOW" -> " << WHITE << (*it).second << "\n";
+	}
+
+
+}
+
+/*#include <fstream>
+
+int main(int argc, char **argv)
+{
+    HttpRequest test;
+    std::ifstream archivo(argv[1]);
+    if (!archivo) {
+        throw std::runtime_error("No se pudo abrir el archivo.");
+    }
+
+    std::stringstream buffer;
+    buffer << archivo.rdbuf();
+	try
+	{
+		test.parseRequest(buffer.str());
+		test.requestPrinter();
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+	}
+}*/
