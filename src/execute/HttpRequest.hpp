@@ -9,7 +9,8 @@
 #include "../utils/colors.hpp"
 #include "../utils/utils.hpp"
 
-class HttpRequest {
+class HttpRequest 
+{
 	private:
 		std::string method;
 		std::string path;
@@ -20,11 +21,24 @@ class HttpRequest {
 		long long contentLength;
 		std::string host;
 
+		//body value
+		std::string body;
+
 	public:
 		void parseRequest(const std::string& raw_request);
 		std::string getHeader(const std::string& key) const;
+
+		void handleMethod();
+		void handlePath();
+		void handleVersion();
+
 		void handleContentLength();
 		void handleHost();
+		void handleBody();
+
+		//getter for almost all private members
+		std::string getStringValue(std::string key);
+
 		void requestPrinter();
 };
 

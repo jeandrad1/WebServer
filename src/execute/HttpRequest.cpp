@@ -8,7 +8,8 @@ std::string HttpRequest::getHeader(const std::string& key) const
 	return "";
 }
 
-void HttpRequest::parseRequest(const std::string& raw_request) {
+void HttpRequest::parseRequest(const std::string& raw_request)
+{
 	std::istringstream stream(raw_request);
 	std::string line;
 
@@ -38,6 +39,7 @@ void HttpRequest::parseRequest(const std::string& raw_request) {
 		else
 			throw std::runtime_error(RED "Header error: " YELLOW + line + "\n\t->" + GREEN" NO SEMICOLON" + WHITE);
 	}
+	handleContentLength();
 }
 
 void	HttpRequest::handleContentLength()
@@ -53,6 +55,56 @@ void	HttpRequest::handleHost()
 	std::string host_str = getHeader("Host");
 }
 
+void HttpRequest::handleBody()
+{
+	if (contentLength > 0 )
+	{
+		if (body.size() < static_cast<size_t>(contentLength))
+			throw std::runtime_error(RED "Body error: BODY SIZE MISMATCH" WHITE);
+		if (body.size() > static_cast<size_t>(contentLength))
+			body = "";
+			std::cout << RED "Body error: BODY SIZE MISMATCH" WHITE << std::endl;
+	}
+}
+
+std::string HttpRequest::getStringValue(std::string key)
+{
+	std::map<std::string, std::string>::iterator it = headers.find(key);
+	if (it != headers.end())
+		return it->second;
+else if (key == "content-Length")
+{
+    if (contentLength > 0) 
+	{
+        std::ostringstream oss;
+        oss << contentLength;
+        return oss.str();
+    } else
+        return "";
+}
+	else if (key == "host")
+	{
+		if (!host.empty())
+			return host;
+		else
+			return "";
+	}
+	else if (key == "body")
+	{
+		if (!body.empty())
+			return body;
+		else
+			return "";
+	}
+	else if (key == "method")
+		return method;
+	else if (key == "path")
+		return path;
+	else if (key == "version")
+		return version;
+	return "";
+}
+
 void	HttpRequest::requestPrinter()
 {
 	std::cout << CYAN"METHOD:\t " << WHITE << method << "\n";
@@ -63,11 +115,10 @@ void	HttpRequest::requestPrinter()
 	{
 		std::cout << (*it).first << YELLOW" -> " << WHITE << (*it).second << "\n";
 	}
-
-
 }
 
-/*#include <fstream>
+/*
+#include <fstream>
 
 int main(int argc, char **argv)
 {
@@ -82,10 +133,13 @@ int main(int argc, char **argv)
 	try
 	{
 		test.parseRequest(buffer.str());
+		test.handleBody();
 		test.requestPrinter();
+		std::cout << "BODY:\n" << test.getStringValue("body") << "\n";
 	}
 	catch(const std::exception& e)
 	{
 		std::cerr << e.what() << '\n';
 	}
-}*/
+}
+*/
