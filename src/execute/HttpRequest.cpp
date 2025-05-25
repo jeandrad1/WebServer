@@ -78,10 +78,10 @@ HeaderField stringToHeaderField(const std::string& key)
 	return HEADER_UNKNOWN;
 }
 
-std::string HttpRequest::getStringValue(std::string key)
+std::string HttpRequest::getStringValue(std::string key) const
 {
 	// First check in headers
-	std::map<std::string, std::string>::iterator it = headers.find(key);
+	std::map<std::string, std::string>::const_iterator it = headers.find(key);
 	if (it != headers.end())
 		return it->second;
 

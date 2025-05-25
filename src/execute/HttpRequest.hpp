@@ -49,8 +49,7 @@ class HttpRequest
 		void handleBody();
 
 		//getter for almost all private members
-		std::string getStringValue(std::string key);
-
+		std::string getStringValue(std::string key) const;
 		void requestPrinter();
 };
 
