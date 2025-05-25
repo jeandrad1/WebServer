@@ -67,42 +67,48 @@ void HttpRequest::handleBody()
 	}
 }
 
+HeaderField stringToHeaderField(const std::string& key)
+{
+	if (key == "method") return HEADER_METHOD;
+	else if (key == "path") return HEADER_PATH;
+	else if (key == "version") return HEADER_VERSION;
+	else if (key == "host") return HEADER_HOST;
+	else if (key == "body") return HEADER_BODY;
+	else if (key == "content-Length") return HEADER_CONTENT_LENGTH;
+	return HEADER_UNKNOWN;
+}
+
 std::string HttpRequest::getStringValue(std::string key)
 {
+	// First check in headers
 	std::map<std::string, std::string>::iterator it = headers.find(key);
 	if (it != headers.end())
 		return it->second;
-else if (key == "content-Length")
-{
-    if (contentLength > 0) 
-	{
-        std::ostringstream oss;
-        oss << contentLength;
-        return oss.str();
-    } else
-        return "";
-}
-	else if (key == "host")
-	{
-		if (!host.empty())
+
+	// Then check internal fields via enum switch
+	switch (stringToHeaderField(key)) {
+		case HEADER_METHOD:
+			return method;
+		case HEADER_PATH:
+			return path;
+		case HEADER_VERSION:
+			return version;
+		case HEADER_HOST:
 			return host;
-		else
-			return "";
-	}
-	else if (key == "body")
-	{
-		if (!body.empty())
+		case HEADER_BODY:
 			return body;
-		else
+		case HEADER_CONTENT_LENGTH:
+			if (contentLength > 0)
+			{
+				std::ostringstream oss;
+				oss << contentLength;
+				return oss.str();
+			} 
+			else
+				return "";
+		default:
 			return "";
 	}
-	else if (key == "method")
-		return method;
-	else if (key == "path")
-		return path;
-	else if (key == "version")
-		return version;
-	return "";
 }
 
 void HttpRequest::generateRequest(const std::string& raw_request)

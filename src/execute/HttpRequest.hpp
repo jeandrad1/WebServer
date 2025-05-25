@@ -9,6 +9,16 @@
 #include "../utils/colors.hpp"
 #include "../utils/utils.hpp"
 
+enum HeaderField {
+	HEADER_METHOD,
+	HEADER_PATH,
+	HEADER_VERSION,
+	HEADER_HOST,
+	HEADER_BODY,
+	HEADER_CONTENT_LENGTH,
+	HEADER_UNKNOWN
+};
+
 class HttpRequest 
 {
 	private:
