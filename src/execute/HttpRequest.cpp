@@ -105,6 +105,15 @@ else if (key == "content-Length")
 	return "";
 }
 
+void HttpRequest::generateRequest(const std::string& raw_request)
+{
+		HttpRequest::parseRequest(raw_request);
+		HttpRequest::handleContentLength();
+		HttpRequest::handleHost();
+		HttpRequest::handleBody();
+}
+
+
 void	HttpRequest::requestPrinter()
 {
 	std::cout << CYAN"METHOD:\t " << WHITE << method << "\n";

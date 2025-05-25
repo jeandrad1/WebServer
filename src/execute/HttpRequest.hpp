@@ -25,6 +25,8 @@ class HttpRequest
 		std::string body;
 
 	public:
+		void generateRequest(const std::string& raw_request);
+
 		void parseRequest(const std::string& raw_request);
 		std::string getHeader(const std::string& key) const;
 
