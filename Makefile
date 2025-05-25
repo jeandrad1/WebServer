@@ -40,7 +40,9 @@ FILES = main \
 		utils/utils \
 		execute/Socket \
 		execute/socketsManager \
-		execute/HttpRequest
+		execute/HttpRequest \
+		execute/HttpResponse \
+		execute/HttpRequestRouter \
 
 
 $(shell mkdir -p ./build)
