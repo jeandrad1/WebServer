@@ -5,19 +5,7 @@ Socket::Socket() {};
 
 Socket::Socket(int socket_fd)
 {
-    _socket = socket_fd;
-    _socket = socket(AF_INET, SOCK_STREAM, 0);
-    int opt = 1;
-    if (setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
-	{
-		std::cout<<"setsockopt"<<std::endl;
-		close(_socket);
-		_socket = -1; // Set to -1 to indicate an error
-	}
-	else
-	{
-		fcntl(_socket, F_SETFL, O_NONBLOCK); // Set the socket to non-blocking mode
-	}
+	_socket = socket_fd;
 }
 
 Socket::~Socket()
