@@ -2,28 +2,15 @@
 
 Socket::Socket() {};
 
-Socket::Socket(int int_socket)
+Socket::Socket(int socket_fd)
 {
-	_socket = socket(AF_INET, SOCK_STREAM, 0);
-	int opt = 1;
-
-    if (_socket == -1)
-    {
-        std::cout << "Error: Failed to create socket." << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-    if (setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
-    {
-        std::cout << "Error: Failed to set socket options." << std::endl;
-        close(_socket);
-        exit(EXIT_FAILURE);
-    }
+	_socket = socket_fd;
 }
 
 Socket::~Socket()
 {
-	close(_socket);
+    if (_socket > 0)
+	    close(_socket);
 }
 
 int Socket::getSocket() const

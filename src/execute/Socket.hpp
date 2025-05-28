@@ -15,7 +15,7 @@ class Socket
 		int _socket;
 		Socket();
 	public:
-		Socket(int int_socket);
+		Socket(int socket_fd);
 		~Socket();
 		
 		int getSocket() const;
