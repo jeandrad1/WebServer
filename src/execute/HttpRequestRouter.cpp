@@ -4,7 +4,7 @@
 
 HttpResponse HttpRequestRouter::handleRequest(const HttpRequest& req)
 {
-	std::string method = req.getStringValue("method");
+	std::string method = req.getMethod();
 
 	if (method == "GET")         return handleGet(req);
 	else if (method == "POST")   return handlePost(req);
@@ -25,7 +25,7 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req) {
 HttpResponse HttpRequestRouter::handlePost(const HttpRequest& req) {
     HttpResponse res;
     res.setStatus(200, "OK");
-    std::string body = req.getStringValue("body");
+    std::string body = req.getBody();
     res.setBody("POST handled with body: " + body);
     std::ostringstream oss;
     oss << res.getBody().size();

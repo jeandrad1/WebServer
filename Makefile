@@ -43,6 +43,7 @@ FILES = main \
 		execute/HttpRequest \
 		execute/HttpResponse \
 		execute/HttpRequestRouter \
+		execute/HttpRequestManager \
 
 
 $(shell mkdir -p ./build)

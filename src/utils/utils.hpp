@@ -1,7 +1,15 @@
 #ifndef UTILS_HPP
 # define UTILS_HPP
 
-# include <string>
+#include <string>
+#include <iostream>
+#include <vector>
+#include <sstream>
+#include <climits>
+#include <cerrno>
+#include <cstdlib>
+#include <string>
+#include <algorithm>
 
 bool		isInteger(std::string value);
 bool		isURI(const std::string &path);
@@ -14,5 +22,6 @@ std::string	trim(const std::string &str);
 int			countWhitespace(const std::string &str);
 bool		checkFilename(const std::string &word);
 bool		safe_atoll(const std::string& str, long long& result);
+std::string to_lowercase(const std::string& input);
 
 #endif

@@ -1,10 +1,4 @@
-#include <string>
-#include <iostream>
-#include <vector>
-#include <sstream>
-#include <climits>
-#include <cerrno>
-#include <cstdlib>
+#include "utils.hpp"
 
 bool safe_atoll(const std::string& str, long long& result) {
     char* end;
@@ -132,13 +126,23 @@ std::vector<std::string> split_str(const std::string &str, const std::string &de
     return tokens;
 }
 
+static char to_lower_char(char c) {
+    return static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+}
+
+std::string to_lowercase(const std::string& input) {
+    std::string result = input;
+    std::transform(result.begin(), result.end(), result.begin(), to_lower_char);
+    return result;
+}
+
 //Printers
-#include <iostream>
+/*#include <iostream>
 #include "../builder/HttpBuilder.hpp"
 #include "../builder/ServerConfig.hpp"
 #include "../builder/LocationConfig.hpp"
 
-/*void printLocation(LocationConfig *location, int indent = 0)
+void printLocation(LocationConfig *location, int indent = 0)
 {
     std::string spaces(indent * 2, ' ');
     std::cout << spaces << "Location:" << std::endl;
@@ -198,7 +202,7 @@ void printHttpConfig(HttpConfig *httpConfig, int indent = 0)
     }
 }
 */
-void printBuiltConfigs(const std::vector<IConfig *> &builtConfigs)
+/*void printBuiltConfigs(const std::vector<IConfig *> &builtConfigs)
 {
     std::vector<IConfig * >::const_iterator ite = builtConfigs.end();
     for (std::vector<IConfig *>::const_iterator it = builtConfigs.begin(); it != ite; ++it) {
@@ -215,4 +219,4 @@ void printBuiltConfigs(const std::vector<IConfig *> &builtConfigs)
             std::cerr << "Error: Unknown config type\n\n";
         }
     }
-}
+}*/

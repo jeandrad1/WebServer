@@ -19,6 +19,8 @@
 #include <cstdio>
 #include <errno.h>
 
+#include "HttpRequestManager.hpp"
+
 class socketsManager
 {
     private:
