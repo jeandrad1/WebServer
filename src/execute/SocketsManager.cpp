@@ -1,4 +1,5 @@
-#include "SocketsManager.hpp"
+#include "socketsManager.hpp"
+
 
 SocketsManager::SocketsManager(){}
 
@@ -80,6 +81,7 @@ void SocketsManager::handleConnections(int epoll_fd)
 {
 	const int MAX_EVENTS = 1500;
 	struct epoll_event events[MAX_EVENTS];
+	std::map<int, std::string> buffs;
 
 	while (true)
 	{
@@ -142,7 +144,44 @@ void SocketsManager::handleConnections(int epoll_fd)
 				}
 				else
 				{
-					std::cout << "Received (" << fd << "): " << std::string(buffer, count);
+					buffs[fd].append(buffer, count);
+
+					size_t header_end = buffs[fd].find("\r\n\r\n");
+					if (header_end != std::string::npos)
+					{
+						try
+						{
+							HttpRequestManager reqMan;
+							reqMan.parseRequest(buffs[fd]);
+
+							HttpRequest *request = reqMan.builderHeadersRequest();
+							long long content_length = request->getContentLenght();
+
+							size_t received_body_size = buffs[fd].size() - (header_end + 4);
+
+							if (received_body_size < content_length)
+							{
+								delete request;
+								continue;
+							}
+							else
+							{
+								std::string full_request = buffs[fd].substr(0, header_end + 4 + content_length);
+								reqMan.parseRequest(full_request);
+
+								reqMan.requestPrinter();
+
+								request->HttpRequestPrinter();
+								delete request; //request manage temporal
+							}
+						}
+						catch(const std::exception& e)
+						{
+							 std::cerr << RED "REQUEST PARSER ERROR: " << e.what() << WHITE "\n";;
+						}
+						
+					}
+					/*std::cout << "Received (" << fd << "): " << std::string(buffer, count);
 					
 					// Replace write with send
 					const char *response = "HTTP/1.1 200 OK\r\nContent-Length: 3\r\n\r\nOK\n";
@@ -151,8 +190,7 @@ void SocketsManager::handleConnections(int epoll_fd)
 					{
 						perror("send");
 						close(fd);
-						epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, NULL);
-					}
+						epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, NULL);*/
 				}
 			}
 		}

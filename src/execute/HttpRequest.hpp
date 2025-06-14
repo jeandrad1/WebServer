@@ -6,51 +6,47 @@
 #include <sstream>
 #include <cstdlib>
 #include <iostream>
+#include <vector>
 #include "../utils/colors.hpp"
 #include "../utils/utils.hpp"
-
-enum HeaderField {
-	HEADER_METHOD,
-	HEADER_PATH,
-	HEADER_VERSION,
-	HEADER_HOST,
-	HEADER_BODY,
-	HEADER_CONTENT_LENGTH,
-	HEADER_UNKNOWN
-};
 
 class HttpRequest 
 {
 	private:
+
 		std::string method;
 		std::string path;
 		std::string version;
-		std::map<std::string, std::string> headers;
 
-		//headers value
-		long long contentLength;
+		long long	contentLength;
+		std::string contentType;
 		std::string host;
+		bool		connection;
 
-		//body value
 		std::string body;
 
+		HttpRequest();
+	
 	public:
-		void generateRequest(const std::string& raw_request);
 
-		void parseRequest(const std::string& raw_request);
-		std::string getHeader(const std::string& key) const;
+		HttpRequest(std::string src_method, std::string src_path, std::string src_version);
+		~HttpRequest();
 
-		void handleMethod();
-		void handlePath();
-		void handleVersion();
+		void handleContentLength(std::string content_length_str);
+		void handleContentType(std::string content_type_str);
+		void handleHost(std::string host_str);
+		void handleConnection(std::string connection_str);
 
-		void handleContentLength();
-		void handleHost();
-		void handleBody();
+		//getters
+		std::string getMethod() const;
+		std::string getPath() const;
+		std::string getVersion() const;
+		long long	getContentLenght();
+		std::string getBody() const;
 
-		//getter for almost all private members
-		std::string getStringValue(std::string key) const;
-		void requestPrinter();
+		//printer
+		void HttpRequestPrinter();
+
 };
 
 #endif
