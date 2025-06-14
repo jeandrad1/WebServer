@@ -39,7 +39,7 @@ FILES = main \
 		builder/LocationConfig \
 		utils/utils \
 		execute/Socket \
-		execute/SocketsManager \
+		execute/socketsManager \
 		execute/HttpRequest \
 		execute/HttpResponse \
 		execute/HttpRequestRouter \

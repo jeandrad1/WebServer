@@ -4,7 +4,7 @@
 #include <fstream>
 #include "../composite/ServerBlock.hpp"
 #include "../factory/StrategyFactory.hpp"
-#include "../execute/SocketsManager.hpp"
+#include "../execute/socketsManager.hpp"
 void					printBuiltConfigs(const std::vector<IConfig *> &builtConfigs);
 std::vector<IConfig *>	createConfigClasses(AConfigBlock *config_ptr);
 
@@ -67,9 +67,9 @@ void WebservManager::run(void)
 
 	impressMapServer(servers);
 
-	SocketsManager ex;
+	socketsManager ex;
 
-	ex.createSockets(servers);
+	ex.setupServer(servers);
 	ex.runEpollLoop();        // listen, epoll and serve
 	std::cout << "runEpollLopp done" << std::endl;
 	ex.printMapServer();
