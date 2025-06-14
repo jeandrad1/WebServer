@@ -25,7 +25,10 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req) {
 HttpResponse HttpRequestRouter::handlePost(const HttpRequest& req) {
     HttpResponse res;
     res.setStatus(200, "OK");
-    std::string body = req.getBody();
+    //Temporal
+    std::vector<unsigned char> body_buffer = req.getBody();
+    std::string body(body_buffer.begin(), body_buffer.end());
+    //Temporal
     res.setBody("POST handled with body: " + body);
     std::ostringstream oss;
     oss << res.getBody().size();

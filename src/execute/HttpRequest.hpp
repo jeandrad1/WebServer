@@ -23,7 +23,7 @@ class HttpRequest
 		std::string host;
 		bool		connection;
 
-		std::string body;
+		std::vector<unsigned char> body;
 
 		HttpRequest();
 	
@@ -37,12 +37,14 @@ class HttpRequest
 		void handleHost(std::string host_str);
 		void handleConnection(std::string connection_str);
 
+		void handleBody(std::string body);
+
 		//getters
 		std::string getMethod() const;
 		std::string getPath() const;
 		std::string getVersion() const;
 		long long	getContentLenght();
-		std::string getBody() const;
+		std::vector<unsigned char> getBody() const;
 
 		//printer
 		void HttpRequestPrinter();

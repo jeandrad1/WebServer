@@ -70,6 +70,14 @@ void HttpRequest::handleConnection(std::string connection_str)
 		throw std::runtime_error(RED "Header error: " YELLOW "VALUE NOT CORRECT TO CONNECTION" WHITE);
 }
 
+void HttpRequest::handleBody(std::string str_body)
+{
+	if (!str_body.empty())
+		return;
+	for(size_t i = 0; i < str_body.size(); i++)
+		body.push_back(str_body[i]);
+}
+
 /////////////////////////////////////////////////////////
 /////////////////////GETTERS/////////////////////////////
 /////////////////////////////////////////////////////////
@@ -94,7 +102,7 @@ long long HttpRequest::getContentLenght()
 	return(contentLength);
 }
 
-std::string HttpRequest::getBody() const
+std::vector<unsigned char> HttpRequest::getBody() const
 {
 	return(body);
 }
@@ -116,4 +124,15 @@ void HttpRequest::HttpRequestPrinter()
 		std::cout << "OPEN\n";
 	else if (connection == false)
 		std::cout << "CLOSE\n";
+	if (!body.empty())
+		std::cout << "\nNO BODY\n";
+	else
+	{
+		std::cout << "\nBODY:\n";
+		std::vector<unsigned char>::iterator it = body.begin();
+		for(std::vector<unsigned char>::iterator ite = body.end(); it != ite; it++)
+		{
+			std::cout << (*it) << "\n";
+		}
+	}
 }
