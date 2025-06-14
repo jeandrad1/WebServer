@@ -79,5 +79,7 @@ HttpRequest *HttpRequestManager::builderHeadersRequest()
 	request->handleHost(getHeader("host"));
 	request->handleConnection(getHeader("connection"));
 
+	request->handleBody(body);
+
 	return(request);
 }
