@@ -26,17 +26,16 @@ class SocketsManager
 {
 	private:
 
-		std::map<Socket *, int > mapServer;
+		std::map<Socket *, int> serverSockets;
 
 	public:
 
 		SocketsManager();
 		void	createSockets(const std::map<int, std::vector<ServerConfig * > > &servers);
 		int		createListeningSocket(int port);
-		void	registerServersToEpoll(EpollManager &epollManager);
-		void	handleConnections(EpollManager &epollManager);
-		void	runEpollLoop();
-		void	printMapServer();
+		void	printServerSockets();
+
+		std::map<Socket *, int> getServerSockets(void);
 };
 
 #endif
