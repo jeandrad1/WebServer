@@ -147,7 +147,7 @@ void WebservManager::impressMapServer(std::map<int, std::vector<ServerConfig *> 
 		std::cout << YELLOW << (*it).first << WHITE << ":\n";
 		for(std::vector<ServerConfig *>::iterator its = (*it).second.begin(); its != (*it).second.end(); its++)
 		{
-			std::cout << GREEN << " CLientMaxBodySize_Server -> [" << BLUE << (*its)->clientMaxBodySize << GREEN "]\n";
+			std::cout << GREEN << " CLientMaxBodySize_Server -> [" << BLUE << (*its)->clientMaxBodySize << GREEN "]\n" RESET;
 		}
 	}
 }
