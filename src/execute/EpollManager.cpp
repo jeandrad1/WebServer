@@ -9,8 +9,7 @@ EpollManager::EpollManager(void)
     this->_epollFd = epoll_create1(0);
 	if (this->_epollFd == -1)
 	{
-		perror("epoll_create1");
-		exit(EXIT_FAILURE);
+		throw std::runtime_error("Failed to create epoll instance");
 	}
 }
 
@@ -35,8 +34,7 @@ void EpollManager::addFd(int serverFd, uint32_t events)
 
 	if (epoll_ctl(this->_epollFd, EPOLL_CTL_ADD, serverFd, &ev) == -1)
 	{
-		std::cout << "Error: epoll_ctl at addFd.\n";
-		exit(EXIT_FAILURE);
+		throw std::runtime_error("epoll_ctl(ADD) failed");
 	}
 }
 
@@ -48,8 +46,7 @@ void EpollManager::modidyFd(int serverFd, uint32_t events)
 
 	if (epoll_ctl(this->_epollFd, EPOLL_CTL_MOD, serverFd, &ev) == -1)
 	{
-		std::cout << "Error: epoll_ctl at modifyFd.\n";
-		exit(EXIT_FAILURE);
+		throw std::runtime_error("epoll_ctl(MOD) failed");
 	}
 }
 
@@ -57,8 +54,7 @@ void EpollManager::removeFd(int serverFd)
 {
 	if (epoll_ctl(this->_epollFd, EPOLL_CTL_DEL, serverFd, NULL) == -1)
 	{
-		std::cout << "Error: epoll_ctl at removeFd.\n";
-		exit(EXIT_FAILURE);
+		throw std::runtime_error("epoll_ctl failed at removeFd");
 	}
 }
 

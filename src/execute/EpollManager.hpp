@@ -5,6 +5,7 @@
 # include <sys/epoll.h>
 # include <unistd.h>
 # include <iostream>
+# include <stdio.h>
 
 class EpollManager {
 
