@@ -44,6 +44,7 @@ FILES = main \
 		execute/HttpResponse \
 		execute/HttpRequestRouter \
 		execute/HttpRequestManager \
+		execute/EpollManager \
 
 
 $(shell mkdir -p ./build)
