@@ -67,12 +67,14 @@ void WebservManager::run(void)
 
 	impressMapServer(servers);
 
-	SocketsManager ex;
+	SocketsManager sockets;
+	EpollManager epoll;
+	sockets.createSockets(servers);
+	EventLoop loop(epoll, sockets.getServerSockets());
 
-	ex.createSockets(servers);
-	ex.runEpollLoop();        // listen, epoll and serve
+	loop.runEventLoop();        // listen, epoll and serve
 	std::cout << "runEpollLopp done" << std::endl;
-	ex.printMapServer();
+	sockets.printServerSockets();
 }
 
 /***********************************************************************/

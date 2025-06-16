@@ -7,6 +7,7 @@
 #include <fstream>
 # include "../composite/AConfigBlock.hpp"
 # include "../builder/ServerConfig.hpp"
+# include "../execute/EventLoop.hpp"
 
 class WebservManager {
 
