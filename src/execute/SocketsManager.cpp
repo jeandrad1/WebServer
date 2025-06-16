@@ -60,23 +60,24 @@ int SocketsManager::createListeningSocket(int port)
 	return (socket_fd);
 }
 
-void SocketsManager::registerServersToEpoll(int epoll_fd)
+void SocketsManager::registerServersToEpoll(EpollManager &epollManager)
 {
 	for (std::map<Socket *, int>::iterator it = mapServer.begin(); it != mapServer.end(); ++it)
 	{
-		struct epoll_event ev;
-		ev.events = EPOLLIN;
-		ev.data.fd = it->first->getSocket();
+		int socketFd = it->first->getSocket();
 
-		if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, it->first->getSocket(), &ev) == -1)
+		try
 		{
-			std::cout << "Error: epoll_ctl , listen socket failed" <<std::endl;
-			exit(EXIT_FAILURE);
+			epollManager.addFd(socketFd, EPOLLIN);
+		}
+		catch (const std::exception &e)
+		{
+			std::cerr << "Failed to add socketFd " << socketFd << " to epoll: " << e.what() << std::endl;
 		}
 	}
 }
 
-void SocketsManager::handleConnections(int epoll_fd)
+void SocketsManager::handleConnections(EpollManager &epollManager)
 {
 	const int MAX_EVENTS = 1500;
 	struct epoll_event events[MAX_EVENTS];
@@ -84,13 +85,13 @@ void SocketsManager::handleConnections(int epoll_fd)
 
 	while (true)
 	{
-		int n_ready = epoll_wait(epoll_fd, events, MAX_EVENTS, -1);
+		
+		int n_ready = epollManager.waitForEvents(MAX_EVENTS, -1, events);
 		if (n_ready == -1)
 		{
 			perror("epoll_wait");
 			continue;
 		}
-
 		for (int i = 0; i < n_ready; ++i)
 		{
 			int fd = events[i].data.fd;
@@ -120,12 +121,13 @@ void SocketsManager::handleConnections(int epoll_fd)
 				// Set non-blocking
 				fcntl(client_fd, F_SETFL, fcntl(client_fd, F_GETFL, 0) | O_NONBLOCK);
 
-				struct epoll_event client_ev;
-				client_ev.events = EPOLLIN | EPOLLET; // Edge-triggered
-				client_ev.data.fd = client_fd;
-				if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &client_ev) == -1)
+				try
 				{
-					perror("epoll_ctl: client_fd");
+					epollManager.addFd(client_fd, EPOLLIN | EPOLLET);
+				}
+				catch (const std::exception &e)
+				{
+					std::cerr << "Failed to add client fd to epoll: " << e.what() << std::endl;
 					close(client_fd);
 					continue;
 				}
@@ -139,7 +141,14 @@ void SocketsManager::handleConnections(int epoll_fd)
 				{
 					if (count < 0) perror("recv");
 					close(fd);
-					epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, NULL);
+					try
+					{
+						epollManager.removeFd(fd);
+					}
+					catch (const std::exception &e)
+					{
+						std::cerr << "Failed to add client fd to epoll: " << e.what() << std::endl;
+					}
 				}
 				else
 				{
@@ -198,15 +207,10 @@ void SocketsManager::handleConnections(int epoll_fd)
 
 void SocketsManager::runEpollLoop()
 {
-	int epoll_fd = epoll_create1(0);
-	if (epoll_fd == -1)
-	{
-		perror("epoll_create1");
-		exit(EXIT_FAILURE);
-	}
+	EpollManager epollManager;
 
-	registerServersToEpoll(epoll_fd);
-	handleConnections(epoll_fd);
+	registerServersToEpoll(epollManager);
+	handleConnections(epollManager);
 }
 
 void SocketsManager::printMapServer()

@@ -20,6 +20,7 @@
 #include <errno.h>
 
 #include "HttpRequestManager.hpp"
+#include "EpollManager.hpp"
 
 class SocketsManager
 {
@@ -32,8 +33,8 @@ class SocketsManager
 		SocketsManager();
 		void	createSockets(const std::map<int, std::vector<ServerConfig * > > &servers);
 		int		createListeningSocket(int port);
-		void	registerServersToEpoll(int epoll_fd);
-		void	handleConnections(int epoll_fd);
+		void	registerServersToEpoll(EpollManager &epollManager);
+		void	handleConnections(EpollManager &epollManager);
 		void	runEpollLoop();
 		void	printMapServer();
 };
