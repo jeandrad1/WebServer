@@ -1,6 +1,14 @@
 #include "SocketsManager.hpp"
 
+/***********************************************************************/
+/*                     Constructors & Destructor                       */
+/***********************************************************************/
+
 SocketsManager::SocketsManager(){}
+
+/***********************************************************************/
+/*                          Public Functions                           */
+/***********************************************************************/
 
 void SocketsManager::createSockets(const std::map<int, std::vector<ServerConfig * > > &servers)
 {
@@ -70,6 +78,10 @@ void SocketsManager::printServerSockets()
 		std::cout << CYAN" -> " << GREEN << (*it).second << "\n" RESET; 
 	}
 }
+
+/***********************************************************************/
+/*                          Getters & Setters                          */
+/***********************************************************************/
 
 std::map<Socket *, int> SocketsManager::getServerSockets()
 {
