@@ -157,7 +157,7 @@ void EventLoop::handleHttpRequest(int clientFd, size_t header_end)
 	{
 		HttpRequestManager reqMan;
 
-		reqMan.parseRequest(_buffers[clientFd]);
+		reqMan.parseHttpHeader(_buffers[clientFd]);
 		HttpRequest *request = reqMan.buildHttpRequest();
 
 		long long content_length = request->getContentLenght();
@@ -169,7 +169,7 @@ void EventLoop::handleHttpRequest(int clientFd, size_t header_end)
 			return ;
 		}
 		std::string full_request = _buffers[clientFd].substr(0, header_end + 4 + content_length);
-		reqMan.parseRequest(full_request);
+		reqMan.parseHttpRequest(full_request);
 
 		reqMan.requestPrinter();
 
