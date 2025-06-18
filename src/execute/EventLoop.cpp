@@ -125,7 +125,7 @@ void EventLoop::handleClientData(int clientFd)
 		}
 		catch (const std::exception &e)
 		{
-			std::cerr << "Failed to add client fd to epoll: " << e.what() << std::endl;
+			std::cerr << "Failed to remove client fd from epoll: " << e.what() << std::endl;
 		}
 	}
 	else
@@ -156,11 +156,11 @@ void EventLoop::handleHttpRequest(int clientFd, size_t header_end)
 	try
 	{
 		HttpRequestManager reqMan;
+
 		reqMan.parseRequest(_buffers[clientFd]);
+		HttpRequest *request = reqMan.buildHttpRequest();
 
-		HttpRequest *request = reqMan.builderHeadersRequest();
 		long long content_length = request->getContentLenght();
-
 		size_t received_body_size = _buffers[clientFd].size() - (header_end + 4);
 
 		if (received_body_size < content_length)
@@ -168,16 +168,13 @@ void EventLoop::handleHttpRequest(int clientFd, size_t header_end)
 			delete request;
 			return ;
 		}
-		else
-		{
-			std::string full_request = _buffers[clientFd].substr(0, header_end + 4 + content_length);
-			reqMan.parseRequest(full_request);
+		std::string full_request = _buffers[clientFd].substr(0, header_end + 4 + content_length);
+		reqMan.parseRequest(full_request);
 
-			reqMan.requestPrinter();
+		reqMan.requestPrinter();
 
-			request->HttpRequestPrinter();
-			delete request; //request manage temporal
-		}
+		request->HttpRequestPrinter();
+		delete request; //request manage temporal
 	}
 	catch(const std::exception& e)
 	{
