@@ -11,11 +11,18 @@ class HttpRequestManager
 		std::string version;
 		std::map<std::string, std::string> headers;
         std::string body;
+
+        void parseRequestLine(const std::string &line);
+        void parseHeaders(std::istream &stream);
+        void parseBody(std::istream &stream);
+
     public:
         std::string getHeader(const std::string& key) const;
-        void parseRequest(const std::string& raw_request);
 
-        HttpRequest *builderHeadersRequest();
+        void parseHttpRequest(const std::string& raw_request);
+        void parseHttpHeader(const std::string& raw_header);
+
+        HttpRequest *buildHttpRequest();
 
         void requestPrinter();
 };

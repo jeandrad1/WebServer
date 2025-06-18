@@ -13,37 +13,79 @@ std::string HttpRequestManager::getHeader(const std::string& key) const
 	return "";
 }
 
-void HttpRequestManager::parseRequest(const std::string& raw_request)
+void	HttpRequestManager::parseHttpHeader(const std::string& raw_header)
+{
+	std::istringstream stream(raw_header);
+	std::string line;
+
+	std::getline(stream, line);
+
+	parseHeaders(stream);
+}
+
+void HttpRequestManager::parseHttpRequest(const std::string& raw_request)
 {
 	std::istringstream stream(raw_request);
 	std::string line;
 
 	std::getline(stream, line);
+	
+	parseRequestLine(line);
+
+	parseHeaders(stream);
+
+	parseBody(stream);
+}
+
+void HttpRequestManager::parseRequestLine(const std::string &line)
+{
 	size_t method_end = line.find(' ');
+    if (method_end == std::string::npos)
+        throw std::runtime_error("Malformed request line: missing method");
+
 	size_t path_end = line.find(' ', method_end + 1);
+    if (path_end == std::string::npos)
+        throw std::runtime_error("Malformed request line: missing path");
+
 	method = line.substr(0, method_end);
 	if (method != "GET" && method != "POST" && method != "DELETE")
 		throw std::runtime_error(RED "HTTP method no soported: " YELLOW + method + WHITE);
+
 	path = line.substr(method_end + 1, path_end - method_end - 1);
 	version = line.substr(path_end + 1);
+
+	if (version.empty() || version.compare(0, 5, "HTTP/") != 0)
+        throw std::runtime_error("Invalid HTTP version: " + version);
+}
+
+void	HttpRequestManager::parseHeaders(std::istream &stream)
+{
+	std::string line;
 
 	while (std::getline(stream, line) && line != "\r") 
 	{
 		size_t colon = line.find(':');
-		if (colon != std::string::npos) 
+		if (colon == std::string::npos) 
 		{
-			std::string key = line.substr(0, colon);
-			if (!key.size())
-				throw std::runtime_error(RED "Header error: " YELLOW + line + "\n\t->" + GREEN" KEY EMPTY" + WHITE);
-			std::string value = line.substr(colon + 1);
-			key.erase(key.find_last_not_of(" \r") + 1);
-			value.erase(0, value.find_first_not_of(" "));
-			value.erase(value.find_last_not_of("\r") + 1);
-			headers[to_lowercase(key)] = value;
-		}
-		else
 			throw std::runtime_error(RED "Header error: " YELLOW + line + "\n\t->" + GREEN" NO SEMICOLON" + WHITE);
+		}
+
+		std::string key = line.substr(0, colon);
+		std::string value = line.substr(colon + 1);
+
+		key.erase(key.find_last_not_of(" \r") + 1);
+		value.erase(0, value.find_first_not_of(" "));
+		value.erase(value.find_last_not_of("\r") + 1);
+
+		if (!key.size())
+			throw std::runtime_error(RED "Header error: " YELLOW + line + "\n\t->" + GREEN" KEY EMPTY" + WHITE);
+
+		headers[to_lowercase(key)] = value;
 	}
+}
+
+void	HttpRequestManager::parseBody(std::istream &stream)
+{
 	if (stream.peek() != EOF)
 	{
 		std::ostringstream body_stream;
@@ -71,7 +113,7 @@ void	HttpRequestManager::requestPrinter()
 		std::cout << CYAN"NO BODY\n" WHITE;
 }
 
-HttpRequest *HttpRequestManager::builderHeadersRequest()
+HttpRequest *HttpRequestManager::buildHttpRequest()
 {
 	HttpRequest *request = new HttpRequest(method, path, version);
 	request->handleContentLength(getHeader("content-length"));
