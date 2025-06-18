@@ -6,7 +6,7 @@
 
 EpollManager::EpollManager(void)
 {
-    this->_epollFd = epoll_create1(0);
+    this->_epollFd = epoll_create(0);
 	if (this->_epollFd == -1)
 	{
 		throw std::runtime_error("Failed to create epoll instance");
