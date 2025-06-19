@@ -16,7 +16,7 @@ class EventLoop {
 		bool isServerSocket(int fd);
 		void handleNewConnection(int serverFd);
 		void handleClientData(int clientFd);
-		void handleHttpRequest(int clientFd, size_t header_end);
+		HttpRequest *handleHttpRequest(int clientFd, size_t header_end);
 
 	public:
 

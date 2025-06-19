@@ -111,6 +111,7 @@ void EventLoop::handleNewConnection(int serverFd)
 void EventLoop::handleClientData(int clientFd)
 {
 	char buffer[4096];
+	HttpRequest *request = NULL;
 	ssize_t count = recv(clientFd, buffer, sizeof(buffer), 0);  // Replaced read with recv
 	if (count <= 0)
 	{
@@ -135,7 +136,12 @@ void EventLoop::handleClientData(int clientFd)
 		size_t header_end = _buffers[clientFd].find("\r\n\r\n");
 		if (header_end != std::string::npos)
 		{
-			handleHttpRequest(clientFd, header_end);				
+			request = handleHttpRequest(clientFd, header_end);				
+		}
+		if (request != NULL)
+		{
+			std::cout <<RED<< "Received HTTP request from fd " << clientFd <<RESET<< ":\n";
+			request->HttpRequestPrinter();
 		}
 		/*std::cout << "Received (" << fd << "): " << std::string(buffer, count);
 
@@ -151,7 +157,7 @@ void EventLoop::handleClientData(int clientFd)
 	}
 }
 
-void EventLoop::handleHttpRequest(int clientFd, size_t header_end)
+HttpRequest *EventLoop::handleHttpRequest(int clientFd, size_t header_end)
 {
 	try
 	{
@@ -166,20 +172,20 @@ void EventLoop::handleHttpRequest(int clientFd, size_t header_end)
 		if (received_body_size < content_length)
 		{
 			delete request;
-			return ;
+			return NULL;
 		}
 		std::string full_request = _buffers[clientFd].substr(0, header_end + 4 + content_length);
 		reqMan.parseHttpRequest(full_request);
 
 		reqMan.requestPrinter();
 
-		request->HttpRequestPrinter();
-		delete request; //request manage temporal
+		return request;
 	}
 	catch(const std::exception& e)
 	{
 		std::cerr << RED "REQUEST PARSER ERROR: " << e.what() << WHITE "\n";;
-	}	
+	}
+	return NULL;
 }
 
 /***********************************************************************/
