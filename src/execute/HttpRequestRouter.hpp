@@ -5,16 +5,19 @@
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
 #include <string>
+# include "EpollManager.hpp"
+# include "SocketsManager.hpp"
+
 
 class HttpRequestRouter : public IHttpRequestHandler
 {
 	public:
-		HttpResponse handleRequest(const HttpRequest& req);
+		HttpResponse handleRequest(const HttpRequest& req, const ServerConfig& server);
 
 	private:
-		HttpResponse handleGet(const HttpRequest& req);
-		HttpResponse handlePost(const HttpRequest& req);
-		HttpResponse handleDelete(const HttpRequest& req);
+		HttpResponse handleGet(const HttpRequest& req, const ServerConfig& server);
+		HttpResponse handlePost(const HttpRequest& req, const ServerConfig& server);
+		HttpResponse handleDelete(const HttpRequest& req, const ServerConfig& server);
 		HttpResponse methodNotAllowed();
 };
 

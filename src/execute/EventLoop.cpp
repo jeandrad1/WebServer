@@ -142,6 +142,7 @@ void EventLoop::handleClientData(int clientFd)
 		{
 			std::cout <<RED<< "Received HTTP request from fd " << clientFd <<RESET<< ":\n";
 			request->HttpRequestPrinter();
+			
 		}
 		/*std::cout << "Received (" << fd << "): " << std::string(buffer, count);
 

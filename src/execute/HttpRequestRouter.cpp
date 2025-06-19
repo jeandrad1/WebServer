@@ -2,17 +2,18 @@
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
 
-HttpResponse HttpRequestRouter::handleRequest(const HttpRequest& req)
+HttpResponse HttpRequestRouter::handleRequest(const HttpRequest& req, const ServerConfig& server)
 {
 	std::string method = req.getMethod();
 
-	if (method == "GET")         return handleGet(req);
-	else if (method == "POST")   return handlePost(req);
-	else if (method == "DELETE") return handleDelete(req);
+	if (method == "GET")         return handleGet(req, server);
+	else if (method == "POST")   return handlePost(req, server);
+	else if (method == "DELETE") return handleDelete(req, server);
 	else                         return methodNotAllowed();
 }
 
-HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req) {
+HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerConfig& server)
+{
     HttpResponse res;
     res.setStatus(200, "OK");
     res.setBody("GET handled\n");
@@ -22,7 +23,8 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req) {
     return res;
 }
 
-HttpResponse HttpRequestRouter::handlePost(const HttpRequest& req) {
+HttpResponse HttpRequestRouter::handlePost(const HttpRequest& req, const ServerConfig& server)
+{
     HttpResponse res;
     res.setStatus(200, "OK");
     //Temporal
@@ -36,7 +38,8 @@ HttpResponse HttpRequestRouter::handlePost(const HttpRequest& req) {
     return res;
 }
 
-HttpResponse HttpRequestRouter::handleDelete(const HttpRequest& req) {
+HttpResponse HttpRequestRouter::handleDelete(const HttpRequest& req, const ServerConfig& server)
+{
     HttpResponse res;
     res.setStatus(200, "OK");
     res.setBody("DELETE handled\n");
@@ -46,7 +49,8 @@ HttpResponse HttpRequestRouter::handleDelete(const HttpRequest& req) {
     return res;
 }
 
-HttpResponse HttpRequestRouter::methodNotAllowed() {
+HttpResponse HttpRequestRouter::methodNotAllowed()
+{
     HttpResponse res;
     res.setStatus(405, "Method Not Allowed");
     res.setBody("405 Method Not Allowed\n");
