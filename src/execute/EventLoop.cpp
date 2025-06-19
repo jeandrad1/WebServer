@@ -4,8 +4,8 @@
 /*                     Constructors & Destructor                       */
 /***********************************************************************/
 
-EventLoop::EventLoop(EpollManager &epollManager, std::map<Socket *, int> serverSockets)
-    : _epollManager(epollManager), _serverSockets(serverSockets)
+EventLoop::EventLoop(EpollManager &epollManager, std::map<Socket *, int> serverSockets, std::map<int, std::vector<ServerConfig *> >	servers)
+    : _epollManager(epollManager), _serverSockets(serverSockets), _servers(servers)
 {
     /* Register sockets into epoll */
 	for (std::map<Socket *, int>::iterator it = _serverSockets.begin(); it != _serverSockets.end(); ++it)
