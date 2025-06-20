@@ -10,6 +10,7 @@ class HttpBuilder : public IConfigBuilder, public DirectiveProcessor<HttpBuilder
 	private:
 		HttpConfig	*http;
 		bool		built;
+		t_cgi		*cgi;
 
 	public:
 		HttpBuilder();
@@ -22,6 +23,7 @@ class HttpBuilder : public IConfigBuilder, public DirectiveProcessor<HttpBuilder
 
 		void	handleErrorPage(const std::string &value);
 		void	handleClientMaxBodySize(const std::string &value);
+		void	handleCGI(const std::string &value);
 };
 
 #endif
