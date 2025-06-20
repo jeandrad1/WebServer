@@ -7,6 +7,7 @@
 #include <string>
 # include "EpollManager.hpp"
 # include "SocketsManager.hpp"
+#include "ResponseFactory.hpp"
 
 
 class HttpRequestRouter : public IHttpRequestHandler
@@ -15,6 +16,8 @@ class HttpRequestRouter : public IHttpRequestHandler
 		HttpResponse handleRequest(const HttpRequest& req, const ServerConfig& server);
 
 	private:
+		HttpResponse serveFile(const std::string& path, const std::string& virtualPath);
+		HttpResponse generateAutoIndexResponse(const std::string& dirPath, const std::string& requestPath);
 		HttpResponse handleGet(const HttpRequest& req, const ServerConfig& server);
 		HttpResponse handlePost(const HttpRequest& req, const ServerConfig& server);
 		HttpResponse handleDelete(const HttpRequest& req, const ServerConfig& server);
