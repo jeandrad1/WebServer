@@ -10,6 +10,7 @@
 # include "../strategy/ServerNameStrategy.hpp"
 # include "../strategy/ReturnStrategy.hpp"
 # include "../strategy/LimitExceptStrategy.hpp"
+# include "../strategy/CGIStrategy.hpp"
 
 # include "../strategy/ServerBlockStrategy.hpp"
 # include "../strategy/HttpBlockStrategy.hpp"
@@ -28,5 +29,6 @@ IValidationStrategy			*createRootStrategy(void);
 IValidationStrategy			*createReturnStrategy(void);
 IValidationStrategy			*createServerNameStrategy(void);
 IValidationStrategy			*createLimitExceptStrategy(void);
+IValidationStrategy			*createCGIStrategy(void);
 
 #endif
