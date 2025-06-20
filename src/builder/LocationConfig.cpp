@@ -13,6 +13,13 @@ LocationConfig::~LocationConfig(void)
 		if (it->second->referencesCount == 0)
 			delete it->second;
 	}
+	if (this->cgi.size() != 0)
+	{
+		for (std::vector<t_cgi *>::iterator it = this->cgi.begin(); it < this->cgi.end(); ++it)
+		{
+			delete (*it);
+		}
+	}
 	delete this->_return;
 }
 
@@ -94,6 +101,11 @@ void	LocationConfig::inheritFromServer(const ServerConfig &server)
 	{
 		index.clear();
 		index = server.index;
+	}
+	if (server.cgiDirective == true && this->cgiDirective == false)
+	{
+		this->cgiDirective = true;
+		this->cgi = server.cgi;
 	}
 }
 
