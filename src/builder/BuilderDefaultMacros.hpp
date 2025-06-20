@@ -6,5 +6,7 @@
 # define DEFAULT_LISTEN_PORT 80
 # define DEFAULT_LISTEN_IP "0.0.0.0"
 # define DEFAULT_ROOT "./www"
+# define DEFAULT_CGI_PATH "/no/path"
+# define DEFAULT_CGI_EXTENSION ".not"
 
 #endif
