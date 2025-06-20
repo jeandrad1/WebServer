@@ -1,7 +1,7 @@
 NAME = webserver
 
 CC = c++
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -g
 
 CPP98_FLAG = -std=c++98
 
@@ -29,6 +29,7 @@ FILES = main \
 		strategy/HttpBlockStrategy \
 		strategy/LocationBlockStrategy \
 		strategy/ServerBlockStrategy \
+		strategy/CGIStrategy \
 		manager/WebservManager \
 		builder/createConfigClasses \
 		builder/HttpBuilder \
