@@ -28,3 +28,9 @@ typedef struct s_listen
 	std::string	ip;
 	int			port;
 }	t_listen;
+
+typedef struct s_cgi
+{
+	std::string extension;
+	std::string path;
+}	t_cgi;
