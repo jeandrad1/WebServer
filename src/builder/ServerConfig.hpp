@@ -25,6 +25,8 @@ class ServerConfig : public IConfig
 		std::map<int, t_errorPage *>	errorPages;
 		std::vector<std::string>		serverNames;
 		std::vector<std::string>		index;
+		std::vector<t_cgi *>			cgi;
+		bool							cgiDirective;
 
 		virtual			~ServerConfig();
 		virtual void	printValues(int indent = 0);

@@ -20,6 +20,13 @@ ServerConfig::~ServerConfig(void)
 			delete (*it);
 		}
 	}
+	if (this->cgi.size() != 0)
+	{
+		for (std::vector<t_cgi *>::iterator it = this->cgi.begin(); it < this->cgi.end(); ++it)
+		{
+			delete (*it);
+		}
+	}
 	delete this->_return;
 	for (std::vector<LocationConfig *>::iterator it = this->locations.begin(); it != this->locations.end(); ++it)
 		delete (*it);
@@ -105,6 +112,11 @@ void	ServerConfig::inheritFromHttp(const HttpConfig &http)
 	{
 		errorPageDirective = true;
 		errorPages = http.errorPages;
+	}
+	if (http.cgiDirective == true && this->cgiDirective == false)
+	{
+		this->cgiDirective = true;
+		this->cgi = http.cgi;
 	}
 }
 
