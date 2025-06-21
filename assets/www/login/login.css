@@ -1,0 +1,16 @@
+body {
+	margin: 0;
+	padding: 0;
+	height: 100vh;					/* 100% de la altura del viewport */
+	display: flex;					/* Usamos Flexbox */
+	justify-content: center;		/* Centrado horizontal */
+	align-items: center;			/* Centrado vertical */
+	flex-direction: column;			/* Para que el h1 esté arriba del p */
+	background-color: #f0f0f0;		/* (Opcional) Color de fondo suave */
+	font-family: sans-serif;		/* (Opcional) Tipo de letra bonito */
+}
+
+h1 {
+	font-size: 3rem;
+	color: #333;
+}
