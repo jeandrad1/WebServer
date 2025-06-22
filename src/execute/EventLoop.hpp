@@ -3,6 +3,7 @@
 
 # include "EpollManager.hpp"
 # include "SocketsManager.hpp"
+# include "CgiDetector.hpp"
 
 class EventLoop {
 
@@ -11,15 +12,19 @@ class EventLoop {
 		std::map<Socket *, int>		_serverSockets;
 		EpollManager				&_epollManager;
 		std::map<int, std::string>	_buffers;
+		std::map<int, std::vector<ServerConfig *> > _servers;
+		std::map<int, int> _clientToServerSocket;
 
 		bool isServerSocket(int fd);
 		void handleNewConnection(int serverFd);
 		void handleClientData(int clientFd);
-		void handleHttpRequest(int clientFd, size_t header_end);
+		HttpRequest *handleHttpRequest(int clientFd, size_t header_end);
+
+		std::vector<ServerConfig *> getServersByFd(int fd);
 
 	public:
 
-		EventLoop(EpollManager &epollManager, std::map<Socket *, int> serverSockets);
+		EventLoop(EpollManager &epollManager, std::map<Socket *, int> serverSockets, std::map<int, std::vector<ServerConfig *> > servers);
 		~EventLoop(void);
 
 		void runEventLoop(void);
