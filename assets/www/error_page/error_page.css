@@ -1,0 +1,17 @@
+body 
+{
+	font-family: sans-serif;
+	text-align: center; 
+	padding: 50px;
+}
+
+h1 
+{
+	font-size: 4rem;
+	color: crimson; 
+}
+
+p
+{
+	font-size: 1.2rem;
+}

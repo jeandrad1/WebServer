@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="error_page.css">
+  <title>Error_page</title>
+</head>
+<body>
+	<h1 id="codigoError"></h1>
+	<p id="descripcionError"></p>
+
+	<script>
+		const params = new URLSearchParams(window.location.search);
+		const code = params.get('code') || 'Error';
+		const descripcionError = params.get("description_error") || "Ha ocurrido un error.";
+
+		document.getElementById('codigoError').textContent = "Error: " + code;
+		document.getElementById('descripcionError').textContent = descripcionError;
+	</script>
+</body>
+</html>
+
+<!-- For this HTML, the response must include code and description_error -->
+<!-- These should be defined in the body, although this is prepared in case they are not -->
+<!-- ej: code=404&descriptionerror=Pagina%20no%20encontrada -->
