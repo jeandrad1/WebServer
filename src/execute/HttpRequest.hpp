@@ -21,6 +21,8 @@ class HttpRequest
 		long long	contentLength;
 		std::string contentType;
 		std::string host;
+		std::string serverName;
+		std::string serverPort;
 		bool		connection;
 
 		std::vector<unsigned char> body;
@@ -34,7 +36,7 @@ class HttpRequest
 
 		void handleContentLength(std::string content_length_str);
 		void handleContentType(std::string content_type_str);
-		void handleHost(std::string host_str);
+		void handleHost(const std::string &host_str);
 		void handleConnection(std::string connection_str);
 
 		void handleBody(std::string body);
@@ -43,6 +45,9 @@ class HttpRequest
 		std::string getMethod() const;
 		std::string getPath() const;
 		std::string getVersion() const;
+		std::string getHost() const;
+		std::string getServerName() const;
+		std::string getServerPort() const;
 		long long	getContentLenght();
 		std::vector<unsigned char> getBody() const;
 

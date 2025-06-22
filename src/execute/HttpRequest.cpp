@@ -52,17 +52,34 @@ void	HttpRequest::handleContentType(std::string content_type_str)
 		throw std::runtime_error(RED "Header error: " YELLOW "VALUE NOT CORRECT TO CONTENT-TYPE" WHITE);
 }
 
-void	HttpRequest::handleHost(std::string host_str)
+void HttpRequest::handleHost(const std::string &host_str)
 {
 	if (!host_str.empty())
+	{
 		host = host_str;
+		size_t colonPos = host_str.find(':');
+		if (colonPos != std::string::npos)
+		{
+			serverName = host_str.substr(0, colonPos);
+			serverPort = host_str.substr(colonPos + 1);
+		}
+		else
+		{
+			serverName = host_str;
+			serverPort = "80"; // Default HTTP port if not specified
+		}
+	}
 	else
+	{
 		host = "EMPTY";
+		serverName = "localhost";
+		serverPort = "80";
+	}
 }
 
 void HttpRequest::handleConnection(std::string connection_str)
 {
-	if (!connection_str.empty() || to_lowercase(connection_str) == "keep-alive")
+	if (connection_str.empty() || to_lowercase(connection_str) == "keep-alive")
 		connection = true;
 	else if (to_lowercase(connection_str) == "close")
 		connection = false;
@@ -95,6 +112,21 @@ std::string	HttpRequest::getPath() const
 std::string	HttpRequest::getVersion() const
 {
 	return(version);
+}
+
+std::string HttpRequest::getHost() const
+{
+	return (this->host);
+}
+
+std::string HttpRequest::getServerName() const
+{
+	return (this->serverName);
+}
+
+std::string HttpRequest::getServerPort() const
+{
+	return (this->serverPort);
 }
 
 long long HttpRequest::getContentLenght()
