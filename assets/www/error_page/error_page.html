@@ -3,20 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <link rel="stylesheet" href="error_page.css">
+  <script src="error_page.js" defer></script>
   <title>Error_page</title>
 </head>
 <body>
 	<h1 id="codigoError"></h1>
 	<p id="descripcionError"></p>
 
-	<script>
-		const params = new URLSearchParams(window.location.search);
-		const code = params.get('code') || 'Error';
-		const descripcionError = params.get("description_error") || "Ha ocurrido un error.";
-
-		document.getElementById('codigoError').textContent = "Error: " + code;
-		document.getElementById('descripcionError').textContent = descripcionError;
-	</script>
+	<br>
+	<img id="scream" src="theScream.jpg"></img>
 </body>
 </html>
 
