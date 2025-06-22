@@ -47,6 +47,7 @@ FILES = main \
 		execute/HttpRequestManager \
 		execute/EpollManager \
 		execute/EventLoop \
+		execute/CgiDetector \
 
 
 $(shell mkdir -p ./build)
