@@ -105,6 +105,9 @@ void EventLoop::handleNewConnection(int serverFd)
 		close(client_fd);
 		return ;
 	}
+
+	_clientToServer[client_fd] = serverFd;
+
 	std::cout << "New connection accepted (fd = " << client_fd << ")\n";
 }
 
@@ -120,6 +123,10 @@ void EventLoop::handleClientData(int clientFd)
 			perror("recv");
 			close(clientFd);
 		}
+		close(clientFd);
+		_buffers.erase(clientFd);  // Clean up buffer
+        _clientToServer.erase(clientFd);  // Clean up mapping
+
 		try
 		{
 			this->_epollManager.removeFd(clientFd);
@@ -138,44 +145,46 @@ void EventLoop::handleClientData(int clientFd)
 		{
 			request = handleHttpRequest(clientFd, header_end);				
 		}
-		if (request != NULL)
-		{
-			std::cout <<RED<< "Received HTTP request from fd " << clientFd <<RESET<< ":\n";
-			request->HttpRequestPrinter();
+    if (request != NULL)
+    {
+        std::cout << RED << "Received HTTP request from fd " << clientFd << RESET << ":\n";
+        request->HttpRequestPrinter();
 
-	HttpRequestRouter router;
-	HttpResponse response = router.handleRequest(*request, *(_servers[clientFd][0]));
+        int serverFd = _clientToServer[clientFd];
+        
+        if (_servers.find(serverFd) != _servers.end() && !_servers[serverFd].empty())
+			{
+				HttpRequestRouter router;
+				HttpResponse response = router.handleRequest(*request, *(_servers[serverFd][0]));
 
-	// Transform the response into a string
-	std::ostringstream oss;
-	oss << "HTTP/1.1 " << response.getStatusCode() << " " << response.getStatusMessage() << "\r\n";
-	const std::map<std::string, std::string>& headers = response.getHeaders();
-	for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
-	{
-		oss << it->first << ": " << it->second << "\r\n";
-	}
-	oss << "\r\n";
-	oss << response.getBody();
-	std::string responseStr = oss.str();
+				// Transform the response into a string
+				std::ostringstream oss;
+				oss << "HTTP/1.1 " << response.getStatusCode() << " " << response.getStatusMessage() << "\r\n";
+				const std::map<std::string, std::string>& headers = response.getHeaders();
+				for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
+				{
+					oss << it->first << ": " << it->second << "\r\n";
+				}
+				oss << "\r\n";
+				oss << response.getBody();
+				std::string responseStr = oss.str();
 
-	// Send the response back to the client
-	ssize_t sent = send(clientFd, responseStr.c_str(), responseStr.size(), 0);
-	if (sent == -1) {
-    perror("send");
-    close(clientFd);
-    }	
+				// Send the response back to the client
+				ssize_t sent = send(clientFd, responseStr.c_str(), responseStr.size(), 0);
+				if (sent == -1)
+				{
+					perror("send");
+					close(clientFd);
+					_buffers.erase(clientFd);
+					_clientToServer.erase(clientFd);
+				}
+			}
+			else
+			{
+				std::cerr << "Error: No server configuration found for client fd " << clientFd << std::endl;
+			}
+			delete request;
 		}
-		/*std::cout << "Received (" << fd << "): " << std::string(buffer, count);
-
-		// Replace write with send
-		const char *response = "HTTP/1.1 200 OK\r\nContent-Length: 3\r\n\r\nOK\n";
-		ssize_t sent = send(fd, response, 41, 0); // 0 = default flags
-		if (sent == -1)
-		{
-			perror("send");
-			close(fd);
-			epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, NULL);
-		}*/
 	}
 }
 
@@ -206,6 +215,7 @@ HttpRequest *EventLoop::handleHttpRequest(int clientFd, size_t header_end)
 	catch(const std::exception& e)
 	{
 		std::cerr << RED "REQUEST PARSER ERROR: " << e.what() << WHITE "\n";;
+		return NULL;
 	}
 	return NULL;
 }
