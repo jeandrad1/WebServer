@@ -27,3 +27,18 @@ std::string HttpResponse::buildResponse() const
     response << body;
     return response.str();
 }
+
+int HttpResponse::getStatusCode() const
+{
+    return statusCode;
+}
+
+std::string HttpResponse::getStatusMessage() const
+{
+    return statusMessage;
+}
+
+const std::map<std::string, std::string>& HttpResponse::getHeaders() const
+{
+    return headers;
+}

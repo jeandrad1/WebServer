@@ -1,5 +1,5 @@
 #include "EventLoop.hpp"
-
+#include "HttpRequestRouter.hpp"
 /***********************************************************************/
 /*                     Constructors & Destructor                       */
 /***********************************************************************/
@@ -142,7 +142,28 @@ void EventLoop::handleClientData(int clientFd)
 		{
 			std::cout <<RED<< "Received HTTP request from fd " << clientFd <<RESET<< ":\n";
 			request->HttpRequestPrinter();
-			
+
+	HttpRequestRouter router;
+	HttpResponse response = router.handleRequest(*request, *(_servers[clientFd][0]));
+
+	// Transform the response into a string
+	std::ostringstream oss;
+	oss << "HTTP/1.1 " << response.getStatusCode() << " " << response.getStatusMessage() << "\r\n";
+	const std::map<std::string, std::string>& headers = response.getHeaders();
+	for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
+	{
+		oss << it->first << ": " << it->second << "\r\n";
+	}
+	oss << "\r\n";
+	oss << response.getBody();
+	std::string responseStr = oss.str();
+
+	// Send the response back to the client
+	ssize_t sent = send(clientFd, responseStr.c_str(), responseStr.size(), 0);
+	if (sent == -1) {
+    perror("send");
+    close(clientFd);
+    }	
 		}
 		/*std::cout << "Received (" << fd << "): " << std::string(buffer, count);
 

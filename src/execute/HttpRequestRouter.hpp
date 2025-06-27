@@ -13,6 +13,8 @@
 class HttpRequestRouter : public IHttpRequestHandler
 {
 	public:
+		HttpRequestRouter() {}
+		~HttpRequestRouter() {}
 		HttpResponse handleRequest(const HttpRequest& req, const ServerConfig& server);
 
 	private:
@@ -24,4 +26,4 @@ class HttpRequestRouter : public IHttpRequestHandler
 		HttpResponse methodNotAllowed();
 };
 
-#endif // REQUESTROUTER_HPP
+#endif
