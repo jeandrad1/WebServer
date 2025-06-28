@@ -34,7 +34,6 @@ WebservManager::~WebservManager(void)
 	this->_configFile.close();
 	
 	std::vector<IConfig * >::const_iterator ite = this->builtConfigs.end();
-	int i = 0;
 	for (std::vector<IConfig *>::const_iterator it = this->builtConfigs.begin(); it != ite; ++it)
 	{
 		delete (*it);
@@ -57,7 +56,7 @@ void WebservManager::run(void)
 
 	//this->_rootBlock->getBlock(0)->printConfig(0);
 
-	int error = validateConfigTreeFactory((*this->_rootBlock));
+	validateConfigTreeFactory((*this->_rootBlock));
 
 	this->builtConfigs = createConfigClasses(this->_rootBlock);
 
