@@ -1,0 +1,24 @@
+body 
+{
+	font-family: sans-serif;
+	text-align: center; 
+	padding: 50px;
+}
+
+h1 
+{
+	font-size: 4rem;
+	color: crimson; 
+}
+
+p
+{
+	font-size: 1.2rem;
+}
+
+#scream
+{
+	border: 5px solid rgb(123, 120, 120);
+	border-radius: 8px;
+	width: 300px;
+}
