@@ -102,11 +102,6 @@ void	LocationConfig::inheritFromServer(const ServerConfig &server)
 		_index.clear();
 		_index = server.index;
 	}
-	if (server.cgiDirective == true && this->cgiDirective == false)
-	{
-		this->cgiDirective = true;
-		this->cgi = server.cgi;
-	}
 }
 
 void	LocationConfig::defaultInheritedValues(void)

@@ -6,7 +6,7 @@ std::vector<std::string>	split_str(const std::string &str, const std::string &de
 /*                     Constructors & Destructor                       */
 /***********************************************************************/
 
-LocationBuilder::LocationBuilder(const std::string &path) : built(false), location(new LocationConfig())
+LocationBuilder::LocationBuilder(const std::string &path) : location(new LocationConfig()), built(false)
 {
 	std::string	newPath;
 
@@ -48,18 +48,22 @@ void	LocationBuilder::setDirective(const std::string &name, const std::string &v
 
 void	LocationBuilder::addNestedBuilder(IConfigBuilder *child, AConfigBlock *newBlock)
 {
-	LocationConfig	*newLocation = static_cast<LocationConfig *>(child->build(newBlock));
-	this->built = false;
+	(void) child;
+	(void) newBlock;
 }
 
 IConfig	*LocationBuilder::build(AConfigBlock *locationBlock)
 {
+	if (this->built == true)
+		return (NULL);
+
 	AConfigBlock::iterator		blockItEnd = locationBlock->end();
 	for (AConfigBlock::iterator	blockIt = locationBlock->begin(); blockIt != blockItEnd; blockIt++)
 	{
 		if (Directive *directive = dynamic_cast<Directive *>(*blockIt))
 			this->dispatchDirective(directive->getName(), directive->getValue());
 	}
+	this->built = true;
 	return (this->location);
 }
 
@@ -213,9 +217,9 @@ void	LocationBuilder::handleReturn(const std::string &value)
 	this->location->setReturnDirective(true);
 
 	std::string	real_value = value.substr(0, value.size() - 1);
-	int http_pos = real_value.find("http");
+	size_t http_pos = real_value.find("http");
 
-	if(http_pos != std::string::npos)
+	if (http_pos != std::string::npos)
 	{
 		std::string t_http = real_value.substr(http_pos, value.size());
 		this->location->setReturnHttp(t_http);

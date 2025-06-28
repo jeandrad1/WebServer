@@ -99,7 +99,7 @@ void	ServerBuilder::handleListen(const std::string &value)
 	t_listen	*listen = new t_listen;
 
 	std::string	real_value = value.substr(0, value.size() - 1);
-	int			colon_pos = real_value.find(":");
+	size_t		colon_pos = real_value.find(":");
 
 	if(colon_pos != std::string::npos)
 	{
@@ -158,9 +158,9 @@ void	ServerBuilder::handleReturn(const std::string &value)
 	this->server->_return->returnDirective = true;
 
 	std::string	real_value = value.substr(0, value.size() - 1);
-	int			http_pos = real_value.find("http");
+	size_t		http_pos = real_value.find("http");
 
-	if(http_pos != std::string::npos)
+	if (http_pos != std::string::npos)
 	{
 		this->server->_return->http = real_value.substr(http_pos, value.size());
 		std::string	port_str = real_value.substr(0, http_pos);
