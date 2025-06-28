@@ -1,6 +1,26 @@
 #include "HttpRequestManager.hpp"
 #include <cstdio>
 
+/***********************************************************************/
+/*                     Constructors & Destructor                       */
+/***********************************************************************/
+
+/***********************************************************************/
+/*                         Operator Overload                           */
+/***********************************************************************/
+
+/***********************************************************************/
+/*                          Public Functions                           */
+/***********************************************************************/
+
+/***********************************************************************/
+/*                          Getters & Setters                          */
+/***********************************************************************/
+
+/***********************************************************************/
+/*                          Private Functions                          */
+/***********************************************************************/
+
 std::string HttpRequestManager::getHeader(const std::string& key) const 
 {
 	std::map<std::string, std::string>::const_iterator it = headers.find(key);
@@ -52,6 +72,14 @@ void HttpRequestManager::parseRequestLine(const std::string &line)
 		throw std::runtime_error(RED "HTTP method no soported: " YELLOW + method + WHITE);
 
 	path = line.substr(method_end + 1, path_end - method_end - 1);
+
+	size_t query_string_pos = path.find('?');
+	if (query_string_pos != std::string::npos)
+	{
+		query_string = path.substr(query_string_pos + 1, path_end);
+		path = path.substr(0, query_string_pos - 1);
+	}
+
 	version = line.substr(path_end + 1);
 
 	if (version.empty() || version.compare(0, 5, "HTTP/") != 0)
@@ -116,10 +144,13 @@ void	HttpRequestManager::requestPrinter()
 HttpRequest *HttpRequestManager::buildHttpRequest()
 {
 	HttpRequest *request = new HttpRequest(method, path, version);
+	request->handleQueryString(this->query_string);
 	request->handleContentLength(getHeader("content-length"));
 	request->handleContentType(getHeader("content-type"));
 	request->handleHost(getHeader("host"));
 	request->handleConnection(getHeader("connection"));
+	request->handleUserAgent(getHeader("user-agent"));
+	request->handleAccept(getHeader("accept"));
 
 	request->handleBody(body);
 

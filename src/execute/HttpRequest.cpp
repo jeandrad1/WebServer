@@ -2,6 +2,11 @@
 
 //GET, POST y DELETE
 
+/***********************************************************************/
+/*                     Constructors & Destructor                       */
+/***********************************************************************/
+
+
 HttpRequest::HttpRequest(std::string src_method, std::string src_path, std::string src_version)
 {
 	method = src_method; path = src_path; version = src_version;
@@ -14,11 +19,20 @@ void	HttpRequest::handleContentLength(std::string content_length_str)
 	if (!content_length_str.empty()) 
 	{
 		safe_atoll(content_length_str, contentLength);
+		this->contentLenghtString = content_length_str;
 	}
 	else{
 		contentLength = 0;
 	}
 }
+
+/***********************************************************************/
+/*                         Operator Overload                           */
+/***********************************************************************/
+
+/***********************************************************************/
+/*                          Public Functions                           */
+/***********************************************************************/
 
 static bool	checkType(std::string content_type_str)
 {
@@ -33,13 +47,18 @@ static bool	checkType(std::string content_type_str)
 	valid_types.push_back("image/jpeg");
 	valid_types.push_back("image/png");
 	valid_types.push_back("application/octet-stream");
-
+	
 	for (size_t i = 0; i < valid_types.size(); i++)
 	{
 		if (content_type_str == valid_types[i])
-			return true;
+		return true;
 	}
 	return(false);
+}
+
+void	HttpRequest::handleQueryString(std::string query_string_str)
+{
+	this->query_string = query_string_str;
 }
 
 void	HttpRequest::handleContentType(std::string content_type_str)
@@ -87,6 +106,16 @@ void HttpRequest::handleConnection(std::string connection_str)
 		throw std::runtime_error(RED "Header error: " YELLOW "VALUE NOT CORRECT TO CONNECTION" WHITE);
 }
 
+void HttpRequest::handleUserAgent(std::string userAgent_str)
+{
+	this->userAgent = userAgent_str;
+}
+
+void HttpRequest::handleUserAgent(std::string accept_str)
+{
+	this->accept = accept_str;
+}
+
 void HttpRequest::handleBody(std::string str_body)
 {
 	if (!str_body.empty())
@@ -95,9 +124,10 @@ void HttpRequest::handleBody(std::string str_body)
 		body.push_back(str_body[i]);
 }
 
-/////////////////////////////////////////////////////////
-/////////////////////GETTERS/////////////////////////////
-/////////////////////////////////////////////////////////
+/***********************************************************************/
+/*                          Getters & Setters                          */
+/***********************************************************************/
+
 
 std::string	HttpRequest::getMethod() const
 {
@@ -109,9 +139,24 @@ std::string	HttpRequest::getPath() const
 	return(path);
 }
 
+std::string HttpRequest::getQueryString() const
+{
+	return (this->query_string);
+}
+
 std::string	HttpRequest::getVersion() const
 {
 	return(version);
+}
+
+std::string HttpRequest::getUserAgent() const
+{
+	return (this->userAgent);
+}
+
+std::string HttpRequest::getAccept() const
+{
+	return (this->accept);
 }
 
 std::string HttpRequest::getHost() const
@@ -129,15 +174,24 @@ std::string HttpRequest::getServerPort() const
 	return (this->serverPort);
 }
 
-long long HttpRequest::getContentLenght()
+long long HttpRequest::getContentLength()
 {
 	return(contentLength);
+}
+
+std::string HttpRequest::getContentLengthString() const
+{
+	return(this->contentLengthString);
 }
 
 std::vector<unsigned char> HttpRequest::getBody() const
 {
 	return(body);
 }
+
+/***********************************************************************/
+/*                          Private Functions                          */
+/***********************************************************************/
 
 /////////////////////////////////////////////////////////
 /////////////////////PRINTER/////////////////////////////
