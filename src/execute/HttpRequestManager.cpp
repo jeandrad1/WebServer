@@ -39,6 +39,7 @@ void	HttpRequestManager::parseHttpHeader(const std::string& raw_header)
 	std::string line;
 
 	std::getline(stream, line);
+	
 	parseRequestLine(line);
 	parseHeaders(stream);
 }

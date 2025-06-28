@@ -47,6 +47,9 @@ FILES = main \
 		execute/HttpRequestManager \
 		execute/EpollManager \
 		execute/EventLoop \
+		execute/ResponseFactory \
+		execute/MimeTypeDetector \
+		execute/FilePathChecker \
 		execute/CgiHandler \
 		execute/CgiEnvBuilder \
 		execute/ServerUtils \
