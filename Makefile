@@ -46,6 +46,9 @@ FILES = main \
 		execute/HttpRequestManager \
 		execute/EpollManager \
 		execute/EventLoop \
+		execute/ResponseFactory \
+		execute/MimeTypeDetector \
+		execute/FilePathChecker \
 
 
 $(shell mkdir -p ./build)

@@ -12,6 +12,7 @@ class EventLoop {
 		EpollManager				&_epollManager;
 		std::map<int, std::string>	_buffers;
         std::map<int, std::vector<ServerConfig *> >	_servers;
+		std::map<int, int>			_clientToServer;
 
 		bool isServerSocket(int fd);
 		void handleNewConnection(int serverFd);
@@ -24,6 +25,7 @@ class EventLoop {
 		~EventLoop(void);
 
 		void runEventLoop(void);
+		
 };
 
 # endif

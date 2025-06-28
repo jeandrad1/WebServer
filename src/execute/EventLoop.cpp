@@ -1,5 +1,5 @@
 #include "EventLoop.hpp"
-
+#include "HttpRequestRouter.hpp"
 /***********************************************************************/
 /*                     Constructors & Destructor                       */
 /***********************************************************************/
@@ -65,6 +65,8 @@ void EventLoop::runEventLoop(void)
 	}
 }
 
+
+
 /***********************************************************************/
 /*                          Private Functions                          */
 /***********************************************************************/
@@ -105,6 +107,29 @@ void EventLoop::handleNewConnection(int serverFd)
 		close(client_fd);
 		return ;
 	}
+	    int serverKey = -1;
+    for (std::map<Socket *, int>::iterator it = _serverSockets.begin(); it != _serverSockets.end(); ++it)
+    {
+        if (it->first->getSocket() == serverFd)
+        {
+            serverKey = it->second;
+            break;
+        }
+    }	
+
+	// new to handle the connections correctly
+    if (serverKey != -1)
+    {
+        _clientToServer[client_fd] = serverKey; 
+        std::cout << "✓ Mapped client " << client_fd << " to server key " << serverKey << std::endl;
+    }
+    else
+    {
+        std::cout << "✗ ERROR: No server key found for serverFd " << serverFd << std::endl;
+    }
+
+	_clientToServer[client_fd] = serverKey; 
+
 	std::cout << "New connection accepted (fd = " << client_fd << ")\n";
 }
 
@@ -120,6 +145,9 @@ void EventLoop::handleClientData(int clientFd)
 			perror("recv");
 			close(clientFd);
 		}
+		close(clientFd);
+		_buffers.erase(clientFd);
+        _clientToServer.erase(clientFd);
 		try
 		{
 			this->_epollManager.removeFd(clientFd);
@@ -138,23 +166,54 @@ void EventLoop::handleClientData(int clientFd)
 		{
 			request = handleHttpRequest(clientFd, header_end);				
 		}
-		if (request != NULL)
-		{
-			std::cout <<RED<< "Received HTTP request from fd " << clientFd <<RESET<< ":\n";
-			request->HttpRequestPrinter();
-			
-		}
-		/*std::cout << "Received (" << fd << "): " << std::string(buffer, count);
+    if (request != NULL)
+    {
+        std::cout << RED << "Received HTTP request from fd " << clientFd << RESET << ":\n";
+        request->HttpRequestPrinter();
 
-		// Replace write with send
-		const char *response = "HTTP/1.1 200 OK\r\nContent-Length: 3\r\n\r\nOK\n";
-		ssize_t sent = send(fd, response, 41, 0); // 0 = default flags
-		if (sent == -1)
-		{
-			perror("send");
-			close(fd);
-			epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, NULL);
-		}*/
+        int serverFd = _clientToServer[clientFd];
+
+		//_servers[serverFd][0]->printValues();  
+        if (_servers.find(serverFd) != _servers.end() && !_servers[serverFd].empty())
+			{
+				HttpRequestRouter router;
+				HttpResponse response = router.handleRequest(*request, *(_servers[serverFd][0]));
+
+				// Transform the response into a string
+				std::ostringstream oss;
+				oss << "HTTP/1.1 " << response.getStatusCode() << " " << response.getStatusMessage() << "\r\n";
+				const std::map<std::string, std::string>& headers = response.getHeaders();
+				for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
+				{
+					oss << it->first << ": " << it->second << "\r\n";
+				}
+				oss << "\r\n";
+				oss << response.getBody();
+				std::string responseStr = oss.str();
+
+				// Send the response back to the client
+				std::cout << "The response is:\n" << responseStr << std::endl;
+				ssize_t sent = send(clientFd, responseStr.c_str(), responseStr.size(), 0);
+				if (sent == -1)
+				{
+					perror("send");
+					close(clientFd);
+					_buffers.erase(clientFd);
+					_clientToServer.erase(clientFd);
+					try {
+						_epollManager.removeFd(clientFd);
+					} catch (const std::exception& e) {
+						std::cerr << "Failed to remove fd: " << e.what() << std::endl;
+					}
+				}
+				else
+				{
+					_buffers[clientFd].clear();
+					std::cout << "✓ Response sent, connection kept alive" << std::endl;
+				}			
+			delete request;
+			}
+		}
 	}
 }
 
@@ -185,6 +244,7 @@ HttpRequest *EventLoop::handleHttpRequest(int clientFd, size_t header_end)
 	catch(const std::exception& e)
 	{
 		std::cerr << RED "REQUEST PARSER ERROR: " << e.what() << WHITE "\n";;
+		return NULL;
 	}
 	return NULL;
 }
