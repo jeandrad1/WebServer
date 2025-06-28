@@ -1,0 +1,29 @@
+#ifndef CGIENVBUILDER_HPP
+# define CGIENVBUILDER_HPP
+
+# include <string>
+# include <vector>
+# include "HttpRequest.hpp"
+# include "../builder/ServerConfig.hpp"
+
+class CgiEnvBuilder {
+
+	private:
+
+		std::vector<std::string> _envv;
+		const HttpRequest		*_req;
+		const ServerConfig		*_server;
+		const LocationConfig	*_location;
+		const std::string		_clientIP;
+	
+	public:
+
+		CgiEnvBuilder(HttpRequest *req, ServerConfig *server, LocationConfig *location, std::string clientIP);
+		std::vector<std::string> build(void);
+		void	addEnv(const std::string &key, const std::string &value);
+		std::vector<std::string> getEnvv(void);
+
+		void	printEnv(void);
+};
+
+#endif

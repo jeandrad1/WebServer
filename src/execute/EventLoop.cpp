@@ -105,6 +105,11 @@ void EventLoop::handleNewConnection(int serverFd)
 		close(client_fd);
 		return ;
 	}
+	_clientToServerSocket[client_fd] = serverFd;
+
+	std::string ip = ServerUtils::getClientIP(client_addr);
+	this->_ClientIPs[client_fd] = ip;
+
 	std::cout << "New connection accepted (fd = " << client_fd << ")\n";
 }
 
@@ -135,7 +140,23 @@ void EventLoop::handleClientData(int clientFd)
 		size_t header_end = _buffers[clientFd].find("\r\n\r\n");
 		if (header_end != std::string::npos)
 		{
-			handleHttpRequest(clientFd, header_end);				
+			try
+			{
+				HttpRequest *req = handleHttpRequest(clientFd, header_end);
+				if (req == NULL)
+					return ;
+				std::string ip = this->_ClientIPs[clientFd];
+				CgiHandler *cgi = new CgiHandler(req, ip, getServersByFd(_clientToServerSocket[clientFd]));
+				if (cgi->isCgiRequest())
+				{
+					std::cout << "CGI matches\n";
+					cgi->buildEnv();
+				}
+			}
+			catch (const std::exception &e)
+			{
+				std::cerr << "Failed cgi: " << e.what() << "\n";
+			}
 		}
 		/*std::cout << "Received (" << fd << "): " << std::string(buffer, count);
 
@@ -151,7 +172,7 @@ void EventLoop::handleClientData(int clientFd)
 	}
 }
 
-void EventLoop::handleHttpRequest(int clientFd, size_t header_end)
+HttpRequest *EventLoop::handleHttpRequest(int clientFd, size_t header_end)
 {
 	try
 	{
@@ -160,13 +181,13 @@ void EventLoop::handleHttpRequest(int clientFd, size_t header_end)
 		reqMan.parseHttpHeader(_buffers[clientFd]);
 		HttpRequest *request = reqMan.buildHttpRequest();
 
-		long long content_length = request->getContentLenght();
+		long long content_length = request->getContentLength();
 		size_t received_body_size = _buffers[clientFd].size() - (header_end + 4);
 
 		if (received_body_size < content_length)
 		{
 			delete request;
-			return ;
+			return (NULL);
 		}
 		std::string full_request = _buffers[clientFd].substr(0, header_end + 4 + content_length);
 		reqMan.parseHttpRequest(full_request);
@@ -174,12 +195,28 @@ void EventLoop::handleHttpRequest(int clientFd, size_t header_end)
 		reqMan.requestPrinter();
 
 		request->HttpRequestPrinter();
-		delete request; //request manage temporal
+		return request; //request manage temporal
 	}
 	catch(const std::exception& e)
 	{
 		std::cerr << RED "REQUEST PARSER ERROR: " << e.what() << WHITE "\n";;
 	}	
+}
+
+std::vector<ServerConfig *> EventLoop::getServersByFd(int fd)
+{
+	std::map<Socket *, int>::iterator ite = this->_serverSockets.end();
+	int port = -1;
+	for (std::map<Socket *, int>::iterator it = this->_serverSockets.begin(); it != ite; it++)
+	{
+		if (it->first->getSocket() == fd)
+		{
+			port = it->second;
+			break ;
+		}
+	}
+	std::vector<ServerConfig *> server = this->_servers[port];
+	return (server);
 }
 
 /***********************************************************************/

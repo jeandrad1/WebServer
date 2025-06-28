@@ -12,6 +12,7 @@ void	registerAllStrategies(StrategyFactory factory)
 	StrategyFactory::getInstance().registerStrategy("root", createRootStrategy);
 	StrategyFactory::getInstance().registerStrategy("server_name", createServerNameStrategy);
 	StrategyFactory::getInstance().registerStrategy("limit_except", createLimitExceptStrategy);
+	StrategyFactory::getInstance().registerStrategy("cgi", createCGIStrategy);
 }
 
 void	registerBlockStrategies(StrategyFactory factory)

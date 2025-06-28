@@ -68,3 +68,8 @@ IValidationStrategy	*createLimitExceptStrategy(void)
 {
 	return (new LimitExceptStrategy());
 }
+
+IValidationStrategy *createCGIStrategy(void)
+{
+	return (new CGIStrategy());
+}

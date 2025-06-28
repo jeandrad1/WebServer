@@ -1,7 +1,7 @@
 NAME = webserver
 
 CC = c++
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -g
 
 CPP98_FLAG = -std=c++98
 
@@ -29,6 +29,7 @@ FILES = main \
 		strategy/HttpBlockStrategy \
 		strategy/LocationBlockStrategy \
 		strategy/ServerBlockStrategy \
+		strategy/CGIStrategy \
 		manager/WebservManager \
 		builder/createConfigClasses \
 		builder/HttpBuilder \
@@ -46,6 +47,9 @@ FILES = main \
 		execute/HttpRequestManager \
 		execute/EpollManager \
 		execute/EventLoop \
+		execute/CgiHandler \
+		execute/CgiEnvBuilder \
+		execute/ServerUtils \
 
 
 $(shell mkdir -p ./build)
@@ -65,12 +69,12 @@ SRCS = $(addprefix $(SRCS_DIR), $(addsuffix .cpp, $(FILES)))
 OBJS = $(addprefix $(OBJS_DIR), $(addsuffix .o, $(FILES)))
 
 $(OBJS_DIR)%.o: $(SRCS_DIR)%.cpp
-	@$(CC) $(FLAGS) $(CPP98_FLAG) -c $< -o $@
+	@$(CC) $(CFLAGS) $(CPP98_FLAG) -c $< -o $@
 
 all: $(NAME)
 
 $(NAME) : $(OBJS) $(OBJS_DIR)charge_flag_makefile/charge.flag
-	@$(CC) $(FLAGS) $(CPP98_FLAG) $(OBJS) -o $(NAME)
+	@$(CC) $(CFLAGS) $(CPP98_FLAG) $(OBJS) -o $(NAME)
 	@echo
 	@echo "$(GREEN)WebServer compiled!"
 	@echo

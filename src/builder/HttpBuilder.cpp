@@ -10,6 +10,7 @@ HttpBuilder::HttpBuilder() : built(false), http(new HttpConfig())
 
 	registerHandler("client_max_body_size", &HttpBuilder::handleClientMaxBodySize);
 	registerHandler("error_page", &HttpBuilder::handleErrorPage);
+	registerHandler("cgi", &HttpBuilder::handleCGI);
 }
 
 HttpBuilder::~HttpBuilder()
@@ -134,4 +135,28 @@ void	HttpBuilder::handleErrorPage(const std::string &value)
 		errorPage->referencesCount++;
 		this->http->errorPages[std::atol((*it).c_str())] = errorPage;
 	}
+}
+
+void	HttpBuilder::handleCGI(std::string const &value)
+{
+	if (this->http->cgiDirective == false)
+	{
+		delete this->http->cgi[0];
+		this->http->cgi.clear();
+	}
+	this->http->cgiDirective = true;
+
+	t_cgi	*cgi = new t_cgi;
+
+	std::istringstream	iss(value);
+
+	std::string extension;
+	std::string path;
+
+	iss >> extension;
+	iss >> path;
+
+	cgi->extension = extension;
+	cgi->path = path;
+	this->http->cgi.push_back(cgi);
 }

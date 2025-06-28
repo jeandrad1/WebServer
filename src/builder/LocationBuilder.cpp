@@ -29,6 +29,7 @@ LocationBuilder::LocationBuilder(const std::string &path) : built(false), locati
 	this->registerHandler("error_page", &LocationBuilder::handleErrorPage);
 	this->registerHandler("return", &LocationBuilder::handleReturn);
 	this->registerHandler("limit_except", &LocationBuilder::handleLimitExcept);
+	this->registerHandler("cgi", &LocationBuilder::handleCGI);
 }
 
 LocationBuilder::~LocationBuilder()
@@ -66,6 +67,7 @@ void	LocationBuilder::setDefaultValues(void)
 {
 	this->location->_return = new t_return;
 	this->location->limit_except = new t_limit_except;
+	t_cgi		*cgi = new t_cgi;
 
     this->location->autoindex = DEFAULT_AUTOINDEX;
 	this->location->clientMaxBodySize = -1;
@@ -79,6 +81,11 @@ void	LocationBuilder::setDefaultValues(void)
 	this->location->limit_except->POST = true;
 	this->location->limit_except->GET = true;
 	this->location->limit_except->DELETE = false;
+
+	this->location->cgiDirective = false;
+	cgi->extension = DEFAULT_CGI_EXTENSION;
+	cgi->path = DEFAULT_CGI_PATH;
+	this->location->cgi.push_back(cgi);
 }
 
 /***********************************************************************/
@@ -237,4 +244,28 @@ void	LocationBuilder::handleLimitExcept(const std::string &value)
 		else if(values[i] == "DELETE" )
 			this->location->limit_except->DELETE = true;
 	}
+}
+
+void	LocationBuilder::handleCGI(std::string const &value)
+{
+	if (this->location->cgiDirective == false)
+	{
+		delete this->location->cgi[0];
+		this->location->cgi.clear();
+	}
+	this->location->cgiDirective = true;
+
+	t_cgi	*cgi = new t_cgi;
+
+	std::istringstream	iss(value);
+
+	std::string extension;
+	std::string path;
+
+	iss >> extension;
+	iss >> path;
+
+	cgi->extension = extension;
+	cgi->path = path;
+	this->location->cgi.push_back(cgi);
 }

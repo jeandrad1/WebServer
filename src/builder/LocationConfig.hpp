@@ -24,6 +24,8 @@ class LocationConfig : public IConfig
 		std::map<int, t_errorPage *>	errorPages;
 		bool							errorPageDirective;
 		t_limit_except					*limit_except;
+		std::vector<t_cgi *>			cgi;
+		bool							cgiDirective;
 
 		virtual			~LocationConfig();
 		virtual void	printValues(int indent = 0);
