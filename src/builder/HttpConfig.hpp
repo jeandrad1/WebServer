@@ -13,8 +13,6 @@ class HttpConfig : public IConfig {
 		unsigned long					clientMaxBodySize;
 		std::map<int, t_errorPage *>	errorPages;
 		bool							errorPageDirective;
-		std::vector<t_cgi *>			cgi;
-		bool							cgiDirective;
 
 		virtual			~HttpConfig();
 		virtual void	printValues(int indent = 0);

@@ -19,7 +19,6 @@ ServerBuilder::ServerBuilder() : built(false), server(new ServerConfig())
 	registerHandler("autoindex", &ServerBuilder::handleAutoindex);
 	registerHandler("error_page", &ServerBuilder::handleErrorPage);
 	registerHandler("return", &ServerBuilder::handleReturn);
-	registerHandler("cgi", &ServerBuilder::handleCGI);
 }
 
 ServerBuilder::~ServerBuilder()
@@ -66,7 +65,6 @@ void	ServerBuilder::setDefaultValues()
 {
 	this->server->_return = new t_return;
 	t_listen	*listen = new t_listen;
-	t_cgi		*cgi = new t_cgi;
 
 	listen->port = DEFAULT_LISTEN_PORT;
 	listen->ip = DEFAULT_LISTEN_IP;
@@ -83,11 +81,6 @@ void	ServerBuilder::setDefaultValues()
 	
 	this->server->_return->returnDirective = false;
 	this->server->errorPageDirective = false;
-
-	this->server->cgiDirective = false;
-	cgi->extension = DEFAULT_CGI_EXTENSION;
-	cgi->path = DEFAULT_CGI_PATH;
-	this->server->cgi.push_back(cgi);
 }
 
 /***********************************************************************/
@@ -264,28 +257,4 @@ void	ServerBuilder::handleClientMaxBodySize(std::string const &value)
 	}
 	if (this->server->clientMaxBodySize > (1024 * 1024 * 1024))
 		this->server->clientMaxBodySize = (1024 * 1024 * 1024);
-}
-
-void	ServerBuilder::handleCGI(std::string const &value)
-{
-	if (this->server->cgiDirective == false)
-	{
-		delete this->server->cgi[0];
-		this->server->cgi.clear();
-	}
-	this->server->cgiDirective = true;
-
-	t_cgi	*cgi = new t_cgi;
-
-	std::istringstream	iss(value);
-
-	std::string extension;
-	std::string path;
-
-	iss >> extension;
-	iss >> path;
-
-	cgi->extension = extension;
-	cgi->path = path;
-	this->server->cgi.push_back(cgi);
 }
