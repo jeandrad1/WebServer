@@ -141,7 +141,6 @@ void EventLoop::handleNewConnection(int serverFd)
 void EventLoop::handleClientData(int clientFd)
 {
 	char buffer[4096];
-	HttpRequest *request = NULL;
 	ssize_t count = recv(clientFd, buffer, sizeof(buffer), 0);  // Replaced read with recv
 	if (count <= 0)
 	{
@@ -171,68 +170,68 @@ void EventLoop::handleClientData(int clientFd)
 		{
 			try
 			{
-				HttpRequest *req = handleHttpRequest(clientFd, header_end);
-				if (req == NULL)
+				HttpRequest *request = handleHttpRequest(clientFd, header_end);
+				if (request == NULL)
 					return ;
 				std::string ip = this->_ClientIPs[clientFd];
-				CgiHandler *cgi = new CgiHandler(req, ip, getServersByFd(_clientToServerSocket[clientFd]));
+				CgiHandler *cgi = new CgiHandler(request, ip, getServersByFd(_clientToServerSocket[clientFd]));
 				if (cgi->isCgiRequest())
 				{
 					std::cout << "CGI matches\n";
 					cgi->buildEnv();
 				}
+				if (request != NULL)
+				{
+					std::cout << RED << "Received HTTP request from fd " << clientFd << RESET << ":\n";
+					request->HttpRequestPrinter();
+
+					int serverFd = _clientToServer[clientFd];
+
+					//_servers[serverFd][0]->printValues();  
+					if (_servers.find(serverFd) != _servers.end() && !_servers[serverFd].empty())
+					{
+						HttpRequestRouter router;
+						HttpResponse response = router.handleRequest(*request, *(_servers[serverFd][0]));
+
+						// Transform the response into a string
+						std::ostringstream oss;
+						oss << "HTTP/1.1 " << response.getStatusCode() << " " << response.getStatusMessage() << "\r\n";
+						const std::map<std::string, std::string>& headers = response.getHeaders();
+						for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
+						{
+							oss << it->first << ": " << it->second << "\r\n";
+						}
+						oss << "\r\n";
+						oss << response.getBody();
+						std::string responseStr = oss.str();
+
+							// Send the response back to the client
+						std::cout << "The response is:\n" << responseStr << std::endl;
+						ssize_t sent = send(clientFd, responseStr.c_str(), responseStr.size(), 0);
+						if (sent == -1)
+						{
+							perror("send");
+							close(clientFd);
+							_buffers.erase(clientFd);
+							_clientToServer.erase(clientFd);
+							try {
+								_epollManager.removeFd(clientFd);
+							} catch (const std::exception& e) {
+								std::cerr << "Failed to remove fd: " << e.what() << std::endl;
+							}
+						}
+						else
+						{
+							_buffers[clientFd].clear();
+							std::cout << "✓ Response sent, connection kept alive" << std::endl;
+						}			
+						delete request;
+					}
+				}
 			}
 			catch (const std::exception &e)
 			{
 				std::cerr << "Failed cgi: " << e.what() << "\n";
-			}
-		}
-    if (request != NULL)
-    {
-        std::cout << RED << "Received HTTP request from fd " << clientFd << RESET << ":\n";
-        request->HttpRequestPrinter();
-
-        int serverFd = _clientToServer[clientFd];
-
-		//_servers[serverFd][0]->printValues();  
-        if (_servers.find(serverFd) != _servers.end() && !_servers[serverFd].empty())
-			{
-				HttpRequestRouter router;
-				HttpResponse response = router.handleRequest(*request, *(_servers[serverFd][0]));
-
-				// Transform the response into a string
-				std::ostringstream oss;
-				oss << "HTTP/1.1 " << response.getStatusCode() << " " << response.getStatusMessage() << "\r\n";
-				const std::map<std::string, std::string>& headers = response.getHeaders();
-				for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
-				{
-					oss << it->first << ": " << it->second << "\r\n";
-				}
-				oss << "\r\n";
-				oss << response.getBody();
-				std::string responseStr = oss.str();
-
-				// Send the response back to the client
-				std::cout << "The response is:\n" << responseStr << std::endl;
-				ssize_t sent = send(clientFd, responseStr.c_str(), responseStr.size(), 0);
-				if (sent == -1)
-				{
-					perror("send");
-					close(clientFd);
-					_buffers.erase(clientFd);
-					_clientToServer.erase(clientFd);
-					try {
-						_epollManager.removeFd(clientFd);
-					} catch (const std::exception& e) {
-						std::cerr << "Failed to remove fd: " << e.what() << std::endl;
-					}
-				}
-				else
-				{
-					_buffers[clientFd].clear();
-					std::cout << "✓ Response sent, connection kept alive" << std::endl;
-				}			
-			delete request;
 			}
 		}
 	}
@@ -248,7 +247,7 @@ HttpRequest *EventLoop::handleHttpRequest(int clientFd, size_t header_end)
 		HttpRequest *request = reqMan.buildHttpRequest();
 
 		long long content_length = request->getContentLength();
-		size_t received_body_size = _buffers[clientFd].size() - (header_end + 4);
+		long long received_body_size = _buffers[clientFd].size() - (header_end + 4);
 
 		if (received_body_size < content_length)
 		{

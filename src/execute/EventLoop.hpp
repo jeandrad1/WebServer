@@ -10,10 +10,10 @@ class EventLoop {
 
 	private:
 
-		std::map<Socket *, int>		_serverSockets;
 		EpollManager				&_epollManager;
-		std::map<int, std::string>	_buffers;
+		std::map<Socket *, int>		_serverSockets;
 		std::map<int, std::vector<ServerConfig *> > _servers;
+		std::map<int, std::string>	_buffers;
 		std::map<int, int>			_clientToServer;
 		std::map<int, int> _clientToServerSocket;
 		std::map<int, std::string> _ClientIPs;
