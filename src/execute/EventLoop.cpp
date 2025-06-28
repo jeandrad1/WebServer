@@ -105,8 +105,28 @@ void EventLoop::handleNewConnection(int serverFd)
 		close(client_fd);
 		return ;
 	}
+	    int serverKey = -1;
+    for (std::map<Socket *, int>::iterator it = _serverSockets.begin(); it != _serverSockets.end(); ++it)
+    {
+        if (it->first->getSocket() == serverFd)
+        {
+            serverKey = it->second;
+            break;
+        }
+    }	
 
-	_clientToServer[client_fd] = serverFd;
+	// new to handle the connections correctly
+    if (serverKey != -1)
+    {
+        _clientToServer[client_fd] = serverKey; 
+        std::cout << "✓ Mapped client " << client_fd << " to server key " << serverKey << std::endl;
+    }
+    else
+    {
+        std::cout << "✗ ERROR: No server key found for serverFd " << serverFd << std::endl;
+    }
+
+	_clientToServer[client_fd] = serverKey; 
 
 	std::cout << "New connection accepted (fd = " << client_fd << ")\n";
 }
@@ -124,9 +144,8 @@ void EventLoop::handleClientData(int clientFd)
 			close(clientFd);
 		}
 		close(clientFd);
-		_buffers.erase(clientFd);  // Clean up buffer
-        _clientToServer.erase(clientFd);  // Clean up mapping
-
+		_buffers.erase(clientFd);
+        _clientToServer.erase(clientFd);
 		try
 		{
 			this->_epollManager.removeFd(clientFd);
@@ -151,7 +170,7 @@ void EventLoop::handleClientData(int clientFd)
         request->HttpRequestPrinter();
 
         int serverFd = _clientToServer[clientFd];
-        
+
         if (_servers.find(serverFd) != _servers.end() && !_servers[serverFd].empty())
 			{
 				HttpRequestRouter router;
@@ -177,13 +196,19 @@ void EventLoop::handleClientData(int clientFd)
 					close(clientFd);
 					_buffers.erase(clientFd);
 					_clientToServer.erase(clientFd);
+					try {
+						_epollManager.removeFd(clientFd);
+					} catch (const std::exception& e) {
+						std::cerr << "Failed to remove fd: " << e.what() << std::endl;
+					}
 				}
-			}
-			else
-			{
-				std::cerr << "Error: No server configuration found for client fd " << clientFd << std::endl;
-			}
+				else
+				{
+					_buffers[clientFd].clear();
+					std::cout << "✓ Response sent, connection kept alive" << std::endl;
+				}			
 			delete request;
+			}
 		}
 	}
 }

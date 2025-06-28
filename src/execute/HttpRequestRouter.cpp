@@ -85,10 +85,20 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerCo
     {
 		std::string indexPath = fullPath + "/index.html";
 		struct stat indexStat;
-		if (stat(indexPath.c_str(), &indexStat) == 0 && S_ISREG(indexStat.st_mode))
-			return serveFile(indexPath, "index.html");
-		else if (server.autoindex)
-			return generateAutoIndexResponse(fullPath, path);
+        if (stat(indexPath.c_str(), &indexStat) == 0 && S_ISREG(indexStat.st_mode)) 
+		{
+            HttpResponse response = serveFile(indexPath, "index.html");
+            response.setHeader("Connection", "keep-alive");
+            response.setHeader("Keep-Alive", "timeout=5, max=100");
+            return response;
+        }
+        else if (server.autoindex) 
+		{
+            HttpResponse response = generateAutoIndexResponse(fullPath, path);
+			response.setHeader("Connection", "keep-alive");
+            response.setHeader("Keep-Alive", "timeout=5, max=100");
+            return response;
+        }
 		else
 			return ResponseFactory::createResponse(403);
 	}
