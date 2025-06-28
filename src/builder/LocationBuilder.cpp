@@ -19,7 +19,7 @@ LocationBuilder::LocationBuilder(const std::string &path) : built(false), locati
 	else
 		newPath = "";
 
-	this->location->locationPath = newPath;
+	this->location->setLocationPath(newPath);
 	setDefaultValues();
 
 	this->registerHandler("root", &LocationBuilder::handleRoot);
@@ -64,21 +64,29 @@ IConfig	*LocationBuilder::build(AConfigBlock *locationBlock)
 
 void	LocationBuilder::setDefaultValues(void)
 {
-	this->location->_return = new t_return;
-	this->location->limit_except = new t_limit_except;
+	this->location->setClientMaxBodySize(-1);
+	
+	std::string r_set = "-1";
+    this->location->setRoot(r_set);
+	
+	this->location->setAutoIndex(DEFAULT_AUTOINDEX);
 
-    this->location->autoindex = DEFAULT_AUTOINDEX;
-	this->location->clientMaxBodySize = -1;
-    this->location->root = "-1";
+	std::vector<std::string> index_default;
+	index_default.push_back(" ");
+    this->location->setIndex(index_default);
+	
+	t_return *r_temp = new t_return;
+	r_temp->returnDirective = false;
+	this->location->setReturn(r_temp);
+	
+	this->location->setErrorPageDirective(false);
 
-    this->location->index.push_back(" ");
-
-	this->location->_return->returnDirective = false;
-	this->location->errorPageDirective = false;
-	this->location->limit_except->limitDirective = false;
-	this->location->limit_except->POST = true;
-	this->location->limit_except->GET = true;
-	this->location->limit_except->DELETE = false;
+	t_limit_except *t_temp = new t_limit_except;
+	t_temp->limitDirective = false;
+	t_temp->POST = true;
+	t_temp->GET = true;
+	t_temp->DELETE = false;
+	this->location->setLimitExcept(t_temp);
 }
 
 /***********************************************************************/
@@ -88,14 +96,14 @@ void	LocationBuilder::setDefaultValues(void)
 void   	LocationBuilder::handleRoot(const std::string &value)
 {
 	std::string	real_value = value.substr(0, value.size() - 1);
-	this->location->root = real_value;
+	this->location->setRoot(real_value);
 }
 
 void	LocationBuilder::handleIndex(std::string const &value)
 {
 	std::string					real_value = value.substr(0, value.size() - 1);
 	std::vector<std::string>	index = split_str(real_value, " ");
-	this->location->index = index;
+	this->location->setIndex(index);
 }
 
 void	LocationBuilder::handleClientMaxBodySize(std::string const &value)
@@ -114,32 +122,32 @@ void	LocationBuilder::handleClientMaxBodySize(std::string const &value)
 	switch (tolower(suffix))
 	{
 		case 'k':
-			this->location->clientMaxBodySize = maxBodySize * 1024;
+			this->location->setClientMaxBodySize(maxBodySize * 1024);
 			break ;
 		case 'm':
-			this->location->clientMaxBodySize = maxBodySize * 1024 * 1024;
+			this->location->setClientMaxBodySize(maxBodySize * 1024 * 1024);
 			break ;
 		case 'g':
-			this->location->clientMaxBodySize = maxBodySize * 1024 * 1024 * 1024;
+			this->location->setClientMaxBodySize(maxBodySize * 1024 * 1024 * 1024);
 			break ;
 		case '\0':
-			this->location->clientMaxBodySize = maxBodySize;
+			this->location->setClientMaxBodySize(maxBodySize);
 			break ;
 		default :
 			std::cout<<"Impossible value found"<<std::endl;
 			return ;
 	}
-	if (this->location->clientMaxBodySize > (1024 * 1024 * 1024))
-		this->location->clientMaxBodySize = (1024 * 1024 * 1024);
+	if (this->location->getClientMaxBodySize() > (1024 * 1024 * 1024))
+		this->location->setClientMaxBodySize(1024 * 1024 * 1024);
 }
 
 void	LocationBuilder::handleAutoindex(const std::string &value)
 {
 	std::string	real_value = value.substr(0, value.size() - 1);
 	if (real_value == "off")
-		this->location->autoindex = false;
+		this->location->setAutoIndex(false);
 	else
-		this->location->autoindex = true;
+		this->location->setAutoIndex(true);
 }
 
 void	LocationBuilder::handleErrorPage(const std::string &value)
@@ -149,7 +157,7 @@ void	LocationBuilder::handleErrorPage(const std::string &value)
 	std::string					info;
 	t_errorPage					*errorPage = new t_errorPage;
 
-	this->location->errorPageDirective = true;
+	this->location->setErrorPageDirective(true);
 
 	if (value.empty())
 		return ;
@@ -177,64 +185,65 @@ void	LocationBuilder::handleErrorPage(const std::string &value)
 		ite--;
 	}
 	ite++;
+	std::map<int, t_errorPage *> t_errorPages;
 	for (std::vector<std::string>::iterator it = values.begin(); it != ite; it++)
 	{
 		errorPage->referencesCount++;
-		this->location->errorPages[std::atol((*it).c_str())] = errorPage;
+		t_errorPages[std::atol((*it).c_str())] = errorPage;
 	}
+	this->location->setErrorPages(t_errorPages);
 }
 
 void	LocationBuilder::handleReturn(const std::string &value)
 {
-	if (this->location->_return->returnDirective == true)
+	if (this->location->getReturn()->returnDirective == true)
 	{
 		std::cout << "Error in builder because of Return encountered twice, should throw exception?";
 		return ;
 	}
 
-	this->location->_return->returnDirective = true;
+	this->location->setReturnDirective(true);
 
 	std::string	real_value = value.substr(0, value.size() - 1);
 	int http_pos = real_value.find("http");
 
 	if(http_pos != std::string::npos)
 	{
-		this->location->_return->http = real_value.substr(http_pos, value.size());
+		std::string t_http = real_value.substr(http_pos, value.size());
+		this->location->setReturnHttp(t_http);
 		std::string	port_str = real_value.substr(0, http_pos);
-		this->location->_return->code = std::atoi(port_str.c_str());
+		this->location->setReturnCode(std::atoi(port_str.c_str()));
 	}
 	else
 	{
 		std::string	true_value = real_value.substr(0, std::string::npos);
-		this->location->_return->code = std::atoi(true_value.c_str());
+		this->location->setReturnCode(std::atoi(true_value.c_str()));
 	}
 }
 
 void	LocationBuilder::handleLimitExcept(const std::string &value)
 {
-	if (this->location->limit_except->limitDirective == true)
+	if (this->location->getLimitExcept()->limitDirective == true)
 	{
 		std::cout << "Error in builder because of limmit_except encountered twice, should throw exception?";
 		return ;
 	}
 
-	this->location->limit_except->limitDirective = true;
+	this->location->setLimitExceptLimitDirective(true);
 
 	std::string					real_value = value.substr(0, value.size() - 1);
 	std::vector<std::string>	values =split_str(real_value," ");
 
-	this->location->limit_except->GET = false;
-	this->location->limit_except->POST = false;
+	this->location->setLimitExceptGet(false);
+	this->location->setLimitExceptPost(false);
 
 	for (size_t	i = 0; i < values.size(); i++)
 	{
 		if(values[i] == "POST" )
-			this->location->limit_except->POST = true;
-
+			this->location->setLimitExceptPost(true);
 		else if(values[i] == "GET" )
-			this->location->limit_except->GET = true;
-
+			this->location->setLimitExceptGet(true);
 		else if(values[i] == "DELETE" )
-			this->location->limit_except->DELETE = true;
+			this->location->setLimitExceptDelete(true);
 	}
 }
