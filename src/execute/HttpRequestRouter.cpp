@@ -78,23 +78,33 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerCo
     
     std::string root;
     std::string indexFile = "index.html"; // default
+	std::string cleanPath = path;
     
     if (location)
     {
         root = location->root.empty() ? server.root : location->root;
-        
+
+        if (path.find(location->locationPath) == 0)
+		{
+            cleanPath = path.substr(location->locationPath.length());
+            if (cleanPath.empty())
+                cleanPath = "/";
+            else if (cleanPath[0] != '/')
+                cleanPath = "/" + cleanPath;
+        }
+
         if (!location->index.empty())
             indexFile = location->index[0]; // maybe future change to handle multiple index files
     }
     else
-    {
+	{
         root = server.root;
-    }
-
-    std::string fullPath = root + path;
+		cleanPath = path;
+	}
+    std::string fullPath = root + cleanPath;
     
     if (!FilePathChecker::isSafePath(root, fullPath))
-        return ResponseFactory::createResponse(403);
+        return ResponseFactory::createResponse(499);
     
     struct stat s;
     if (stat(fullPath.c_str(), &s) != 0)

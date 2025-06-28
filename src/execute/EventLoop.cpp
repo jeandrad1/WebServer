@@ -173,7 +173,7 @@ void EventLoop::handleClientData(int clientFd)
 
         int serverFd = _clientToServer[clientFd];
 
-		_servers[serverFd][0]->printValues();  
+		//_servers[serverFd][0]->printValues();  
         if (_servers.find(serverFd) != _servers.end() && !_servers[serverFd].empty())
 			{
 				HttpRequestRouter router;
