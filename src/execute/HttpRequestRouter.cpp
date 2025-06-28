@@ -155,6 +155,7 @@ HttpResponse HttpRequestRouter::handlePost(const HttpRequest& req, const ServerC
     // Basic POST behavior: echo back the body.
     // Need to do a lot more
     // Conversion because of the vector of unsigned char
+    (void) server;
     std::vector<unsigned char> bodyVec = req.getBody();
     std::string body
     (
