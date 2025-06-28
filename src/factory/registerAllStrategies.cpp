@@ -1,7 +1,7 @@
 #include "StrategyFactory.hpp"
 #include "createStrategies.hpp"
 
-void	registerAllStrategies(StrategyFactory factory)
+void	registerAllStrategies(void)
 {
 	StrategyFactory::getInstance().registerStrategy("autoindex", createAutoIndexStrategy);
 	StrategyFactory::getInstance().registerStrategy("client_max_body_size", createClientMaxBodySizeStrategy);
@@ -15,7 +15,7 @@ void	registerAllStrategies(StrategyFactory factory)
 	StrategyFactory::getInstance().registerStrategy("cgi", createCGIStrategy);
 }
 
-void	registerBlockStrategies(StrategyFactory factory)
+void	registerBlockStrategies(void)
 {
 	StrategyFactory::getInstance().registerStrategy("server", createServerBlockStrategy);
 	StrategyFactory::getInstance().registerStrategy("http", createHttpBlockStrategy);
