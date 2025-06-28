@@ -11,8 +11,8 @@ std::vector<IConfig *>	createConfigClasses(AConfigBlock *config_ptr);
 
 AConfigBlock			*createBlock(std::ifstream &filename, AConfigBlock &block);
 int						validateConfigTreeFactory(AConfigBlock &config);
-void					registerAllStrategies(StrategyFactory factory);
-void					registerBlockStrategies(StrategyFactory factory);
+void					registerAllStrategies(void);
+void					registerBlockStrategies(void);
 
 /***********************************************************************/
 /*                     Constructors & Destructor                       */
@@ -25,8 +25,8 @@ WebservManager::WebservManager(const std::string &configPath) : _configFile(conf
 		std::cerr << "Error: Could not open the file.\n";
 	}
 
-	registerAllStrategies(StrategyFactory::getInstance());
-	registerBlockStrategies(StrategyFactory::getInstance());
+	registerAllStrategies();
+	registerBlockStrategies();
 }
 
 WebservManager::~WebservManager(void)
