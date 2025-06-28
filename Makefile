@@ -1,7 +1,7 @@
 NAME = webserver
 
 CC = c++
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror 
 
 CPP98_FLAG = -std=c++98
 
@@ -65,7 +65,7 @@ SRCS = $(addprefix $(SRCS_DIR), $(addsuffix .cpp, $(FILES)))
 OBJS = $(addprefix $(OBJS_DIR), $(addsuffix .o, $(FILES)))
 
 $(OBJS_DIR)%.o: $(SRCS_DIR)%.cpp
-	@$(CC) $(FLAGS) $(CPP98_FLAG) -c $< -o $@
+	@$(CC) $(CFLAGS) $(CPP98_FLAG) -c $< -o $@
 
 all: $(NAME)
 

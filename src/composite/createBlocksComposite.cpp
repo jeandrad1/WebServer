@@ -55,7 +55,6 @@ AConfigBlock	*createBlock(std::ifstream &filename, AConfigBlock &block)
 	while (!line.empty())
 	{
 		std::size_t http = line.find("http");
-		std::size_t semicolon = line.find(";");
 		if (line.empty())
 			continue;
 		if (line.find("server") != std::string::npos && line.find("server_name") == std::string::npos)
