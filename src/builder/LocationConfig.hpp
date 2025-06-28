@@ -21,20 +21,20 @@ class LocationConfig : public IConfig
 		bool							_autoindex;
 		long long						_clientMaxBodySize;
 		t_return						*_return;
-		std::map<int, t_errorPage *>	errorPages;
-		bool							errorPageDirective;
-		t_limit_except					*limit_except;
-		std::vector<t_cgi *>			cgi;
+		std::map<int, t_errorPage *>	_errorPages;
+		bool							_errorPageDirective;
+		t_limit_except					*_limit_except;
+		
+		public:
 		bool							cgiDirective;
-
-	public:
+		std::vector<t_cgi *>			cgi;
 		virtual							~LocationConfig();
 		virtual void					printValues(int indent = 0);
-
+		
 		void							applyInheritedConfig(void);
 		void							defaultInheritedValues(void);
 		void							inheritFromServer(const ServerConfig &server);
-
+		
 		void							setLocationPath(std::string &src);
 		void							setRoot(std::string &src);
 		void							setIndex(std::vector<std::string> &src);
