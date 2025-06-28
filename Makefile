@@ -69,12 +69,12 @@ SRCS = $(addprefix $(SRCS_DIR), $(addsuffix .cpp, $(FILES)))
 OBJS = $(addprefix $(OBJS_DIR), $(addsuffix .o, $(FILES)))
 
 $(OBJS_DIR)%.o: $(SRCS_DIR)%.cpp
-	@$(CC) $(FLAGS) $(CPP98_FLAG) -c $< -o $@
+	@$(CC) $(CFLAGS) $(CPP98_FLAG) -c $< -o $@
 
 all: $(NAME)
 
 $(NAME) : $(OBJS) $(OBJS_DIR)charge_flag_makefile/charge.flag
-	@$(CC) $(FLAGS) $(CPP98_FLAG) $(OBJS) -o $(NAME)
+	@$(CC) $(CFLAGS) $(CPP98_FLAG) $(OBJS) -o $(NAME)
 	@echo
 	@echo "$(GREEN)WebServer compiled!"
 	@echo
