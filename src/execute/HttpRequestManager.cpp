@@ -61,12 +61,12 @@ void HttpRequestManager::parseHttpRequest(const std::string& raw_request)
 void HttpRequestManager::parseRequestLine(const std::string &line)
 {
 	size_t method_end = line.find(' ');
-    if (method_end == std::string::npos)
-        throw std::runtime_error("Malformed request line: missing method");
+	if (method_end == std::string::npos)
+		throw std::runtime_error("Malformed request line: missing method");
 
 	size_t path_end = line.find(' ', method_end + 1);
-    if (path_end == std::string::npos)
-        throw std::runtime_error("Malformed request line: missing path");
+	if (path_end == std::string::npos)
+		throw std::runtime_error("Malformed request line: missing path");
 
 	method = line.substr(0, method_end);
 	if (method != "GET" && method != "POST" && method != "DELETE")
