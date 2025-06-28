@@ -82,19 +82,19 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerCo
     
     if (location)
     {
-        root = location->root.empty() ? server.root : location->root;
+        root = location->getRoot().empty() ? server.root : location->getRoot();
 
-        if (path.find(location->locationPath) == 0)
+        if (path.find(location->getLocationPath()) == 0)
 		{
-            cleanPath = path.substr(location->locationPath.length());
+            cleanPath = path.substr(location->getLocationPath().length());
             if (cleanPath.empty())
                 cleanPath = "/";
             else if (cleanPath[0] != '/')
                 cleanPath = "/" + cleanPath;
         }
 
-        if (!location->index.empty())
-            indexFile = location->index[0]; // maybe future change to handle multiple index files
+        if (!location->getIndex().empty())
+            indexFile = location->getIndex()[0]; // maybe future change to handle multiple index files
     }
     else
 	{
@@ -141,10 +141,10 @@ const LocationConfig* HttpRequestRouter::findMatchingLocation(const ServerConfig
          it != server.locations.end(); ++it)
     {
         LocationConfig* loc = *it; 
-        if (path.find(loc->locationPath) == 0 && loc->locationPath.length() > longestMatch)
+        if (path.find(loc->getLocationPath()) == 0 && loc->getLocationPath().length() > longestMatch)
         {
             bestMatch = loc;
-            longestMatch = loc->locationPath.length();
+            longestMatch = loc->getLocationPath().length();
         }
     }
     
