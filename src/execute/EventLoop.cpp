@@ -65,6 +65,8 @@ void EventLoop::runEventLoop(void)
 	}
 }
 
+
+
 /***********************************************************************/
 /*                          Private Functions                          */
 /***********************************************************************/
@@ -171,6 +173,7 @@ void EventLoop::handleClientData(int clientFd)
 
         int serverFd = _clientToServer[clientFd];
 
+		_servers[serverFd][0]->printValues();  
         if (_servers.find(serverFd) != _servers.end() && !_servers[serverFd].empty())
 			{
 				HttpRequestRouter router;
@@ -189,6 +192,7 @@ void EventLoop::handleClientData(int clientFd)
 				std::string responseStr = oss.str();
 
 				// Send the response back to the client
+				std::cout << "The response is:\n" << responseStr << std::endl;
 				ssize_t sent = send(clientFd, responseStr.c_str(), responseStr.size(), 0);
 				if (sent == -1)
 				{

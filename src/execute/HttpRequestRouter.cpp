@@ -7,6 +7,7 @@
 #include <fstream>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <sstream>
 
 HttpResponse HttpRequestRouter::handleRequest(const HttpRequest& req, const ServerConfig& server) {
 	std::string method = req.getMethod();
@@ -69,42 +70,76 @@ HttpResponse HttpRequestRouter::serveFile(const std::string& path, const std::st
 	return res;
 }
 
-HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerConfig& server) {
-	std::string path = req.getPath();
-	std::string root = server.root;
-	std::string fullPath = root + path;
-
-	if (!FilePathChecker::isSafePath(root, fullPath))
-		return ResponseFactory::createResponse(403);
-
-	struct stat s;
-	if (stat(fullPath.c_str(), &s) != 0)
-		return ResponseFactory::createResponse(404);
-
-	if (S_ISDIR(s.st_mode))
+HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerConfig& server)
+{
+    std::string path = req.getPath();
+    
+    const LocationConfig* location = findMatchingLocation(server, path);
+    
+    std::string root;
+    std::string indexFile = "index.html"; // default
+    
+    if (location)
     {
-		std::string indexPath = fullPath + "/index.html";
-		struct stat indexStat;
-        if (stat(indexPath.c_str(), &indexStat) == 0 && S_ISREG(indexStat.st_mode)) 
-		{
-            HttpResponse response = serveFile(indexPath, "index.html");
+        root = location->root.empty() ? server.root : location->root;
+        
+        if (!location->index.empty())
+            indexFile = location->index[0]; // maybe future change to handle multiple index files
+    }
+    else
+    {
+        root = server.root;
+    }
+
+    std::string fullPath = root + path;
+    
+    if (!FilePathChecker::isSafePath(root, fullPath))
+        return ResponseFactory::createResponse(403);
+    
+    struct stat s;
+    if (stat(fullPath.c_str(), &s) != 0)
+        return ResponseFactory::createResponse(404);
+    
+    if (S_ISDIR(s.st_mode))
+	{
+        std::string indexPath = fullPath + "/" + indexFile;
+        struct stat indexStat;
+        if (stat(indexPath.c_str(), &indexStat) == 0 && S_ISREG(indexStat.st_mode)) {
+            HttpResponse response = serveFile(indexPath, indexFile);
             response.setHeader("Connection", "keep-alive");
             response.setHeader("Keep-Alive", "timeout=5, max=100");
             return response;
         }
-        else if (server.autoindex) 
-		{
+        else if (server.autoindex) {
             HttpResponse response = generateAutoIndexResponse(fullPath, path);
-			response.setHeader("Connection", "keep-alive");
+            response.setHeader("Connection", "keep-alive");
             response.setHeader("Keep-Alive", "timeout=5, max=100");
             return response;
         }
-		else
-			return ResponseFactory::createResponse(403);
-	}
-	return serveFile(fullPath, path);
+        else
+            return ResponseFactory::createResponse(403);
+    }
+    
+    return serveFile(fullPath, path);
 }
 
+const LocationConfig* HttpRequestRouter::findMatchingLocation(const ServerConfig& server, const std::string& path) {
+    const LocationConfig* bestMatch = NULL;
+    size_t longestMatch = 0;
+    
+    for (std::vector<LocationConfig*>::const_iterator it = server.locations.begin(); 
+         it != server.locations.end(); ++it)
+    {
+        LocationConfig* loc = *it; 
+        if (path.find(loc->locationPath) == 0 && loc->locationPath.length() > longestMatch)
+        {
+            bestMatch = loc;
+            longestMatch = loc->locationPath.length();
+        }
+    }
+    
+    return bestMatch;
+}
 HttpResponse HttpRequestRouter::handlePost(const HttpRequest& req, const ServerConfig& server)
 {
     // Basic POST behavior: echo back the body.

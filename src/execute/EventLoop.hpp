@@ -25,6 +25,7 @@ class EventLoop {
 		~EventLoop(void);
 
 		void runEventLoop(void);
+		
 };
 
 # endif
