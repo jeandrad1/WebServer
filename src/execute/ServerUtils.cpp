@@ -31,9 +31,9 @@ LocationConfig *ServerUtils::getLocationByRequestPath(std::string path, ServerCo
 	for (std::vector<LocationConfig *>::iterator it = server->locations.begin(); it != ite; it++)
 	{
 		std::string locPath;
-		if (path.find((*it)->locationPath) == 0)
+		if (path.find((*it)->getLocationPath()) == 0)
 		{
-			locPath = (*it)->locationPath;
+			locPath = (*it)->getLocationPath();
 			if (locPath.length() > bestMatch.length())
 			{
 				bestMatch = locPath;
