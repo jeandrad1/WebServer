@@ -19,7 +19,7 @@ void	HttpRequest::handleContentLength(std::string content_length_str)
 	if (!content_length_str.empty()) 
 	{
 		safe_atoll(content_length_str, contentLength);
-		this->contentLenghtString = content_length_str;
+		this->contentLengthString = content_length_str;
 	}
 	else{
 		contentLength = 0;
@@ -111,7 +111,7 @@ void HttpRequest::handleUserAgent(std::string userAgent_str)
 	this->userAgent = userAgent_str;
 }
 
-void HttpRequest::handleUserAgent(std::string accept_str)
+void HttpRequest::handleAccept(std::string accept_str)
 {
 	this->accept = accept_str;
 }
@@ -177,6 +177,11 @@ std::string HttpRequest::getServerPort() const
 long long HttpRequest::getContentLength()
 {
 	return(contentLength);
+}
+
+std::string HttpRequest::getContentType() const
+{
+	return (this->contentType);
 }
 
 std::string HttpRequest::getContentLengthString() const
