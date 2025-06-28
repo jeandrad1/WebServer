@@ -53,15 +53,15 @@ class LocationConfig : public IConfig
 		void							setLimitExceptDelete(bool src);
 
 
-		std::string						getLocationPath();
-		std::string						getRoot();
-		std::vector<std::string>		getIndex();
-		bool							getAutoIndex();
-		long long						getClientMaxBodySize();
-		t_return						*getReturn();
-		std::map<int, t_errorPage *>	getErrorPages();
-		bool							getErrorPageDirective();
-		t_limit_except					*getLimitExcept();
+		std::string								getLocationPath() const;
+		std::string								getRoot() const;
+		const std::vector<std::string>			getIndex()const;
+		bool									getAutoIndex() const;
+		long long								getClientMaxBodySize() const;
+		t_return								*getReturn() const;
+		const std::map<int, t_errorPage *>		getErrorPages() const;
+		bool									getErrorPageDirective() const;
+		t_limit_except							*getLimitExcept() const;
 };
 
 #endif

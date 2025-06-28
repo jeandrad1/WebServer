@@ -167,29 +167,29 @@ void LocationConfig::setLimitExceptDelete(bool src)
 /*                          Getters                                    */
 /***********************************************************************/
 
-std::string LocationConfig::getLocationPath()
+std::string LocationConfig::getLocationPath() const
 {return _locationPath;}
 
-std::string LocationConfig::getRoot()
+std::string LocationConfig::getRoot() const
 {return _root;}
 
-std::vector<std::string> LocationConfig::getIndex()
+const std::vector<std::string> LocationConfig::getIndex() const
 {return _index;}
 
-bool LocationConfig::getAutoIndex()
+bool LocationConfig::getAutoIndex() const
 {return _autoindex;}
 
-long long LocationConfig::getClientMaxBodySize()
+long long LocationConfig::getClientMaxBodySize() const
 {return _clientMaxBodySize;}
 
-t_return *LocationConfig::getReturn()
+t_return *LocationConfig::getReturn() const
 {return _return;}
 
-std::map<int, t_errorPage *> LocationConfig::getErrorPages()
+const std::map<int, t_errorPage *> LocationConfig::getErrorPages() const
 {return _errorPages;}
 
-bool LocationConfig::getErrorPageDirective()
+bool LocationConfig::getErrorPageDirective() const
 {return _errorPageDirective;}
 
-t_limit_except *LocationConfig::getLimitExcept()
+t_limit_except *LocationConfig::getLimitExcept() const
 {return _limit_except;}
