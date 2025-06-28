@@ -106,6 +106,10 @@ void EventLoop::handleNewConnection(int serverFd)
 		return ;
 	}
 	_clientToServerSocket[client_fd] = serverFd;
+
+	std::string ip = ServerUtils::getClientIP(client_addr);
+	this->_ClientIPs[client_fd] = ip;
+
 	std::cout << "New connection accepted (fd = " << client_fd << ")\n";
 }
 
@@ -136,12 +140,23 @@ void EventLoop::handleClientData(int clientFd)
 		size_t header_end = _buffers[clientFd].find("\r\n\r\n");
 		if (header_end != std::string::npos)
 		{
-			HttpRequest *req = handleHttpRequest(clientFd, header_end);
-			if (req == NULL)
-				return ;
-			CgiDetector detector;
-			if (detector.isCgiRequest(req, getServersByFd(_clientToServerSocket[clientFd])))
-				std::cout << "CGI matches\n";			
+			try
+			{
+				HttpRequest *req = handleHttpRequest(clientFd, header_end);
+				if (req == NULL)
+					return ;
+				std::string ip = this->_ClientIPs[clientFd];
+				CgiHandler *cgi = new CgiHandler(req, ip, getServersByFd(_clientToServerSocket[clientFd]));
+				if (cgi->isCgiRequest())
+				{
+					std::cout << "CGI matches\n";			
+					cgi->buildEnv();
+				}
+			}
+			catch (const std::exception &e)
+			{
+				std::cerr << "Failed cgi: " << e.what() << "\n";
+			}
 		}
 		/*std::cout << "Received (" << fd << "): " << std::string(buffer, count);
 
@@ -166,7 +181,7 @@ HttpRequest *EventLoop::handleHttpRequest(int clientFd, size_t header_end)
 		reqMan.parseHttpHeader(_buffers[clientFd]);
 		HttpRequest *request = reqMan.buildHttpRequest();
 
-		long long content_length = request->getContentLenght();
+		long long content_length = request->getContentLength();
 		size_t received_body_size = _buffers[clientFd].size() - (header_end + 4);
 
 		if (received_body_size < content_length)

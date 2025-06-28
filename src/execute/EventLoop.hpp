@@ -4,6 +4,8 @@
 # include "EpollManager.hpp"
 # include "SocketsManager.hpp"
 # include "CgiDetector.hpp"
+# include "CgiHandler.hpp"
+# include "ServerUtils.hpp"
 
 class EventLoop {
 
@@ -14,6 +16,7 @@ class EventLoop {
 		std::map<int, std::string>	_buffers;
 		std::map<int, std::vector<ServerConfig *> > _servers;
 		std::map<int, int> _clientToServerSocket;
+		std::map<int, std::string> _ClientIPs;
 
 		bool isServerSocket(int fd);
 		void handleNewConnection(int serverFd);
