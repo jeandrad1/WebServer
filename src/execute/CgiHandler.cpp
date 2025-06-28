@@ -67,7 +67,7 @@ void	CgiHandler::buildEnv(void)
 
 void	CgiHandler::resolveScriptPath(void)
 {
-	std::string rootPath = this->_location->root;
+	std::string rootPath = this->_location->getRoot();
 	std::string script = this->_req->getPath();
 	this->_scriptPath = rootPath + script;
 }
