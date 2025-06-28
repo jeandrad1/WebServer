@@ -48,6 +48,9 @@ FILES = main \
 		execute/EpollManager \
 		execute/EventLoop \
 		execute/CgiDetector \
+		execute/CgiHandler \
+		execute/CgiEnvBuilder \
+		execute/ServerUtils \
 
 
 $(shell mkdir -p ./build)
