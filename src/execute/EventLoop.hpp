@@ -3,7 +3,6 @@
 
 # include "EpollManager.hpp"
 # include "SocketsManager.hpp"
-# include "CgiDetector.hpp"
 # include "CgiHandler.hpp"
 # include "ServerUtils.hpp"
 
