@@ -82,7 +82,7 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerCo
     
     if (location)
     {
-        root = location->getRoot().empty() ? server.root : location->getRoot();
+        root = location->getRoot().empty() ? server.getRoot() : location->getRoot();
 
         if (path.find(location->getLocationPath()) == 0)
 		{
@@ -98,7 +98,7 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerCo
     }
     else
 	{
-        root = server.root;
+        root = server.getRoot();
 		cleanPath = path;
 	}
     std::string fullPath = root + cleanPath;
@@ -120,7 +120,7 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerCo
             response.setHeader("Keep-Alive", "timeout=5, max=100");
             return response;
         }
-        else if (server.autoindex) {
+        else if (server.getAutoIndex()) {
             HttpResponse response = generateAutoIndexResponse(fullPath, path);
             response.setHeader("Connection", "keep-alive");
             response.setHeader("Keep-Alive", "timeout=5, max=100");
@@ -137,8 +137,8 @@ const LocationConfig* HttpRequestRouter::findMatchingLocation(const ServerConfig
     const LocationConfig* bestMatch = NULL;
     size_t longestMatch = 0;
     
-    for (std::vector<LocationConfig*>::const_iterator it = server.locations.begin(); 
-         it != server.locations.end(); ++it)
+    const std::vector<LocationConfig*> &location = server.getLocations();
+    for (std::vector<LocationConfig*>::const_iterator it = location.begin(); it != server.getLocations().end(); ++it)
     {
         LocationConfig* loc = *it; 
         if (path.find(loc->getLocationPath()) == 0 && loc->getLocationPath().length() > longestMatch)
@@ -168,7 +168,7 @@ HttpResponse HttpRequestRouter::handlePost(const HttpRequest& req, const ServerC
 }
 HttpResponse HttpRequestRouter::handleDelete(const HttpRequest& req, const ServerConfig& server) {
 	std::string path = req.getPath();
-	std::string root = server.root;
+	std::string root = server.getRoot();
 	std::string fullPath = root + path;
 
 	struct stat s;
