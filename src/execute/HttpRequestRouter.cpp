@@ -77,7 +77,7 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerCo
     const LocationConfig* location = findMatchingLocation(server, path);
     
     std::string root;
-    std::string indexFile = "index.html"; // default
+    std::string indexFile = server.index[0]; // default, change in the future to take all the strings
 	std::string cleanPath = path;
     
     if (location)
