@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <sstream>
+#include "../utils/to_string.hpp"
 
 HttpResponse HttpRequestRouter::handleRequest(const HttpRequest& req, const ServerConfig& server) {
 	std::string method = req.getMethod();
@@ -150,22 +151,65 @@ const LocationConfig* HttpRequestRouter::findMatchingLocation(const ServerConfig
     
     return bestMatch;
 }
+
 HttpResponse HttpRequestRouter::handlePost(const HttpRequest& req, const ServerConfig& server)
 {
-    // Basic POST behavior: echo back the body.
-    // Need to do a lot more
-    // Conversion because of the vector of unsigned char
-    (void) server;
-    std::vector<unsigned char> bodyVec = req.getBody();
-    std::string body
-    (
-        static_cast<const char*>(static_cast<const void*>(bodyVec.data())),
-        bodyVec.size()
-    );
-    HttpResponse res = ResponseFactory::createResponse(200, "POST received:\n" + body);
-    res.setHeader("Content-Type", "text/plain");
+    std::string path = req.getPath();
+    const LocationConfig* location = findMatchingLocation(server, path);
+
+    std::string root;
+    std::string cleanPath = path;
+
+    if (location)
+    {
+        root = location->getRoot().empty() ? server.root : location->getRoot();
+
+        if (path.find(location->getLocationPath()) == 0)
+        {
+            cleanPath = path.substr(location->getLocationPath().length());
+            if (cleanPath.empty())
+                cleanPath = "/";
+            else if (cleanPath[0] != '/')
+                cleanPath = "/" + cleanPath;
+        }
+    }
+    else
+        root = server.root;
+
+    std::string fullPath = root + cleanPath;
+
+    if (!FilePathChecker::isSafePath(root, fullPath))
+        return ResponseFactory::createResponse(499);
+
+    struct stat s;
+    if (stat(fullPath.c_str(), &s) == 0 && S_ISDIR(s.st_mode))
+        return ResponseFactory::createResponse(403); // Forbidden: cannot POST to a directory
+
+    if (access(fullPath.c_str(), F_OK) == 0)
+        return ResponseFactory::createResponse(409); // existing file conflict
+
+    std::ofstream out(fullPath.c_str(), std::ios::binary);
+	
+	if (!out)
+		return ResponseFactory::createResponse(500); // write error
+
+	std::string body = to_string(req.getBody());
+	if (body.empty())
+		return ResponseFactory::createResponse(400); // Bad Request: empty body
+
+	out.write(body.c_str(), body.size());
+    out.close();
+
+    // Succces: 201 Created
+    HttpResponse res;
+    res.setStatus(201, "Created");
+    res.setHeader("Content-Length", "0");
+    res.setHeader("Connection", "keep-alive");
+    res.setHeader("Keep-Alive", "timeout=5, max=100");
+
     return res;
 }
+
 HttpResponse HttpRequestRouter::handleDelete(const HttpRequest& req, const ServerConfig& server) {
 	std::string path = req.getPath();
 	std::string root = server.root;
