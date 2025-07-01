@@ -243,7 +243,7 @@ HttpRequest *EventLoop::handleHttpRequest(int clientFd, size_t header_end)
 	{
 		HttpRequestManager reqMan;
 
-		reqMan.parseHttpHeader(_buffers[clientFd]);
+		reqMan.parseHttpRequest(_buffers[clientFd]);
 		HttpRequest *request = reqMan.buildHttpRequest();
 
 		long long content_length = request->getContentLength();
