@@ -25,6 +25,7 @@ class HttpRequestRouter : public IHttpRequestHandler
 		HttpResponse handleDelete(const HttpRequest& req, const ServerConfig& server);
 		HttpResponse methodNotAllowed();
 		const LocationConfig* findMatchingLocation(const ServerConfig& server, const std::string& path);
+		HttpResponse generateErrorResponse(int code, const ServerConfig& server, const LocationConfig* location);
 
 };
 

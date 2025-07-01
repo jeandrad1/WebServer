@@ -20,62 +20,6 @@ HttpResponse HttpRequestRouter::handleRequest(const HttpRequest& req, const Serv
 	else                       return methodNotAllowed();
 }
 
-HttpResponse ResponseFactory::generateErrorResponse(int code, const ServerConfig& server, const LocationConfig* location)
-{
-    std::string errorPath;
-    
-    // Check if location has a generic error page first, then server
-    if (location && location->getErrorPageDirective())
-        errorPath = location->getErrorPageDirective();
-
-    else if (server.errorPageDirective)
-        errorPath = server.errorPageDirective;
-
-    // Try to serve the custom error page if found
-    if (!errorPath.empty())
-	{
-        std::string fullPath = server.root + "/" + errorPath;
-        if (access(fullPath.c_str(), R_OK) == 0)
-		{
-			HttpResponse res = HttpRequestRouter::serveFile(fullPath, errorPath);
-            return res;
-		}
-	}
-
-    return ResponseFactory::createBasicErrorResponse(code);
-}
-
-// Helper function for basic error responses
-HttpResponse ResponseFactory::createBasicErrorResponse(int code)
-{
-    std::string statusText = getStatusText(code);
-    std::string body = "<html><body><h1>" + to_string(code) + " " + statusText + "</h1></body></html>";
-    
-    HttpResponse response;
-    response.setStatus(code, statusText);
-    response.setHeader("Content-Type", "text/html");
-    response.setHeader("Content-Length", to_string(body.length()));
-    response.setBody(body);
-    
-    return response;
-}
-
-// Helper function to get status text
-std::string ResponseFactory::getStatusText(int code)
-{
-    switch (code)
-	{
-        case 400: return "Bad Request";
-        case 403: return "Forbidden";
-        case 404: return "Not Found";
-        case 405: return "Method Not Allowed";
-        case 409: return "Conflict";
-        case 413: return "Payload Too Large";
-        case 499: return "Request Timeout";
-        case 500: return "Internal Server Error";
-        default: return "Error";
-    }
-}
 HttpResponse HttpRequestRouter::generateAutoIndexResponse(const std::string& dirPath, const std::string& requestPath)
 {
 	DIR* dir = opendir(dirPath.c_str());
@@ -102,14 +46,16 @@ HttpResponse HttpRequestRouter::generateAutoIndexResponse(const std::string& dir
 	return res;
 }
 
-HttpResponse HttpRequestRouter::serveFile(const std::string& path, const std::string& virtualPath) 
+HttpResponse HttpRequestRouter::serveFile(const std::string& path, const std::string& virtualPath, const &server) 
 {
     MimeTypeDetector mime;
 
 	int fd = open(path.c_str(), O_RDONLY);
 	if (fd < 0)
-		return ResponseFactory::createResponse(403);
-
+	{
+		ResponseFactory factory;
+        return factory.generateErrorResponse(403, server, location);
+	}
 	std::string body;
 	char buffer[4096];
 	ssize_t bytes;
@@ -161,17 +107,22 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerCo
     std::string fullPath = root + cleanPath;
     
     if (!FilePathChecker::isSafePath(root, fullPath))
-        return ResponseFactory::createResponse(499);
-    
+	{
+		ResponseFactory factory;
+        return factory.generateErrorResponse(403, server, location);
+	}
     struct stat s;
     if (stat(fullPath.c_str(), &s) != 0)
-        return ResponseFactory::createResponse(404);
-    
+	{
+		ResponseFactory factory;
+        return factory.generateErrorResponse(404, server, location);
+	}
     if (S_ISDIR(s.st_mode))
 	{
         std::string indexPath = fullPath + "/" + indexFile;
         struct stat indexStat;
-        if (stat(indexPath.c_str(), &indexStat) == 0 && S_ISREG(indexStat.st_mode)) {
+        if (stat(indexPath.c_str(), &indexStat) == 0 && S_ISREG(indexStat.st_mode))
+		{
             HttpResponse response = serveFile(indexPath, indexFile);
             response.setHeader("Connection", "keep-alive");
             response.setHeader("Keep-Alive", "timeout=5, max=100");
@@ -266,7 +217,8 @@ HttpResponse HttpRequestRouter::handlePost(const HttpRequest& req, const ServerC
     return res;
 }
 
-HttpResponse HttpRequestRouter::handleDelete(const HttpRequest& req, const ServerConfig& server) {
+HttpResponse HttpRequestRouter::handleDelete(const HttpRequest& req, const ServerConfig& server)
+{
 	std::string path = req.getPath();
 	std::string root = server.root;
 	std::string fullPath = root + path;
@@ -281,6 +233,7 @@ HttpResponse HttpRequestRouter::handleDelete(const HttpRequest& req, const Serve
 	return ResponseFactory::createResponse(200, "File deleted");
 }
 
-HttpResponse HttpRequestRouter::methodNotAllowed() {
+HttpResponse HttpRequestRouter::methodNotAllowed()
+{
 	return ResponseFactory::createResponse(405);
 }
