@@ -10,7 +10,8 @@
 #include <sstream>
 #include "../utils/to_string.hpp"
 
-HttpResponse HttpRequestRouter::handleRequest(const HttpRequest& req, const ServerConfig& server) {
+HttpResponse HttpRequestRouter::handleRequest(const HttpRequest& req, const ServerConfig& server)
+{
 	std::string method = req.getMethod();
 
 	if (method == "GET")       return handleGet(req, server);
@@ -19,7 +20,62 @@ HttpResponse HttpRequestRouter::handleRequest(const HttpRequest& req, const Serv
 	else                       return methodNotAllowed();
 }
 
+HttpResponse ResponseFactory::generateErrorResponse(int code, const ServerConfig& server, const LocationConfig* location)
+{
+    std::string errorPath;
+    
+    // Check if location has a generic error page first, then server
+    if (location && location->getErrorPageDirective())
+        errorPath = location->getErrorPageDirective();
 
+    else if (server.errorPageDirective)
+        errorPath = server.errorPageDirective;
+
+    // Try to serve the custom error page if found
+    if (!errorPath.empty())
+	{
+        std::string fullPath = server.root + "/" + errorPath;
+        if (access(fullPath.c_str(), R_OK) == 0)
+		{
+			HttpResponse res = HttpRequestRouter::serveFile(fullPath, errorPath);
+            return res;
+		}
+	}
+
+    return ResponseFactory::createBasicErrorResponse(code);
+}
+
+// Helper function for basic error responses
+HttpResponse ResponseFactory::createBasicErrorResponse(int code)
+{
+    std::string statusText = getStatusText(code);
+    std::string body = "<html><body><h1>" + to_string(code) + " " + statusText + "</h1></body></html>";
+    
+    HttpResponse response;
+    response.setStatus(code, statusText);
+    response.setHeader("Content-Type", "text/html");
+    response.setHeader("Content-Length", to_string(body.length()));
+    response.setBody(body);
+    
+    return response;
+}
+
+// Helper function to get status text
+std::string ResponseFactory::getStatusText(int code)
+{
+    switch (code)
+	{
+        case 400: return "Bad Request";
+        case 403: return "Forbidden";
+        case 404: return "Not Found";
+        case 405: return "Method Not Allowed";
+        case 409: return "Conflict";
+        case 413: return "Payload Too Large";
+        case 499: return "Request Timeout";
+        case 500: return "Internal Server Error";
+        default: return "Error";
+    }
+}
 HttpResponse HttpRequestRouter::generateAutoIndexResponse(const std::string& dirPath, const std::string& requestPath)
 {
 	DIR* dir = opendir(dirPath.c_str());

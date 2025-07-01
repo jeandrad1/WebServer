@@ -16,9 +16,9 @@ class HttpRequestRouter : public IHttpRequestHandler
 		HttpRequestRouter() {}
 		~HttpRequestRouter() {}
 		HttpResponse handleRequest(const HttpRequest& req, const ServerConfig& server);
+		static HttpResponse serveFile(const std::string& path, const std::string& virtualPath);
 
 	private:
-		HttpResponse serveFile(const std::string& path, const std::string& virtualPath);
 		HttpResponse generateAutoIndexResponse(const std::string& dirPath, const std::string& requestPath);
 		HttpResponse handleGet(const HttpRequest& req, const ServerConfig& server);
 		HttpResponse handlePost(const HttpRequest& req, const ServerConfig& server);
