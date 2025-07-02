@@ -13,7 +13,7 @@
 #include "../utils/to_string.hpp"
 
 
-HttpResponse ResponseFactory::generateErrorResponse(int code, const ServerConfig& server, const LocationConfig* location)
+HttpResponse ResponseFactory::generateErrorResponse(int code, const ServerConfig& server, const LocationConfig* location, const std::string& urlPath)
 {
     std::string errorPagePath;
     
@@ -34,7 +34,10 @@ HttpResponse ResponseFactory::generateErrorResponse(int code, const ServerConfig
         std::string fullPath = server.root + "/" + errorPagePath;
         struct stat s;
         if (stat(fullPath.c_str(), &s) == 0 && S_ISREG(s.st_mode))
-            return HttpRequestRouter::serveFile(fullPath, errorPagePath);
+        {
+            HttpRequestRouter router;
+            return router.serveFile(fullPath, urlPath, server);
+        }
     }
     return ResponseFactory::createBasicErrorResponse(code);
 }

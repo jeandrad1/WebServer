@@ -8,6 +8,7 @@
 # include "EpollManager.hpp"
 # include "SocketsManager.hpp"
 #include "ResponseFactory.hpp"
+#include "../builder/ServerConfig.hpp"
 
 
 class HttpRequestRouter : public IHttpRequestHandler
@@ -16,7 +17,7 @@ class HttpRequestRouter : public IHttpRequestHandler
 		HttpRequestRouter() {}
 		~HttpRequestRouter() {}
 		HttpResponse handleRequest(const HttpRequest& req, const ServerConfig& server);
-		static HttpResponse serveFile(const std::string& path, const std::string& virtualPath);
+		HttpResponse serveFile(const std::string& filePath, const std::string& urlPath, const ServerConfig &server);
 
 	private:
 		HttpResponse generateAutoIndexResponse(const std::string& dirPath, const std::string& requestPath);
