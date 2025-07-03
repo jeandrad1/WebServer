@@ -81,7 +81,9 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerCo
     const LocationConfig* location = findMatchingLocation(server, path);
     
     std::string root;
-    std::string indexFile = server.index[0]; // default, change in the future to take all the strings
+    std::string indexFile;
+	std::vector<std::string> server_indexes = server.getIndex(); // default, change in the future to take all the strings
+
 	std::string cleanPath = path;
     
     if (location)
@@ -99,11 +101,17 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerCo
 
         if (!location->getIndex().empty())
             indexFile = location->getIndex()[0]; // maybe future change to handle multiple index files
+		else if (!server_indexes.empty())
+            indexFile = server_indexes[0]; // Use server's index as fallback
+
     }
     else
 	{
         root = server.getRoot();
 		cleanPath = path;
+		if (!server_indexes.empty())
+            indexFile = server_indexes[0];
+
 	}
     std::string fullPath = root + cleanPath;
     
@@ -119,11 +127,38 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerCo
         return factory.generateErrorResponse(404, server, location, path);
 	}
     if (S_ISDIR(s.st_mode))
-	{
-        std::string indexPath = fullPath + "/" + indexFile;
-        struct stat indexStat;
-        if (stat(indexPath.c_str(), &indexStat) == 0 && S_ISREG(indexStat.st_mode))
-		{
+    {
+        // Try to find any available index file from the list
+        std::string indexPath;
+        bool indexFound = false;
+        
+        // If we have an indexFile, try it first
+        if (!indexFile.empty())
+        {
+            indexPath = fullPath + "/" + indexFile;
+            struct stat indexStat;
+            if (stat(indexPath.c_str(), &indexStat) == 0 && S_ISREG(indexStat.st_mode))
+                indexFound = true;
+        }
+        
+        // If first index file not found, try all server indexes
+        if (!indexFound && !server_indexes.empty())
+        {
+            for (std::vector<std::string>::const_iterator it = server_indexes.begin(); 
+                 it != server_indexes.end(); ++it)
+            {
+                indexPath = fullPath + "/" + *it;
+                struct stat indexStat;
+                if (stat(indexPath.c_str(), &indexStat) == 0 && S_ISREG(indexStat.st_mode))
+                {
+                    indexFound = true;
+                    break;
+                }
+            }
+        }
+        
+        if (indexFound)
+        {
             HttpResponse response = serveFile(indexPath, path, server);
             response.setHeader("Connection", "keep-alive");
             response.setHeader("Keep-Alive", "timeout=5, max=100");
@@ -136,12 +171,12 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerCo
             return response;
         }
         else
-		{
-			ResponseFactory factory;
-            return factory.generateErrorResponse(403,server,location,path);
-		}
-	}
-    
+        {
+            ResponseFactory factory;
+            return factory.generateErrorResponse(403, server, location, path);
+        }
+    }
+
     return serveFile(fullPath, path, server);
 }
 
@@ -174,7 +209,7 @@ HttpResponse HttpRequestRouter::handlePost(const HttpRequest& req, const ServerC
 
     if (location)
     {
-        root = location->getRoot().empty() ? server.root : location->getRoot();
+        root = location->getRoot().empty() ? server.getRoot() : location->getRoot();
 
         if (path.find(location->getLocationPath()) == 0)
         {
@@ -186,7 +221,7 @@ HttpResponse HttpRequestRouter::handlePost(const HttpRequest& req, const ServerC
         }
     }
     else
-        root = server.root;
+        root = server.getRoot();
 
     std::string fullPath = root + cleanPath;
 

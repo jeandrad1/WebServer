@@ -37,27 +37,26 @@ HttpResponse ResponseFactory::generateErrorResponse(int code, const ServerConfig
     }
     else if (location)
     {
-		std::map<int, t_errorPage*>::const_iterator it = server.errorPages.find(code);
-		if (it != server.errorPages.end() && it->second)
-			errorPagePath = it->second->targetPage;
-
-    }
-	// with inheritance this else should not be necessary
-    else
-    {
-        // Check server-level error pages
-        std::map<int, t_errorPage*>::const_iterator it = server.errorPages.find(code);
-        if (it != server.errorPages.end() && it->second)
+        const std::map<int, t_errorPage*> serverErrorPages = server.getErrorPages();
+        std::map<int, t_errorPage*>::const_iterator it = serverErrorPages.find(code);
+        if (it != serverErrorPages.end() && it->second)
             errorPagePath = it->second->targetPage;
     }
-    
+    // with inheritance this else should not be necessary
+    else
+    {
+        const std::map<int, t_errorPage*> serverErrorPages = server.getErrorPages();
+        std::map<int, t_errorPage*>::const_iterator it = serverErrorPages.find(code);
+        if (it != serverErrorPages.end() && it->second)
+            errorPagePath = it->second->targetPage;
+    }
     if (!errorPagePath.empty())
     {
         std::string fullPath;
         if (errorPagePath[0] == '/')
-            fullPath = server.root + errorPagePath;
+            fullPath = server.getRoot() + errorPagePath;
         else
-            fullPath = server.root + "/" + errorPagePath;
+            fullPath = server.getRoot() + "/" + errorPagePath;
         
         std::cout << YELLOW << "Full error page path: " << fullPath << RESET << std::endl;
         struct stat s;
