@@ -17,31 +17,62 @@ HttpResponse ResponseFactory::generateErrorResponse(int code, const ServerConfig
 {
     std::string errorPagePath;
     
+    std::cout << YELLOW << "Debug: Error code = " << code << RESET << std::endl;
+    std::cout << YELLOW << "Debug: Location = " << (location ? "found" : "NULL") << RESET << std::endl;
+    
     if (location && location->getErrorPageDirective())
     {
+        std::cout << YELLOW << "Found an error page in the config" << RESET << std::endl;
         const std::map<int, t_errorPage*>& errorPages = location->getErrorPages();
+        
+        std::cout << YELLOW << "Debug: Available error codes in location: ";
+        for (std::map<int, t_errorPage*>::const_iterator it = errorPages.begin(); it != errorPages.end(); ++it) {
+            std::cout << it->first << " ";
+        }
+        std::cout << RESET << std::endl;
+        
         std::map<int, t_errorPage*>::const_iterator it = errorPages.find(code);
         
         if (it != errorPages.end() && it->second)
             errorPagePath = it->second->targetPage;
-		
-		std::cout<<RED<<"The error page path is:"<<errorPagePath<<RESET<<std::endl;
-	
-	}
+        std::cout << RED << "The error page path is:" << errorPagePath << RESET << std::endl;
+    }
+    else if (location)
+    {
+        std::cout << YELLOW << "Location found but no error page directive" << RESET << std::endl;
+		std::map<int, t_errorPage*>::const_iterator it = server.errorPages.find(code);
+		if (it != server.errorPages.end() && it->second)
+			errorPagePath = it->second->targetPage;
+
+    }
+    else
+    {
+        std::cout << YELLOW << "No location found, checking server error pages" << RESET << std::endl;
+        // Check server-level error pages
+        std::map<int, t_errorPage*>::const_iterator it = server.errorPages.find(code);
+        if (it != server.errorPages.end() && it->second)
+            errorPagePath = it->second->targetPage;
+    }
     
     if (!errorPagePath.empty())
     {
+        std::cout << RED << "Found an error page" << RESET << std::endl;
         std::string fullPath = server.root + "/" + errorPagePath;
+        std::cout << YELLOW << "Full error page path: " << fullPath << RESET << std::endl;
         struct stat s;
         if (stat(fullPath.c_str(), &s) == 0 && S_ISREG(s.st_mode))
         {
             HttpRequestRouter router;
             return router.serveFile(fullPath, urlPath, server);
         }
-    }
+        else
+        {
+            std::cout << RED << "Error page file not found or not accessible: " << fullPath << RESET << std::endl;
+        }
+    }   
+	std::cout << BLUE << "Something else happened and the error page response wa created" << RESET << std::endl;
     return ResponseFactory::createBasicErrorResponse(code);
 }
-
 HttpResponse ResponseFactory::createBasicErrorResponse(int code)
 {
     std::string statusText = getStatusText(code);

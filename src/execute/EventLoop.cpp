@@ -205,7 +205,7 @@ void EventLoop::handleClientData(int clientFd)
 						oss << response.getBody();
 						std::string responseStr = oss.str();
 
-							// Send the response back to the client
+						// Send the response back to the client
 						std::cout << "The response is:\n" << responseStr << std::endl;
 						ssize_t sent = send(clientFd, responseStr.c_str(), responseStr.size(), 0);
 						if (sent == -1)
@@ -257,7 +257,7 @@ HttpRequest *EventLoop::handleHttpRequest(int clientFd, size_t header_end)
 		std::string full_request = _buffers[clientFd].substr(0, header_end + 4 + content_length);
 		reqMan.parseHttpRequest(full_request);
 		request = reqMan.buildHttpRequest();
-		reqMan.requestPrinter();
+		//reqMan.requestPrinter();
 
 		return request;
 	}

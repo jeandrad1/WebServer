@@ -136,8 +136,11 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerCo
             return response;
         }
         else
-            return ResponseFactory::createResponse(403);
-    }
+		{
+			ResponseFactory factory;
+            return factory.generateErrorResponse(403,server,location,path);
+		}
+	}
     
     return serveFile(fullPath, path, server);
 }

@@ -204,7 +204,6 @@ void	ServerBuilder::handleErrorPage(const std::string &value)
 	std::string	target = *ite;
 
 	errorPage->targetPage = target.substr(0, target.size() - 1);
-	errorPage->targetPage = target.substr(0, target.size() - 1);
 	errorPage->isEqualModifier = false;
 	errorPage->equalModifier = 0;
 	errorPage->referencesCount = 0;

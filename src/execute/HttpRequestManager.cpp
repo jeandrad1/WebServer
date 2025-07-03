@@ -152,7 +152,6 @@ HttpRequest *HttpRequestManager::buildHttpRequest()
 	request->handleConnection(getHeader("connection"));
 	request->handleUserAgent(getHeader("user-agent"));
 	request->handleAccept(getHeader("accept"));
-	std::cout << "DEBUG: body before buildHttpRequest: '" << body << "'\n";
 	request->handleBody(body);
 
 	return(request);
