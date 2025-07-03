@@ -17,6 +17,9 @@ HttpResponse ResponseFactory::generateErrorResponse(int code, const ServerConfig
 {
     std::string errorPagePath;
     
+	// Refactor the entire function !!
+	(void) urlPath;
+
     std::cout << YELLOW << "Debug: Error code = " << code << RESET << std::endl;
     std::cout << YELLOW << "Debug: Location = " << (location ? "found" : "NULL") << RESET << std::endl;
     
@@ -46,6 +49,7 @@ HttpResponse ResponseFactory::generateErrorResponse(int code, const ServerConfig
 			errorPagePath = it->second->targetPage;
 
     }
+	// with inheritance this else should not be necessary
     else
     {
         std::cout << YELLOW << "No location found, checking server error pages" << RESET << std::endl;
@@ -69,11 +73,36 @@ HttpResponse ResponseFactory::generateErrorResponse(int code, const ServerConfig
         struct stat s;
         if (stat(fullPath.c_str(), &s) == 0 && S_ISREG(s.st_mode))
         {
-            HttpRequestRouter router;
-            return router.serveFile(fullPath, urlPath, server);
+            // Refactor this block entirely. it is to put the values 
+            std::ifstream file(fullPath.c_str());
+            if (file.is_open())
+            {
+                std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+                file.close();
+                
+                std::string codeStr = to_string(code);
+                std::string statusText = getStatusText(code);
+                
+                size_t scriptPos = content.find("<script");
+                if (scriptPos != std::string::npos)
+                {
+                    std::string injection = "<script>\n";
+                    injection += "window.errorCode = " + codeStr + ";\n";
+                    injection += "window.errorMessage = '" + statusText + "';\n";
+                    injection += "</script>\n";
+                    content.insert(scriptPos, injection);
+                }
+                
+                HttpResponse response;
+                response.setStatus(200, "OK");
+                response.setHeader("Content-Type", "text/html");
+                response.setHeader("Content-Length", to_string(content.length()));
+                response.setBody(content);
+                return response;
+			}
         }
         else
-            std::cout << RED << "Error page file not found or not accessible: " << fullPath << RESET << std::endl;
+    		std::cout << RED << "Error page file not found or not accessible: " << fullPath << RESET << std::endl;
     }   
 	std::cout << BLUE << "Something else happened and the error page response wa created" << RESET << std::endl;
     return ResponseFactory::createBasicErrorResponse(code);
