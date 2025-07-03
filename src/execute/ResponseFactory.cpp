@@ -58,7 +58,6 @@ HttpResponse ResponseFactory::generateErrorResponse(int code, const ServerConfig
         else
             fullPath = server.getRoot() + "/" + errorPagePath;
         
-        std::cout << YELLOW << "Full error page path: " << fullPath << RESET << std::endl;
         struct stat s;
         if (stat(fullPath.c_str(), &s) == 0 && S_ISREG(s.st_mode))
         {

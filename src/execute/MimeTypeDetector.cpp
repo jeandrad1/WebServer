@@ -13,6 +13,7 @@ MimeTypeDetector::MimeTypeDetector()
     mimeTypes["txt"] = "text/plain";
     mimeTypes["json"] = "application/json";
     mimeTypes["pdf"] = "application/pdf";
+	mimeTypes["ico"] = "image/x-icon";
 }
 
 std::string MimeTypeDetector::getMimeType(const std::string& path) const

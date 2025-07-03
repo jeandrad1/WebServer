@@ -156,7 +156,6 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerCo
                 }
             }
         }
-        
         if (indexFound)
         {
             HttpResponse response = serveFile(indexPath, path, server);
