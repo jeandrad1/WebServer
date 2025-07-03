@@ -19,16 +19,11 @@ HttpResponse ResponseFactory::generateErrorResponse(int code, const ServerConfig
     
 	// Refactor the entire function !!
 	(void) urlPath;
-
-    std::cout << YELLOW << "Debug: Error code = " << code << RESET << std::endl;
-    std::cout << YELLOW << "Debug: Location = " << (location ? "found" : "NULL") << RESET << std::endl;
     
     if (location && location->getErrorPageDirective())
     {
-        std::cout << YELLOW << "Found an error page in the config" << RESET << std::endl;
         const std::map<int, t_errorPage*>& errorPages = location->getErrorPages();
         
-        std::cout << YELLOW << "Debug: Available error codes in location: ";
         for (std::map<int, t_errorPage*>::const_iterator it = errorPages.begin(); it != errorPages.end(); ++it)
 		{
             std::cout << it->first << " ";
@@ -39,11 +34,9 @@ HttpResponse ResponseFactory::generateErrorResponse(int code, const ServerConfig
         
         if (it != errorPages.end() && it->second)
             errorPagePath = it->second->targetPage;
-        std::cout << RED << "The error page path is:" << errorPagePath << RESET << std::endl;
     }
     else if (location)
     {
-        std::cout << YELLOW << "Location found but no error page directive" << RESET << std::endl;
 		std::map<int, t_errorPage*>::const_iterator it = server.errorPages.find(code);
 		if (it != server.errorPages.end() && it->second)
 			errorPagePath = it->second->targetPage;
@@ -52,7 +45,6 @@ HttpResponse ResponseFactory::generateErrorResponse(int code, const ServerConfig
 	// with inheritance this else should not be necessary
     else
     {
-        std::cout << YELLOW << "No location found, checking server error pages" << RESET << std::endl;
         // Check server-level error pages
         std::map<int, t_errorPage*>::const_iterator it = server.errorPages.find(code);
         if (it != server.errorPages.end() && it->second)
@@ -61,8 +53,6 @@ HttpResponse ResponseFactory::generateErrorResponse(int code, const ServerConfig
     
     if (!errorPagePath.empty())
     {
-        std::cout << RED << "Found an error page" << RESET << std::endl;
-        
         std::string fullPath;
         if (errorPagePath[0] == '/')
             fullPath = server.root + errorPagePath;
@@ -104,7 +94,6 @@ HttpResponse ResponseFactory::generateErrorResponse(int code, const ServerConfig
         else
     		std::cout << RED << "Error page file not found or not accessible: " << fullPath << RESET << std::endl;
     }   
-	std::cout << BLUE << "Something else happened and the error page response wa created" << RESET << std::endl;
     return ResponseFactory::createBasicErrorResponse(code);
 }
 
@@ -159,7 +148,8 @@ HttpResponse ResponseFactory::createResponse(int code, const std::string& custom
 // to avoid hardcoding them in the codebase.
 std::string ResponseFactory::getDefaultMessage(int code)
 {
-    switch (code) {
+    switch (code)
+	{
         case 200: return "OK";
         case 400: return "Bad Request";
         case 403: return "Forbidden";
