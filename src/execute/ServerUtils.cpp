@@ -9,8 +9,9 @@ ServerConfig *ServerUtils::getServerByHostName(std::string host, std::vector<Ser
 	std::vector<ServerConfig *>::iterator ite = servers.end();
 	for (std::vector<ServerConfig *>::iterator it = servers.begin(); it != ite; it++)
 	{
-		std::vector<std::string>::iterator itend = (*it)->serverNames.end();
-		for (std::vector<std::string>::iterator itbeg = (*it)->serverNames.begin(); itbeg != itend; itbeg++)
+		std::vector<std::string> serverName = (*it)->getServerNames();
+		std::vector<std::string>::iterator itend = serverName.end();
+		for (std::vector<std::string>::iterator itbeg = serverName.begin(); itbeg != itend; itbeg++)
 		{
 			if (host == (*itbeg))
 			{
@@ -23,12 +24,13 @@ ServerConfig *ServerUtils::getServerByHostName(std::string host, std::vector<Ser
 
 LocationConfig *ServerUtils::getLocationByRequestPath(std::string path, ServerConfig *server)
 {
-	if (server->locations.empty())
+	if (server->getLocations().empty())
 		return (NULL);
 	std::string bestMatch;
-	std::vector<LocationConfig *>::iterator bestIt = server->locations.end();
-	std::vector<LocationConfig *>::iterator ite = server->locations.end();
-	for (std::vector<LocationConfig *>::iterator it = server->locations.begin(); it != ite; it++)
+	std::vector<LocationConfig *> location = server->getLocations();
+	std::vector<LocationConfig *>::iterator bestIt = location.end();
+	std::vector<LocationConfig *>::iterator ite = location.end();
+	for (std::vector<LocationConfig *>::iterator it = location.begin(); it != ite; it++)
 	{
 		std::string locPath;
 		if (path.find((*it)->getLocationPath()) == 0)

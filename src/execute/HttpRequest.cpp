@@ -118,7 +118,7 @@ void HttpRequest::handleAccept(std::string accept_str)
 
 void HttpRequest::handleBody(std::string str_body)
 {
-	if (!str_body.empty())
+	if (str_body.empty())
 		return;
 	for(size_t i = 0; i < str_body.size(); i++)
 		body.push_back(str_body[i]);
@@ -215,7 +215,7 @@ void HttpRequest::HttpRequestPrinter()
 		std::cout << "OPEN\n";
 	else if (connection == false)
 		std::cout << "CLOSE\n";
-	if (!body.empty())
+	if (body.empty())
 		std::cout << "\nNO BODY\n";
 	else
 	{

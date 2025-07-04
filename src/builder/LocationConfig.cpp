@@ -88,19 +88,19 @@ void	LocationConfig::applyInheritedConfig(void)
 
 void	LocationConfig::inheritFromServer(const ServerConfig &server)
 {
-	if (_clientMaxBodySize == -1 && server.clientMaxBodySize != -1)
-		_clientMaxBodySize = server.clientMaxBodySize;
-	if (server.errorPageDirective && !_errorPageDirective)
+	if (_clientMaxBodySize == -1 && server.getClientMaxBodySize() != -1)
+		_clientMaxBodySize = server.getClientMaxBodySize();
+	if (server.getErrorPageDirective() && !_errorPageDirective)
 	{
 		_errorPageDirective = true;
-		_errorPages = server.errorPages;
+		_errorPages = server.getErrorPages();
 	}
-	if (_root == "-1" && server.root != "-1")
-		_root = server.root;
-	if (_index[0] == " " && server.index[0] != " ")
+	if (_root == "-1" && server.getRoot() != "-1")
+		_root = server.getRoot();
+	if (_index[0] == " " && server.getIndex()[0] != " ")
 	{
 		_index.clear();
-		_index = server.index;
+		_index = server.getIndex();
 	}
 }
 
