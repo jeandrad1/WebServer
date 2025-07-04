@@ -56,6 +56,37 @@ bool	CgiHandler::isCgiRequest(void)
 	return (false);
 }
 
+bool	CgiHandler::executeCgi(void)
+{
+	int	input_pipe[2];
+	int output_pipe[2];
+
+	pipe(input_pipe);
+	pipe(output_pipe);
+
+	pid_t pid = fork();
+	if (pid == 0)
+	{
+		dup2(input_pipe[0], STDIN_FILENO);
+		dup2(output_pipe[1], STDOUT_FILENO);
+		close(input_pipe[1]);
+		close(output_pipe[0]);
+
+		char *argv[] = {const_cast<char*>(this->_interpreterPath), const_cast<char*>(this->_scriptPath), NULL};
+		execve(argv[0], argv, this->_envv);
+	}
+	else
+	{
+		close(input_pipe[0]);
+		close(output_pipe[1]);
+/* 		if (this->_req->getMethod() == "POST")
+		{
+			char *this->_req->getBody()
+			write(input_pipe[1], this->_req->getBody());
+		} */
+	}
+}
+
 void	CgiHandler::buildEnv(void)
 {
 	CgiEnvBuilder *envBuilder = new CgiEnvBuilder(this->_req, this->_server, this->_location, this->_clientIp);
@@ -69,7 +100,8 @@ void	CgiHandler::resolveScriptPath(void)
 {
 	std::string rootPath = this->_location->getRoot();
 	std::string script = this->_req->getPath();
-	this->_scriptPath = rootPath + script;
+	std::string scriptPath = rootPath + script;
+	this->_scriptPath = scriptPath.c_str();
 }
 
 void	CgiHandler::resolveInterpreterPath(void)
@@ -79,7 +111,7 @@ void	CgiHandler::resolveInterpreterPath(void)
 	{
 		if (this->_extension == (*it)->extension)
 		{
-			this->_interpreterPath = (*it)->path;
+			this->_interpreterPath = (*it)->path.c_str();
 			break ;
 		}
 	}

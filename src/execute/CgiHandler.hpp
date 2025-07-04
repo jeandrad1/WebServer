@@ -7,6 +7,7 @@
 # include <exception>
 # include <iostream>
 # include "CgiEnvBuilder.hpp"
+# include <unistd.h>
 
 class CgiHandler {
 
@@ -19,14 +20,15 @@ class CgiHandler {
 		std::string					_requestPath;
 		std::string					_clientIp;
 
-		std::string					_scriptPath;
-		std::string					_interpreterPath;
-		std::vector<std::string>	_envv;
+		const char					*_scriptPath;
+		const char					*_interpreterPath;
+		char						**_envv;
 
 	public:
 
 		CgiHandler(HttpRequest *req, std::string clientIp, std::vector<ServerConfig *> servers);
 
+		bool	executeCgi(void);
 		bool	isCgiRequest(void);
 		void	resolveScriptPath(void);
 		void	resolveInterpreterPath(void);
