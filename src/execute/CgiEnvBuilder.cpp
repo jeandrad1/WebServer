@@ -18,7 +18,7 @@ CgiEnvBuilder::CgiEnvBuilder(HttpRequest *req, ServerConfig *server, LocationCon
 /*                          Public Functions                           */
 /***********************************************************************/
 
-std::vector<std::string>	CgiEnvBuilder::build(void)
+char	**CgiEnvBuilder::build(void)
 {
 	if (!_req || !_server || !_location)
 		throw std::runtime_error("Invalid arguments to build Env Variables");
@@ -40,7 +40,9 @@ std::vector<std::string>	CgiEnvBuilder::build(void)
 		addEnv("CONTENT_LENGTH", _req->getContentLengthString());
 		addEnv("CONTENT_TYPE", _req->getContentType());
 	}
-	return (this->_envv);
+
+	this->_envv_array = vectorToCharArray();
+	return (this->_envv_array);
 }
 
 void	CgiEnvBuilder::addEnv(const std::string &key, const std::string &value)
@@ -49,6 +51,18 @@ void	CgiEnvBuilder::addEnv(const std::string &key, const std::string &value)
 
 	newEnvVariable = key + "=" + value;
 	this->_envv.push_back(newEnvVariable);
+}
+
+char	**CgiEnvBuilder::vectorToCharArray(void)
+{
+	char	**envv = new (char *[this->_envv.size() + 1]);
+
+	for (size_t i = 0; i < this->_envv.size(); i++)
+	{
+		envv[i] = new char[this->_envv[i].size() + 1];
+		std::strcpy(envv[i], this->_envv[i].c_str());
+	}
+	envv[this->_envv.size()] = NULL;
 }
 
 void	CgiEnvBuilder::printEnv(void)
