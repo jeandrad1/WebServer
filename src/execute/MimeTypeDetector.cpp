@@ -7,7 +7,7 @@ MimeTypeDetector::MimeTypeDetector()
     mimeTypes["css"] = "text/css";
     mimeTypes["js"] = "application/javascript";
     mimeTypes["png"] = "image/png";
-    mimeTypes["jpg"] = "image/jpeg";
+    mimeTypes["jpg"] = "image/jpg";
     mimeTypes["jpeg"] = "image/jpeg";
     mimeTypes["gif"] = "image/gif";
     mimeTypes["txt"] = "text/plain";

@@ -95,7 +95,7 @@ void EventLoop::handleNewConnection(int serverFd)
 	}
 
 	// Set non-blocking
-	fcntl(client_fd, F_SETFL, fcntl(client_fd, F_GETFL, 0) | O_NONBLOCK);
+	ServerUtils::setNotBlockingFd(client_fd);
 
 	try
 	{
@@ -206,7 +206,7 @@ void EventLoop::handleClientData(int clientFd)
 						std::string responseStr = oss.str();
 
 						// Send the response back to the client
-						std::cout << "The response is:\n" << responseStr << std::endl;
+						//std::cout << "The response is:\n" << responseStr << std::endl;
 						ssize_t sent = send(clientFd, responseStr.c_str(), responseStr.size(), 0);
 						if (sent == -1)
 						{

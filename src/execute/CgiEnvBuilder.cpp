@@ -41,6 +41,9 @@ char	**CgiEnvBuilder::build(void)
 		addEnv("CONTENT_TYPE", _req->getContentType());
 	}
 
+	std::string scriptPath = ServerUtils::resolveScriptPath(_req, _location);
+	addEnv("PATH_INFO", scriptPath);
+
 	this->_envv_array = vectorToCharArray();
 	return (this->_envv_array);
 }
@@ -55,7 +58,7 @@ void	CgiEnvBuilder::addEnv(const std::string &key, const std::string &value)
 
 char	**CgiEnvBuilder::vectorToCharArray(void)
 {
-	char	**envv = new (char *[this->_envv.size() + 1]);
+	char	**envv = new char *[this->_envv.size() + 1];
 
 	for (size_t i = 0; i < this->_envv.size(); i++)
 	{
@@ -63,6 +66,7 @@ char	**CgiEnvBuilder::vectorToCharArray(void)
 		std::strcpy(envv[i], this->_envv[i].c_str());
 	}
 	envv[this->_envv.size()] = NULL;
+	return (envv);
 }
 
 void	CgiEnvBuilder::printEnv(void)

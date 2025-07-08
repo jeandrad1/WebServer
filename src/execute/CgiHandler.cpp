@@ -1,4 +1,5 @@
 #include "CgiHandler.hpp"
+#include <stdio.h>
 
 /***********************************************************************/
 /*                     Constructors & Destructor                       */
@@ -67,55 +68,39 @@ bool	CgiHandler::executeCgi(void)
 	pid_t pid = fork();
 	if (pid == 0)
 	{
+		CgiEnvBuilder *envBuilder = new CgiEnvBuilder(this->_req, this->_server, this->_location, this->_clientIp);
+		this->_envv = envBuilder->build();
 		dup2(input_pipe[0], STDIN_FILENO);
 		dup2(output_pipe[1], STDOUT_FILENO);
+
 		close(input_pipe[1]);
 		close(output_pipe[0]);
-
-		char *argv[] = {const_cast<char*>(this->_interpreterPath), const_cast<char*>(this->_scriptPath), NULL};
+		char *argv[] = {const_cast<char*>(this->_interpreterPath.c_str()), const_cast<char*>(this->_scriptPath.c_str()), NULL};
 		execve(argv[0], argv, this->_envv);
+		std::cerr << "Falla\n";
 	}
 	else
 	{
 		close(input_pipe[0]);
 		close(output_pipe[1]);
-/* 		if (this->_req->getMethod() == "POST")
+		if (this->_req->getMethod() == "POST")
 		{
-			char *this->_req->getBody()
-			write(input_pipe[1], this->_req->getBody());
-		} */
+			ServerUtils::setNotBlockingFd(input_pipe[1]);
+			EpollManager::getInstance().addFd(input_pipe[1], EPOLLIN);
+		}
+		ServerUtils::setNotBlockingFd(output_pipe[0]);
+		EpollManager::getInstance().addFd(output_pipe[0], EPOLLOUT);
 	}
+	return (0);
 }
 
 void	CgiHandler::buildEnv(void)
 {
-	CgiEnvBuilder *envBuilder = new CgiEnvBuilder(this->_req, this->_server, this->_location, this->_clientIp);
-	this->_envv = envBuilder->build();
-	resolveScriptPath();
-	envBuilder->printEnv();
-	delete envBuilder;
+	this->_scriptPath = ServerUtils::resolveScriptPath(const_cast<HttpRequest *>(this->_req), const_cast<LocationConfig *>(this->_location));
+	this->_interpreterPath = ServerUtils::resolveInterpreterPath(this->_location, this->_extension);
+	this->executeCgi();
 }
 
-void	CgiHandler::resolveScriptPath(void)
-{
-	std::string rootPath = this->_location->getRoot();
-	std::string script = this->_req->getPath();
-	std::string scriptPath = rootPath + script;
-	this->_scriptPath = scriptPath.c_str();
-}
-
-void	CgiHandler::resolveInterpreterPath(void)
-{
-	std::vector<t_cgi *>::iterator ite = this->_location->cgi.end();
-	for (std::vector<t_cgi *>::iterator it = this->_location->cgi.begin(); it != ite; it++)
-	{
-		if (this->_extension == (*it)->extension)
-		{
-			this->_interpreterPath = (*it)->path.c_str();
-			break ;
-		}
-	}
-}
 /***********************************************************************/
 /*                          Getters & Setters                          */
 /***********************************************************************/

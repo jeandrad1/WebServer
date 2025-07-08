@@ -8,6 +8,8 @@
 # include <iostream>
 # include "CgiEnvBuilder.hpp"
 # include <unistd.h>
+# include "../utils/to_string.hpp"
+# include "EpollManager.hpp"
 
 class CgiHandler {
 
@@ -20,8 +22,8 @@ class CgiHandler {
 		std::string					_requestPath;
 		std::string					_clientIp;
 
-		const char					*_scriptPath;
-		const char					*_interpreterPath;
+		std::string					_scriptPath;
+		std::string					_interpreterPath;
 		char						**_envv;
 
 	public:
@@ -30,8 +32,6 @@ class CgiHandler {
 
 		bool	executeCgi(void);
 		bool	isCgiRequest(void);
-		void	resolveScriptPath(void);
-		void	resolveInterpreterPath(void);
 		void	buildEnv(void);
 };
 

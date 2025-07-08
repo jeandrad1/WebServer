@@ -280,6 +280,6 @@ void	LocationBuilder::handleCGI(std::string const &value)
 	iss >> path;
 
 	cgi->extension = extension;
-	cgi->path = path;
+	cgi->path = path.substr(0, path.size() - 1);
 	this->location->cgi.push_back(cgi);
 }

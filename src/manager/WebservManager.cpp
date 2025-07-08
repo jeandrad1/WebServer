@@ -67,9 +67,8 @@ void WebservManager::run(void)
 	impressMapServer(servers);
 
 	SocketsManager sockets;
-	EpollManager epoll;
 	sockets.createSockets(servers);
-	EventLoop loop(epoll, sockets.getServerSockets(), this->servers);
+	EventLoop loop(EpollManager::getInstance(), sockets.getServerSockets(), this->servers);
 
 	loop.runEventLoop();        // listen, epoll and serve
 	std::cout << "runEpollLopp done" << std::endl;

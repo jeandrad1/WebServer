@@ -6,6 +6,7 @@
 # include <cstring>
 # include "HttpRequest.hpp"
 # include "../builder/ServerConfig.hpp"
+# include "ServerUtils.hpp"
 
 class CgiEnvBuilder {
 

@@ -7,6 +7,7 @@ bool	isURI(const std::string &path);
 CGIStrategy::CGIStrategy(void)
 {
 	this->validExtensions.push_back(".py");
+	this->validExtensions.push_back(".cgi");
 }
 
 bool	isValidExtension(std::vector<std::string> validExtensions, const std::string &suffix)

@@ -55,3 +55,44 @@ std::string ServerUtils::getClientIP(struct sockaddr_in &client_addr)
 	oss << (int)bytes[0] << "." << (int)bytes[1] << "." << (int)bytes[2] << "." << (int)bytes[3];
 	return oss.str();
 }
+
+std::string	ServerUtils::resolveScriptPath(const HttpRequest *req, const LocationConfig *location)
+{
+	std::string rootPath = location->getRoot();
+	std::string script = req->getPath();
+	if (rootPath.compare("/") == 0)
+		return (script);
+	std::string scriptPath = rootPath + script;
+	return (scriptPath);
+}
+
+std::string ServerUtils::resolveInterpreterPath(LocationConfig *location, std::string extension)
+{
+	std::string interpreterPath;
+
+	std::vector<t_cgi *>::iterator ite = location->cgi.end();
+	for (std::vector<t_cgi *>::iterator it = location->cgi.begin(); it != ite; it++)
+	{
+		if (extension == (*it)->extension)
+		{
+			interpreterPath = (*it)->path;
+			if (extension == ".cgi")
+				interpreterPath = "." + interpreterPath;
+			break ;
+		}
+	}
+	return (interpreterPath);
+}
+
+void	ServerUtils::setNotBlockingFd(int fd)
+{
+	int flags = fcntl(fd, F_GETFL, 0);
+	if (flags <= -1)
+	{
+		return ;
+	}
+	if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1)
+	{
+		std::cerr << "Error setting Not Blocking pipe\n";
+	}
+}
