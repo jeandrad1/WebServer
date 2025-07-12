@@ -56,8 +56,9 @@ void WebservManager::run(void)
 
 	//this->_rootBlock->getBlock(0)->printConfig(0);
 
-	validateConfigTreeFactory((*this->_rootBlock));
-
+	if (validateConfigTreeFactory((*this->_rootBlock)) != 0)
+		throw std::runtime_error("Invalid configuration file");
+	 
 	this->builtConfigs = createConfigClasses(this->_rootBlock);
 
 	//printBuiltConfigs(this->builtConfigs);
