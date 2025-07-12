@@ -300,5 +300,5 @@ HttpResponse HttpRequestRouter::handleDelete(const HttpRequest& req, const Serve
 
 HttpResponse HttpRequestRouter::methodNotAllowed()
 {
-	return ResponseFactory::createResponse(405);
+	return ResponseFactory::createResponse(501);
 }
