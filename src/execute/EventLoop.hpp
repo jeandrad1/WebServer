@@ -15,12 +15,18 @@ class EventLoop {
 		std::map<int, std::vector<ServerConfig *> > _servers;
 		std::map<int, std::string>	_buffers;
 		std::map<int, int>			_clientToServer;
-		std::map<int, int> _clientToServerSocket;
-		std::map<int, std::string> _ClientIPs;
+		std::map<int, int>			_clientToServerSocket;
+		std::map<int, std::string>	_ClientIPs;
+		std::map<int, CgiHandler *>	_CgiInputFds;
+		std::map<int, CgiHandler *> _CgiOutputFds;
 
 		bool isServerSocket(int fd);
+		bool isCgiOutputPipe(int fd);
+		bool isCgiInputPipe(int fd);
 		void handleNewConnection(int serverFd);
 		void handleClientData(int clientFd);
+		void handleCgiOutput(int fd);
+		void handleCgiInput(int fd);
 		HttpRequest *handleHttpRequest(int clientFd, size_t header_end);
 
 		std::vector<ServerConfig *> getServersByFd(int fd);

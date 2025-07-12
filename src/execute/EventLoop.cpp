@@ -52,10 +52,18 @@ void EventLoop::runEventLoop(void)
 		for (int i = 0; i < n_ready; ++i)
 		{
 			int fd = events[i].data.fd;
-
+			std::cout << "Actual fd: " << fd << "\nN_ready: " << n_ready << "\n";
 			if (isServerSocket(fd))
 			{
 				handleNewConnection(fd);
+			}
+			else if (isCgiOutputPipe(fd))
+			{
+				handleCgiOutput(fd);
+			}
+			else if (isCgiInputPipe(fd))
+			{
+				handleCgiInput(fd);
 			}
 			else
 			{
@@ -81,6 +89,91 @@ bool EventLoop::isServerSocket(int fd)
 		}
 	}
 	return (false);
+}
+
+bool EventLoop::isCgiOutputPipe(int fd)
+{
+	std::cerr << "IscgiOutputPipe 2\n";
+	for (std::map<int, CgiHandler *>::iterator it = this->_CgiOutputFds.begin(); it != this->_CgiOutputFds.end(); ++it)
+	{
+		if (it->first == fd)
+		{
+			std::cerr << "IscgiOutputPipe 1\n";
+			return (true);
+		}
+	}
+	return (false);
+}
+
+bool EventLoop::isCgiInputPipe(int fd)
+{
+	std::cerr << "IscgiInputPipe 2\n";
+	for (std::map<int, CgiHandler *>::iterator it = this->_CgiInputFds.begin(); it != this->_CgiInputFds.end(); ++it)
+	{
+		if (it->first == fd)
+		{
+			std::cerr << "IscgiInputPipe 1\n";
+			return (true);
+		}
+	}
+	return (false);
+}
+
+void EventLoop::handleCgiOutput(int fd)
+{
+	std::cerr << "Entra en handleCgiOutput\n";
+	CgiHandler *cgi = this->_CgiOutputFds[fd];
+
+	char	buffer[4096];
+	ssize_t	bytesRead = read(fd, buffer, sizeof(buffer));
+	if (bytesRead > 0)
+	{
+		cgi->appendToCgiBuffer(buffer, bytesRead);
+	}
+	else if (bytesRead <= 0)
+	{
+		std::cout << "Entra 1\n";
+		this->_epollManager.removeFd(fd);
+		close(fd);
+		cgi->setOutputAsClosed();
+	}
+	std::cout << "Llega 1\n";
+	if (cgi->getInputFdClosed() == true && cgi->getOutputFdClosed() == true)
+	{
+		std::string buffer = cgi->parseCgiBuffer();
+		send(cgi->getClientFd(), buffer.c_str(), buffer.size(), 0);
+		this->_CgiOutputFds.erase(fd);
+	}
+}
+
+void EventLoop::handleCgiInput(int fd)
+{
+	CgiHandler *cgi = this->_CgiInputFds[fd];
+
+	std::string body = cgi->getRequestBody();
+	size_t		bytesAlreadyWritten = cgi->getBytesWritten();
+	size_t		bytesToWrite = body.size() - bytesAlreadyWritten;
+
+	if (bytesToWrite > 0)
+	{
+		size_t	bytesWritten = write(fd, body.data() + bytesAlreadyWritten, bytesToWrite);
+		if (bytesWritten > 0)
+		{
+			cgi->updateBytesWritten(bytesWritten);
+		}
+		else if (bytesWritten <= 0)
+		{
+			this->_epollManager.removeFd(fd);
+			close(fd);
+			cgi->setInputAsClosed();
+		}
+	}
+	else
+	{
+		this->_epollManager.removeFd(fd);
+		close(fd);
+		cgi->setInputAsClosed();
+	}
 }
 
 void EventLoop::handleNewConnection(int serverFd)
@@ -151,7 +244,7 @@ void EventLoop::handleClientData(int clientFd)
 		}
 		close(clientFd);
 		_buffers.erase(clientFd);
-        _clientToServer.erase(clientFd);
+		_clientToServer.erase(clientFd);
 		try
 		{
 			this->_epollManager.removeFd(clientFd);
@@ -178,7 +271,8 @@ void EventLoop::handleClientData(int clientFd)
 				if (cgi->isCgiRequest())
 				{
 					std::cout << "CGI matches\n";
-					cgi->buildEnv();
+					cgi->executeCgi(this->_CgiInputFds, this->_CgiOutputFds, clientFd);
+					return ;
 				}
 				if (request != NULL)
 				{

@@ -21,6 +21,14 @@ class CgiHandler {
 		std::string					_extension;
 		std::string					_requestPath;
 		std::string					_clientIp;
+		int							_clientFd;
+
+		int							_inputFd;
+		int							_outputFd;
+		bool						_inputFdClosed;
+		bool						_outputFdClosed;
+		std::string					_buffer;
+		size_t						_bytesWritten;
 
 		std::string					_scriptPath;
 		std::string					_interpreterPath;
@@ -30,9 +38,24 @@ class CgiHandler {
 
 		CgiHandler(HttpRequest *req, std::string clientIp, std::vector<ServerConfig *> servers);
 
-		bool	executeCgi(void);
+		bool	executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<int, CgiHandler *> &cgiOutputFd, int clientFd);
 		bool	isCgiRequest(void);
-		void	buildEnv(void);
+
+		void	appendToCgiBuffer(char *buffer, ssize_t bytes_read);
+		void	updateBytesWritten(size_t newBytesWritten);
+		std::string	parseCgiBuffer(void);
+
+		void	setInputAsClosed(void);
+		void	setOutputAsClosed(void);
+
+		int		getClientFd(void);
+		int		getInputFd(void);
+		int		getOutputFd(void);
+		bool	getInputFdClosed(void);
+		bool	getOutputFdClosed(void);
+		size_t	getBytesWritten(void);
+		std::string getBuffer(void);
+		std::string getRequestBody(void);
 };
 
 #endif
