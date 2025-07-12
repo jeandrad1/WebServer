@@ -82,7 +82,7 @@ HttpResponse ResponseFactory::generateErrorResponse(int code, const ServerConfig
                 }
                 
                 HttpResponse response;
-                response.setStatus(200, "OK");
+                response.setStatus(code, getStatusText(code));
                 response.setHeader("Content-Type", "text/html");
                 response.setHeader("Content-Length", to_string(content.length()));
                 response.setBody(content);

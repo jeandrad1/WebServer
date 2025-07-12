@@ -53,9 +53,12 @@ HttpResponse HttpRequestRouter::serveFile(const std::string& filePath, const std
     int fd = open(filePath.c_str(), O_RDONLY);
     if (fd < 0)
     {
-        const LocationConfig* location = HttpRequestRouter::findMatchingLocation(server,urlPath);
-        ResponseFactory factory;
-        return factory.generateErrorResponse(403, server, location, urlPath);
+		const LocationConfig* location = HttpRequestRouter::findMatchingLocation(server, urlPath);
+		ResponseFactory factory;
+		if (errno == ENOENT)
+			return factory.generateErrorResponse(404, server, location, urlPath);
+		else
+			return factory.generateErrorResponse(403, server, location, urlPath);
     }
     std::string body;
     char buffer[4096];
@@ -113,19 +116,22 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerCo
             indexFile = server_indexes[0];
 
 	}
+
     std::string fullPath = root + cleanPath;
+
+	struct stat s;
+	if (stat(fullPath.c_str(), &s) != 0)
+	{
+		ResponseFactory factory;
+        return factory.generateErrorResponse(404, server, location, path);
+	}
     
     if (!FilePathChecker::isSafePath(root, fullPath))
 	{
 		ResponseFactory factory;
         return factory.generateErrorResponse(403, server, location, path);
 	}
-    struct stat s;
-    if (stat(fullPath.c_str(), &s) != 0)
-	{
-		ResponseFactory factory;
-        return factory.generateErrorResponse(404, server, location, path);
-	}
+	
     if (S_ISDIR(s.st_mode))
     {
         // Try to find any available index file from the list
@@ -163,7 +169,8 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerCo
             response.setHeader("Keep-Alive", "timeout=5, max=100");
             return response;
         }
-        else if (server.getAutoIndex()) {
+        else if (server.getAutoIndex())
+		{
             HttpResponse response = generateAutoIndexResponse(fullPath, path);
             response.setHeader("Connection", "keep-alive");
             response.setHeader("Keep-Alive", "timeout=5, max=100");
