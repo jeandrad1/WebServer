@@ -26,10 +26,8 @@ std::string HttpRequestManager::getHeader(const std::string& key) const
 	std::map<std::string, std::string>::const_iterator it = headers.find(key);
 	if (it != headers.end())
 	{
-		std::cout << "Existe " << it->first << "\n";
 		return it->second;
 	}
-	std::cout << "No existe " << key << "\n";
 	return "";
 }
 

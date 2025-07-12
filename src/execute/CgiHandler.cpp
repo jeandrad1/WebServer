@@ -8,6 +8,8 @@
 CgiHandler::CgiHandler(HttpRequest *req, std::string clientIp, std::vector<ServerConfig *> servers)
 	: _req(req), _clientIp(clientIp)
 {
+	this->_outputFdClosed = true;
+	this->_inputFdClosed = true;
 	if (!req)
 		throw std::invalid_argument("HttpRequest pointer is null");
 	if (servers.empty())
@@ -57,8 +59,31 @@ bool	CgiHandler::isCgiRequest(void)
 	return (false);
 }
 
-bool	CgiHandler::executeCgi(void)
+std::string	CgiHandler::parseCgiBuffer(void)
 {
+	std::istringstream iss(this->_buffer);
+	std::ostringstream oss;
+
+	std::cout << "Peta\n";
+	std::string line;
+	std::getline(iss, line);
+	std::cout << line << "\n";
+	oss << "HTTP/1.1 " << line.substr(line.size());
+	while (std::getline(iss, line))
+	{
+		oss << line << "\n";
+	}
+	std::string parsedBuffer = oss.str();
+	std::cout << parsedBuffer;
+	return (parsedBuffer);
+}
+
+bool	CgiHandler::executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<int, CgiHandler *> &cgiOutputFd, int clientFd)
+{
+	this->_scriptPath = ServerUtils::resolveScriptPath(const_cast<HttpRequest *>(this->_req), const_cast<LocationConfig *>(this->_location));
+	this->_interpreterPath = ServerUtils::resolveInterpreterPath(this->_location, this->_extension);
+	this->_clientFd = clientFd;
+
 	int	input_pipe[2];
 	int output_pipe[2];
 
@@ -75,9 +100,11 @@ bool	CgiHandler::executeCgi(void)
 
 		close(input_pipe[1]);
 		close(output_pipe[0]);
+		close(STDIN_FILENO);
 		char *argv[] = {const_cast<char*>(this->_interpreterPath.c_str()), const_cast<char*>(this->_scriptPath.c_str()), NULL};
 		execve(argv[0], argv, this->_envv);
 		std::cerr << "Falla\n";
+		exit(1);
 	}
 	else
 	{
@@ -86,24 +113,90 @@ bool	CgiHandler::executeCgi(void)
 		if (this->_req->getMethod() == "POST")
 		{
 			ServerUtils::setNotBlockingFd(input_pipe[1]);
-			EpollManager::getInstance().addFd(input_pipe[1], EPOLLIN);
+			EpollManager::getInstance().addFd(input_pipe[1], EPOLLOUT);
+			this->_inputFd = input_pipe[1];
+			this->_inputFdClosed = false;
+			cgiInputFd[input_pipe[1]] = this;
+			std::cout << "InputPipe fd: " << input_pipe[1] << "\n";
 		}
 		ServerUtils::setNotBlockingFd(output_pipe[0]);
-		EpollManager::getInstance().addFd(output_pipe[0], EPOLLOUT);
+		EpollManager::getInstance().addFd(output_pipe[0], EPOLLIN);
+		std::cout << "OutputPipe fd: " << output_pipe[0] << "\n";
+		this->_outputFd = output_pipe[0];
+		this->_outputFdClosed = false;
+		cgiOutputFd[output_pipe[0]] = this;
+		return (true);
 	}
-	return (0);
+	return (false);
 }
 
-void	CgiHandler::buildEnv(void)
+void	CgiHandler::appendToCgiBuffer(char *buffer, ssize_t bytes_read)
 {
-	this->_scriptPath = ServerUtils::resolveScriptPath(const_cast<HttpRequest *>(this->_req), const_cast<LocationConfig *>(this->_location));
-	this->_interpreterPath = ServerUtils::resolveInterpreterPath(this->_location, this->_extension);
-	this->executeCgi();
+	this->_buffer.append(buffer, bytes_read);
+}
+
+void	CgiHandler::updateBytesWritten(size_t newBytesWritten)
+{
+	size_t	actualBytes = this->_bytesWritten;
+
+	this->_bytesWritten = actualBytes + newBytesWritten;
+}
+
+void	CgiHandler::setInputAsClosed(void)
+{
+	if (this->_inputFdClosed == false)
+		this->_inputFdClosed = true;
+}
+
+void	CgiHandler::setOutputAsClosed(void)
+{
+	if (this->_outputFdClosed == false)
+		this->_outputFdClosed = true;
 }
 
 /***********************************************************************/
 /*                          Getters & Setters                          */
 /***********************************************************************/
+
+int	CgiHandler::getClientFd(void)
+{
+	return (this->_clientFd);
+}
+
+int	CgiHandler::getInputFd(void)
+{
+	return (this->_inputFd);
+}
+
+int CgiHandler::getOutputFd(void)
+{
+	return (this->_outputFd);
+}
+
+size_t CgiHandler::getBytesWritten(void)
+{
+	return (this->_bytesWritten);
+}
+
+std::string CgiHandler::getBuffer(void)
+{
+	return (this->_buffer);
+}
+
+std::string CgiHandler::getRequestBody(void)
+{
+	return (to_string(this->_req->getBody()));
+}
+
+bool	CgiHandler::getInputFdClosed(void)
+{
+	return (this->_inputFdClosed);
+}
+
+bool	CgiHandler::getOutputFdClosed(void)
+{
+	return (this->_outputFdClosed);
+}
 
 /***********************************************************************/
 /*                          Private Functions                          */

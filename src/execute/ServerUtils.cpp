@@ -58,10 +58,16 @@ std::string ServerUtils::getClientIP(struct sockaddr_in &client_addr)
 
 std::string	ServerUtils::resolveScriptPath(const HttpRequest *req, const LocationConfig *location)
 {
+	std::string script;
 	std::string rootPath = location->getRoot();
-	std::string script = req->getPath();
 	if (rootPath.compare("/") == 0)
-		return (script);
+	{
+		script = req->getPath();
+		std::cout << "Script: " << script << "\n";
+		return (script.substr(1, script.size() - 1));
+	}
+	else
+		script = req->getPath().substr(location->getLocationPath().length());
 	std::string scriptPath = rootPath + script;
 	return (scriptPath);
 }
