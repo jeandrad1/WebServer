@@ -12,6 +12,13 @@
 #include <sstream>
 #include "../utils/to_string.hpp"
 
+static std::string stripLeadingSlash(const std::string& path)
+{
+    if (!path.empty() && path[0] == '/')
+        return path.substr(1);
+    return path;
+}
+
 
 HttpResponse ResponseFactory::generateErrorResponse(int code, const ServerConfig& server, const LocationConfig* location, const std::string& urlPath)
 {
@@ -53,10 +60,7 @@ HttpResponse ResponseFactory::generateErrorResponse(int code, const ServerConfig
     if (!errorPagePath.empty())
     {
         std::string fullPath;
-        if (errorPagePath[0] == '/')
-            fullPath = server.getRoot() + errorPagePath;
-        else
-            fullPath = server.getRoot() + "/" + errorPagePath;
+		fullPath = stripLeadingSlash(server.getRoot()) + "/" + stripLeadingSlash(errorPagePath);
         
         struct stat s;
         if (stat(fullPath.c_str(), &s) == 0 && S_ISREG(s.st_mode))
