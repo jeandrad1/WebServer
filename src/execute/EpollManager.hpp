@@ -18,6 +18,8 @@ class EpollManager {
 		EpollManager(void);
 		~EpollManager(void);
 
+		static	EpollManager &getInstance(void);
+
 		void	addFd(int serverFd, uint32_t events);
 		void	modidyFd(int serverFd, uint32_t events);
 		void	removeFd(int serverFd);

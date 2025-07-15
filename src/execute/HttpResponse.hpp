@@ -20,6 +20,9 @@ class HttpResponse
         void setBody(const std::string& data);
         std::string buildResponse() const;
         std::string getBody() const { return body; }
+        int getStatusCode() const;
+        std::string getStatusMessage() const;
+        const std::map<std::string, std::string>& getHeaders() const;
 
 };
 

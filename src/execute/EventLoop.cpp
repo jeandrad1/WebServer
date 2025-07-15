@@ -1,5 +1,5 @@
 #include "EventLoop.hpp"
-
+#include "HttpRequestRouter.hpp"
 /***********************************************************************/
 /*                     Constructors & Destructor                       */
 /***********************************************************************/
@@ -52,10 +52,18 @@ void EventLoop::runEventLoop(void)
 		for (int i = 0; i < n_ready; ++i)
 		{
 			int fd = events[i].data.fd;
-
+			std::cout << "Actual fd: " << fd << "\nN_ready: " << n_ready << "\n";
 			if (isServerSocket(fd))
 			{
 				handleNewConnection(fd);
+			}
+			else if (isCgiOutputPipe(fd))
+			{
+				handleCgiOutput(fd);
+			}
+			else if (isCgiInputPipe(fd))
+			{
+				handleCgiInput(fd);
 			}
 			else
 			{
@@ -64,6 +72,8 @@ void EventLoop::runEventLoop(void)
 		}
 	}
 }
+
+
 
 /***********************************************************************/
 /*                          Private Functions                          */
@@ -81,6 +91,91 @@ bool EventLoop::isServerSocket(int fd)
 	return (false);
 }
 
+bool EventLoop::isCgiOutputPipe(int fd)
+{
+	std::cerr << "IscgiOutputPipe 2\n";
+	for (std::map<int, CgiHandler *>::iterator it = this->_CgiOutputFds.begin(); it != this->_CgiOutputFds.end(); ++it)
+	{
+		if (it->first == fd)
+		{
+			std::cerr << "IscgiOutputPipe 1\n";
+			return (true);
+		}
+	}
+	return (false);
+}
+
+bool EventLoop::isCgiInputPipe(int fd)
+{
+	std::cerr << "IscgiInputPipe 2\n";
+	for (std::map<int, CgiHandler *>::iterator it = this->_CgiInputFds.begin(); it != this->_CgiInputFds.end(); ++it)
+	{
+		if (it->first == fd)
+		{
+			std::cerr << "IscgiInputPipe 1\n";
+			return (true);
+		}
+	}
+	return (false);
+}
+
+void EventLoop::handleCgiOutput(int fd)
+{
+	std::cerr << "Entra en handleCgiOutput\n";
+	CgiHandler *cgi = this->_CgiOutputFds[fd];
+
+	char	buffer[4096];
+	ssize_t	bytesRead = read(fd, buffer, sizeof(buffer));
+	if (bytesRead > 0)
+	{
+		cgi->appendToCgiBuffer(buffer, bytesRead);
+	}
+	else if (bytesRead <= 0)
+	{
+		std::cout << "Entra 1\n";
+		this->_epollManager.removeFd(fd);
+		close(fd);
+		cgi->setOutputAsClosed();
+	}
+	std::cout << "Llega 1\n";
+	if (cgi->getInputFdClosed() == true && cgi->getOutputFdClosed() == true)
+	{
+		std::string buffer = cgi->parseCgiBuffer();
+		send(cgi->getClientFd(), buffer.c_str(), buffer.size(), 0);
+		this->_CgiOutputFds.erase(fd);
+	}
+}
+
+void EventLoop::handleCgiInput(int fd)
+{
+	CgiHandler *cgi = this->_CgiInputFds[fd];
+
+	std::string body = cgi->getRequestBody();
+	size_t		bytesAlreadyWritten = cgi->getBytesWritten();
+	size_t		bytesToWrite = body.size() - bytesAlreadyWritten;
+
+	if (bytesToWrite > 0)
+	{
+		size_t	bytesWritten = write(fd, body.data() + bytesAlreadyWritten, bytesToWrite);
+		if (bytesWritten > 0)
+		{
+			cgi->updateBytesWritten(bytesWritten);
+		}
+		else if (bytesWritten <= 0)
+		{
+			this->_epollManager.removeFd(fd);
+			close(fd);
+			cgi->setInputAsClosed();
+		}
+	}
+	else
+	{
+		this->_epollManager.removeFd(fd);
+		close(fd);
+		cgi->setInputAsClosed();
+	}
+}
+
 void EventLoop::handleNewConnection(int serverFd)
 {
 	struct sockaddr_in client_addr;
@@ -93,7 +188,7 @@ void EventLoop::handleNewConnection(int serverFd)
 	}
 
 	// Set non-blocking
-	fcntl(client_fd, F_SETFL, fcntl(client_fd, F_GETFL, 0) | O_NONBLOCK);
+	ServerUtils::setNotBlockingFd(client_fd);
 
 	try
 	{
@@ -105,13 +200,40 @@ void EventLoop::handleNewConnection(int serverFd)
 		close(client_fd);
 		return ;
 	}
+	    int serverKey = -1;
+    for (std::map<Socket *, int>::iterator it = _serverSockets.begin(); it != _serverSockets.end(); ++it)
+    {
+        if (it->first->getSocket() == serverFd)
+        {
+            serverKey = it->second;
+            break;
+        }
+    }	
+
+	// new to handle the connections correctly
+    if (serverKey != -1)
+    {
+        _clientToServer[client_fd] = serverKey; 
+        std::cout << "✓ Mapped client " << client_fd << " to server key " << serverKey << std::endl;
+    }
+    else
+    {
+        std::cout << "✗ ERROR: No server key found for serverFd " << serverFd << std::endl;
+    }
+
+	_clientToServer[client_fd] = serverKey; 
+
+	_clientToServerSocket[client_fd] = serverFd;
+
+	std::string ip = ServerUtils::getClientIP(client_addr);
+	this->_ClientIPs[client_fd] = ip;
+
 	std::cout << "New connection accepted (fd = " << client_fd << ")\n";
 }
 
 void EventLoop::handleClientData(int clientFd)
 {
 	char buffer[4096];
-	HttpRequest *request = NULL;
 	ssize_t count = recv(clientFd, buffer, sizeof(buffer), 0);  // Replaced read with recv
 	if (count <= 0)
 	{
@@ -120,6 +242,9 @@ void EventLoop::handleClientData(int clientFd)
 			perror("recv");
 			close(clientFd);
 		}
+		close(clientFd);
+		_buffers.erase(clientFd);
+		_clientToServer.erase(clientFd);
 		try
 		{
 			this->_epollManager.removeFd(clientFd);
@@ -136,25 +261,73 @@ void EventLoop::handleClientData(int clientFd)
 		size_t header_end = _buffers[clientFd].find("\r\n\r\n");
 		if (header_end != std::string::npos)
 		{
-			request = handleHttpRequest(clientFd, header_end);				
-		}
-		if (request != NULL)
-		{
-			std::cout <<RED<< "Received HTTP request from fd " << clientFd <<RESET<< ":\n";
-			request->HttpRequestPrinter();
-			
-		}
-		/*std::cout << "Received (" << fd << "): " << std::string(buffer, count);
+			try
+			{
+				HttpRequest *request = handleHttpRequest(clientFd, header_end);
+				if (request == NULL)
+					return ;
+				std::string ip = this->_ClientIPs[clientFd];
+				CgiHandler *cgi = new CgiHandler(request, ip, getServersByFd(_clientToServerSocket[clientFd]));
+				if (cgi->isCgiRequest())
+				{
+					std::cout << "CGI matches\n";
+					cgi->executeCgi(this->_CgiInputFds, this->_CgiOutputFds, clientFd);
+					return ;
+				}
+				if (request != NULL)
+				{
+					std::cout << RED << "Received HTTP request from fd " << clientFd << RESET << ":\n";
+					request->HttpRequestPrinter();
 
-		// Replace write with send
-		const char *response = "HTTP/1.1 200 OK\r\nContent-Length: 3\r\n\r\nOK\n";
-		ssize_t sent = send(fd, response, 41, 0); // 0 = default flags
-		if (sent == -1)
-		{
-			perror("send");
-			close(fd);
-			epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, NULL);
-		}*/
+					int serverFd = _clientToServer[clientFd];
+
+					//_servers[serverFd][0]->printValues();  
+					if (_servers.find(serverFd) != _servers.end() && !_servers[serverFd].empty())
+					{
+						HttpRequestRouter router;
+						HttpResponse response = router.handleRequest(*request, *(_servers[serverFd][0]));
+
+						// Transform the response into a string
+						std::ostringstream oss;
+						oss << "HTTP/1.1 " << response.getStatusCode() << " " << response.getStatusMessage() << "\r\n";
+						const std::map<std::string, std::string>& headers = response.getHeaders();
+						for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
+						{
+							oss << it->first << ": " << it->second << "\r\n";
+						}
+						oss << "\r\n";
+						oss << response.getBody();
+						std::string responseStr = oss.str();
+
+						// Send the response back to the client
+						//std::cout << "The response is:\n" << responseStr << std::endl;
+						ssize_t sent = send(clientFd, responseStr.c_str(), responseStr.size(), 0);
+						if (sent == -1)
+						{
+							perror("send");
+							close(clientFd);
+							_buffers.erase(clientFd);
+							_clientToServer.erase(clientFd);
+							try {
+								_epollManager.removeFd(clientFd);
+							} catch (const std::exception& e) {
+								std::cerr << "Failed to remove fd: " << e.what() << std::endl;
+							}
+						}
+						else
+						{
+							_buffers[clientFd].clear();
+							std::cout << "✓ Response sent, connection kept alive" << std::endl;
+						}			
+						delete request;
+					}
+				}
+			}
+			catch (const std::exception &e)
+			{
+				std::cerr << "Failed cgi: " << e.what() << "\n";
+			}
+		}
 	}
 }
 
@@ -164,29 +337,64 @@ HttpRequest *EventLoop::handleHttpRequest(int clientFd, size_t header_end)
 	{
 		HttpRequestManager reqMan;
 
-		reqMan.parseHttpHeader(_buffers[clientFd]);
+		reqMan.parseHttpRequest(_buffers[clientFd]);
 		HttpRequest *request = reqMan.buildHttpRequest();
 
-		long long content_length = request->getContentLenght();
-		size_t received_body_size = _buffers[clientFd].size() - (header_end + 4);
+		long long content_length = request->getContentLength();
+		long long received_body_size = _buffers[clientFd].size() - (header_end + 4);
 
 		if (received_body_size < content_length)
 		{
 			delete request;
-			return NULL;
+			return (NULL);
 		}
 		std::string full_request = _buffers[clientFd].substr(0, header_end + 4 + content_length);
 		reqMan.parseHttpRequest(full_request);
-
-		reqMan.requestPrinter();
+		request = reqMan.buildHttpRequest();
+		//reqMan.requestPrinter();
 
 		return request;
 	}
 	catch(const std::exception& e)
 	{
+		ResponseFactory factory;
+        HttpResponse res = factory.createBasicErrorResponse(501);
+		
+		std::ostringstream oss;
+		oss << "HTTP/1.1 " << res.getStatusCode() << " " << res.getStatusMessage() << "\r\n";
+		const std::map<std::string, std::string>& headers = res.getHeaders();
+		for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
+		{
+			oss << it->first << ": " << it->second << "\r\n";
+		}
+		oss << "\r\n";
+		oss << res.getBody();
+		std::string responseStr = oss.str();
+
+		// lacks security
+		send(clientFd, responseStr.c_str(), responseStr.size(), 0);
+
 		std::cerr << RED "REQUEST PARSER ERROR: " << e.what() << WHITE "\n";;
+		return NULL;
 	}
 	return NULL;
+}
+
+
+std::vector<ServerConfig *> EventLoop::getServersByFd(int fd)
+{
+	std::map<Socket *, int>::iterator ite = this->_serverSockets.end();
+	int port = -1;
+	for (std::map<Socket *, int>::iterator it = this->_serverSockets.begin(); it != ite; it++)
+	{
+		if (it->first->getSocket() == fd)
+		{
+			port = it->second;
+			break ;
+		}
+	}
+	std::vector<ServerConfig *> server = this->_servers[port];
+	return (server);
 }
 
 /***********************************************************************/

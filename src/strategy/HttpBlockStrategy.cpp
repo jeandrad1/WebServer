@@ -5,6 +5,7 @@ HttpBlockStrategy::HttpBlockStrategy()
 	this->validDirectives.push_back("client_max_body_size");
 	this->validDirectives.push_back("error_page");
 	this->validDirectives.push_back("server");
+	this->validDirectives.push_back("cgi");
 }
 
 bool	HttpBlockStrategy::validate(std::vector<AConfigBlock*> const &block) const

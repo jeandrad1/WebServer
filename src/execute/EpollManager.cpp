@@ -26,6 +26,12 @@ EpollManager::~EpollManager(void)
 /*                          Public Functions                           */
 /***********************************************************************/
 
+EpollManager &EpollManager::getInstance(void)
+{
+	static EpollManager	instance;
+	return (instance);
+}
+
 void EpollManager::addFd(int serverFd, uint32_t events)
 {
 	struct epoll_event ev;

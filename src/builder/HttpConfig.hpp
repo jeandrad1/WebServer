@@ -10,7 +10,7 @@ class HttpConfig : public IConfig {
 	public:
 		std::vector<ServerConfig *>		servers;
 
-		unsigned long					clientMaxBodySize;
+		long							clientMaxBodySize;
 		std::map<int, t_errorPage *>	errorPages;
 		bool							errorPageDirective;
 
