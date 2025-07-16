@@ -27,7 +27,9 @@ CgiHandler::CgiHandler(HttpRequest *req, std::string clientIp, std::vector<Serve
 
 	this->_location = ServerUtils::getLocationByRequestPath(this->_requestPath, this->_server);
 	if (!this->_location)
+	{
 		throw std::runtime_error("No matching location found for host: " + this->_requestPath);
+	}
 }
 
 /***********************************************************************/
@@ -40,7 +42,7 @@ CgiHandler::CgiHandler(HttpRequest *req, std::string clientIp, std::vector<Serve
 
 bool	CgiHandler::isCgiRequest(void)
 {
-	if (this->_location->cgiDirective == false)
+	if (!this->_location && this->_location->cgiDirective == false)
 	{
 		std::cerr << "Error with location in CGI\n";
 		return (false);
@@ -62,19 +64,57 @@ bool	CgiHandler::isCgiRequest(void)
 std::string	CgiHandler::parseCgiBuffer(void)
 {
 	std::istringstream iss(this->_buffer);
-	std::ostringstream oss;
+	std::string			line;
+	std::string			parsedBuffer;
+	int					HttpHeaderFlag = -1;
+	int					endHeadersFlag = -1;
 
-	std::cout << "Peta\n";
-	std::string line;
-	std::getline(iss, line);
-	std::cout << line << "\n";
-	oss << "HTTP/1.1 " << line.substr(line.size());
-	while (std::getline(iss, line))
+	while (getline(iss, line))
 	{
-		oss << line << "\n";
+		if (line.empty())
+			break ;
+		size_t colon = line.find(":");
+		if (colon != std::string::npos)
+		{
+			std::string key = trimSpaces(line.substr(0, colon));
+			std::string lowerKey = to_lowercase(key);
+
+			if (lowerKey == "status")
+			{
+				parsedBuffer.append(CgiHeaderParser::parseStatusHeader(line));
+				HttpHeaderFlag = 1;
+			}
+			else if (lowerKey == "content-type")
+			{
+				parsedBuffer.append(CgiHeaderParser::parseContentTypeHeader(line));
+			}
+			else if (lowerKey == "location")
+			{
+				parsedBuffer.append(CgiHeaderParser::parseLocationHeader(line));
+			}
+			else
+			{
+				if (CgiHeaderParser::parseFormatHeader(line))
+				{
+					if (to_lowercase(line) == "http/1.1 200 ok\n")
+						HttpHeaderFlag = 1;
+					parsedBuffer.append(trim(line) + "\r\n");
+				}
+			}
+		}
+		else
+		{
+			if (endHeadersFlag == -1)
+			{
+				endHeadersFlag = 1;
+				parsedBuffer.append("\r\n");
+			}
+			parsedBuffer.append(line);
+		}
 	}
-	std::string parsedBuffer = oss.str();
-	std::cout << parsedBuffer;
+	if (HttpHeaderFlag == -1)
+		parsedBuffer = "HTTP/1.1 200 OK\n" + parsedBuffer;
+	std::cout << "Parsed Buffer: \n" << parsedBuffer << "\n";
 	return (parsedBuffer);
 }
 
@@ -102,6 +142,8 @@ bool	CgiHandler::executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<in
 		close(output_pipe[0]);
 		close(STDIN_FILENO);
 		char *argv[] = {const_cast<char*>(this->_interpreterPath.c_str()), const_cast<char*>(this->_scriptPath.c_str()), NULL};
+		std::cerr << "Argv[0]: " << argv[0] << "\n";
+		std::cerr << "Argv[1]: " << argv[1] << "\n";
 		execve(argv[0], argv, this->_envv);
 		std::cerr << "Falla\n";
 		exit(1);

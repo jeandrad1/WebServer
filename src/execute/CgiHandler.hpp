@@ -9,7 +9,9 @@
 # include "CgiEnvBuilder.hpp"
 # include <unistd.h>
 # include "../utils/to_string.hpp"
+# include "../utils/utils.hpp"
 # include "EpollManager.hpp"
+# include "CgiHeaderParser.hpp"
 
 class CgiHandler {
 
