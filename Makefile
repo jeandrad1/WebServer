@@ -53,6 +53,7 @@ FILES = main \
 		execute/CgiHandler \
 		execute/CgiEnvBuilder \
 		execute/ServerUtils \
+		execute/CgiHeaderParser \
 
 
 $(shell mkdir -p ./build)
