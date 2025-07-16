@@ -19,6 +19,7 @@ bool		checkCodeIsValid(int code);
 std::string	getSubstringBeforeSemicolon(const std::string &value);
 bool		checkChars(const std::string &value);
 std::string	trim(const std::string &str);
+std::string	trimSpaces(const std::string &str);
 int			countWhitespace(const std::string &str);
 bool		checkFilename(const std::string &word);
 bool		safe_atoll(const std::string& str, long long& result);
