@@ -357,6 +357,23 @@ HttpRequest *EventLoop::handleHttpRequest(int clientFd, size_t header_end)
 	}
 	catch(const std::exception& e)
 	{
+		ResponseFactory factory;
+        HttpResponse res = factory.createBasicErrorResponse(501);
+		
+		std::ostringstream oss;
+		oss << "HTTP/1.1 " << res.getStatusCode() << " " << res.getStatusMessage() << "\r\n";
+		const std::map<std::string, std::string>& headers = res.getHeaders();
+		for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
+		{
+			oss << it->first << ": " << it->second << "\r\n";
+		}
+		oss << "\r\n";
+		oss << res.getBody();
+		std::string responseStr = oss.str();
+
+		// lacks security
+		send(clientFd, responseStr.c_str(), responseStr.size(), 0);
+
 		std::cerr << RED "REQUEST PARSER ERROR: " << e.what() << WHITE "\n";;
 		return NULL;
 	}

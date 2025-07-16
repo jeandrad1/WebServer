@@ -10,6 +10,13 @@
 #include <sstream>
 #include "../utils/to_string.hpp"
 
+static std::string stripLeadingSlash(const std::string& path)
+{
+    if (!path.empty() && path[0] == '/')
+        return path.substr(1);
+    return path;
+}
+
 HttpResponse HttpRequestRouter::handleRequest(const HttpRequest& req, const ServerConfig& server)
 {
     std::string method = req.getMethod();
@@ -92,6 +99,7 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerCo
     if (location)
     {
         root = location->getRoot().empty() ? server.getRoot() : location->getRoot();
+    	root = stripLeadingSlash(root);
 
         if (path.find(location->getLocationPath()) == 0)
 		{
@@ -111,6 +119,7 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerCo
     else
 	{
         root = server.getRoot();
+		root = stripLeadingSlash(root);
 		cleanPath = path;
 		if (!server_indexes.empty())
             indexFile = server_indexes[0];
@@ -118,7 +127,7 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerCo
 	}
 
     std::string fullPath = root + cleanPath;
-
+	
 	struct stat s;
 	if (stat(fullPath.c_str(), &s) != 0)
 	{
@@ -291,5 +300,5 @@ HttpResponse HttpRequestRouter::handleDelete(const HttpRequest& req, const Serve
 
 HttpResponse HttpRequestRouter::methodNotAllowed()
 {
-	return ResponseFactory::createResponse(405);
+	return ResponseFactory::createResponse(501);
 }
