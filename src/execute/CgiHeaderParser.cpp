@@ -104,9 +104,7 @@ std::string CgiHeaderParser::parseContentTypeHeader(std::string line)
                 size_t semicolon = value.find(";");
                 if (semicolon == std::string::npos)
                 {
-					std::cout << "Entra en content-type\n";
-					std::cout << "Value: " << value << "\n";
-                    if (known_mime_types.count(value) == 0)
+                    if (known_mime_types.count(trim(to_lowercase(value))) == 0)
                     {
                         std::cerr << "[Warning] Unknown Mime-Type: " << value << "\n";
                         return (DEFAULT_CONTENT_TYPE_HEADER);
@@ -136,6 +134,16 @@ std::string CgiHeaderParser::parseContentTypeHeader(std::string line)
 /***********************************************************************/
 /*                          Private Functions                          */
 /***********************************************************************/
+
+bool CgiHeaderParser::findValidMimeType(std::string value)
+{
+	for (std::map<std::string, std::string>::iterator it = mime_types.begin(); it != mime_types.end(); it++)
+	{
+		if (value == (*it).second)
+			return (true);
+	}
+	return (false);
+}
 
 void CgiHeaderParser::loadErrorCodes()
 {
@@ -306,79 +314,79 @@ void CgiHeaderParser::loadMimeTypes()
 	mime_types["wmv"]		= "video/x-ms-wmv";
 	mime_types["avi"]		= "video/x-msvideo";
 
-	known_mime_types.insert("text/html");
-	known_mime_types.insert("text/css");
-	known_mime_types.insert("text/xml");
-	known_mime_types.insert("image/gif");
-	known_mime_types.insert("image/jpeg");
-	known_mime_types.insert("application/javascript");
-	known_mime_types.insert("application/atom+xml");
-	known_mime_types.insert("application/rss+xml");
-	known_mime_types.insert("text/mathml");
-	known_mime_types.insert("text/plain");
-	known_mime_types.insert("text/vnd.sun.j2me.app-descriptor");
-	known_mime_types.insert("text/vnd.wap.wml");
-	known_mime_types.insert("text/x-component");
-	known_mime_types.insert("image/png");
-	known_mime_types.insert("image/tiff");
-	known_mime_types.insert("image/vnd.wap.wbmp");
-	known_mime_types.insert("image/x-icon");
-	known_mime_types.insert("image/x-jng");
-	known_mime_types.insert("image/x-ms-bmp");
-	known_mime_types.insert("image/svg+xml");
-	known_mime_types.insert("image/webp");
-	known_mime_types.insert("application/font-woff");
-	known_mime_types.insert("application/java-archive");
-	known_mime_types.insert("application/json");
-	known_mime_types.insert("application/mac-binhex40");
-	known_mime_types.insert("application/msword");
-	known_mime_types.insert("application/pdf");
-	known_mime_types.insert("application/postscript");
-	known_mime_types.insert("application/rtf");
-	known_mime_types.insert("application/vnd.apple.mpegurl");
-	known_mime_types.insert("application/vnd.ms-excel");
-	known_mime_types.insert("application/vnd.ms-fontobject");
-	known_mime_types.insert("application/vnd.ms-powerpoint");
-	known_mime_types.insert("application/vnd.wap.wmlc");
-	known_mime_types.insert("application/vnd.google-earth.kml+xml");
-	known_mime_types.insert("application/vnd.google-earth.kmz");
-	known_mime_types.insert("application/x-7z-compressed");
-	known_mime_types.insert("application/x-cocoa");
-	known_mime_types.insert("application/x-java-archive-diff");
-	known_mime_types.insert("application/x-java-jnlp-file");
-	known_mime_types.insert("application/x-makeself");
-	known_mime_types.insert("application/x-perl");
-	known_mime_types.insert("application/x-pilot");
-	known_mime_types.insert("application/x-rar-compressed");
-	known_mime_types.insert("application/x-redhat-package-manager");
-	known_mime_types.insert("application/x-sea");
-	known_mime_types.insert("application/x-shockwave-flash");
-	known_mime_types.insert("application/x-stuffit");
-	known_mime_types.insert("application/x-tcl");
-	known_mime_types.insert("application/x-x509-ca-cert");
-	known_mime_types.insert("application/x-xpinstall");
-	known_mime_types.insert("application/xhtml+xml");
-	known_mime_types.insert("application/xspf+xml");
-	known_mime_types.insert("application/zip");
-	known_mime_types.insert("application/octet-stream");
-	known_mime_types.insert("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-	known_mime_types.insert("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-	known_mime_types.insert("application/vnd.openxmlformats-officedocument.presentationml.presentation");
-	known_mime_types.insert("audio/midi");
-	known_mime_types.insert("audio/mpeg");
-	known_mime_types.insert("audio/ogg");
-	known_mime_types.insert("audio/x-m4a");
-	known_mime_types.insert("audio/x-realaudio");
-	known_mime_types.insert("video/3gpp");
-	known_mime_types.insert("video/mp2t");
-	known_mime_types.insert("video/mp4");
-	known_mime_types.insert("video/mpeg");
-	known_mime_types.insert("video/quicktime");
-	known_mime_types.insert("video/webm");
-	known_mime_types.insert("video/x-flv");
-	known_mime_types.insert("video/x-m4v");
-	known_mime_types.insert("video/x-mng");
-	known_mime_types.insert("video/x-ms-asf");
-	known_mime_types.insert("video/x-ms-wmv");
-	known_mime_types.insert("video/x-msvideo");
+	this->known_mime_types.insert("text/html");
+	this->known_mime_types.insert("text/css");
+	this->known_mime_types.insert("text/xml");
+	this->known_mime_types.insert("image/gif");
+	this->known_mime_types.insert("image/jpeg");
+	this->known_mime_types.insert("application/javascript");
+	this->known_mime_types.insert("application/atom+xml");
+	this->known_mime_types.insert("application/rss+xml");
+	this->known_mime_types.insert("text/mathml");
+	this->known_mime_types.insert("text/plain");
+	this->known_mime_types.insert("text/vnd.sun.j2me.app-descriptor");
+	this->known_mime_types.insert("text/vnd.wap.wml");
+	this->known_mime_types.insert("text/x-component");
+	this->known_mime_types.insert("image/png");
+	this->known_mime_types.insert("image/tiff");
+	this->known_mime_types.insert("image/vnd.wap.wbmp");
+	this->known_mime_types.insert("image/x-icon");
+	this->known_mime_types.insert("image/x-jng");
+	this->known_mime_types.insert("image/x-ms-bmp");
+	this->known_mime_types.insert("image/svg+xml");
+	this->known_mime_types.insert("image/webp");
+	this->known_mime_types.insert("application/font-woff");
+	this->known_mime_types.insert("application/java-archive");
+	this->known_mime_types.insert("application/json");
+	this->known_mime_types.insert("application/mac-binhex40");
+	this->known_mime_types.insert("application/msword");
+	this->known_mime_types.insert("application/pdf");
+	this->known_mime_types.insert("application/postscript");
+	this->known_mime_types.insert("application/rtf");
+	this->known_mime_types.insert("application/vnd.apple.mpegurl");
+	this->known_mime_types.insert("application/vnd.ms-excel");
+	this->known_mime_types.insert("application/vnd.ms-fontobject");
+	this->known_mime_types.insert("application/vnd.ms-powerpoint");
+	this->known_mime_types.insert("application/vnd.wap.wmlc");
+	this->known_mime_types.insert("application/vnd.google-earth.kml+xml");
+	this->known_mime_types.insert("application/vnd.google-earth.kmz");
+	this->known_mime_types.insert("application/x-7z-compressed");
+	this->known_mime_types.insert("application/x-cocoa");
+	this->known_mime_types.insert("application/x-java-archive-diff");
+	this->known_mime_types.insert("application/x-java-jnlp-file");
+	this->known_mime_types.insert("application/x-makeself");
+	this->known_mime_types.insert("application/x-perl");
+	this->known_mime_types.insert("application/x-pilot");
+	this->known_mime_types.insert("application/x-rar-compressed");
+	this->known_mime_types.insert("application/x-redhat-package-manager");
+	this->known_mime_types.insert("application/x-sea");
+	this->known_mime_types.insert("application/x-shockwave-flash");
+	this->known_mime_types.insert("application/x-stuffit");
+	this->known_mime_types.insert("application/x-tcl");
+	this->known_mime_types.insert("application/x-x509-ca-cert");
+	this->known_mime_types.insert("application/x-xpinstall");
+	this->known_mime_types.insert("application/xhtml+xml");
+	this->known_mime_types.insert("application/xspf+xml");
+	this->known_mime_types.insert("application/zip");
+	this->known_mime_types.insert("application/octet-stream");
+	this->known_mime_types.insert("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+	this->known_mime_types.insert("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+	this->known_mime_types.insert("application/vnd.openxmlformats-officedocument.presentationml.presentation");
+	this->known_mime_types.insert("audio/midi");
+	this->known_mime_types.insert("audio/mpeg");
+	this->known_mime_types.insert("audio/ogg");
+	this->known_mime_types.insert("audio/x-m4a");
+	this->known_mime_types.insert("audio/x-realaudio");
+	this->known_mime_types.insert("video/3gpp");
+	this->known_mime_types.insert("video/mp2t");
+	this->known_mime_types.insert("video/mp4");
+	this->known_mime_types.insert("video/mpeg");
+	this->known_mime_types.insert("video/quicktime");
+	this->known_mime_types.insert("video/webm");
+	this->known_mime_types.insert("video/x-flv");
+	this->known_mime_types.insert("video/x-m4v");
+	this->known_mime_types.insert("video/x-mng");
+	this->known_mime_types.insert("video/x-ms-asf");
+	this->known_mime_types.insert("video/x-ms-wmv");
+	this->known_mime_types.insert("video/x-msvideo");
 }
