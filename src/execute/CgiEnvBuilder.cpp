@@ -34,15 +34,17 @@ char	**CgiEnvBuilder::build(void)
 	addEnv("HTTP_HOST", _req->getHost());
 	addEnv("HTTP_USER_AGENT", _req->getUserAgent());
 	addEnv("HTTP_ACCEPT", _req->getAccept());
-
+	
 	if (_req->getMethod() == "POST")
 	{
 		addEnv("CONTENT_LENGTH", _req->getContentLengthString());
 		addEnv("CONTENT_TYPE", _req->getContentType());
 	}
-
+	
 	std::string scriptPath = ServerUtils::resolveScriptPath(_req, _location);
 	addEnv("PATH_INFO", scriptPath);
+	addEnv("REDIRECT_STATUS", "200");
+	addEnv("SCRIPT_FILENAME", scriptPath);
 
 	this->_envv_array = vectorToCharArray();
 	return (this->_envv_array);
