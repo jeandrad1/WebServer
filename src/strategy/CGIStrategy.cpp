@@ -8,6 +8,7 @@ CGIStrategy::CGIStrategy(void)
 {
 	this->validExtensions.push_back(".py");
 	this->validExtensions.push_back(".cgi");
+	this->validExtensions.push_back(".php");
 }
 
 bool	isValidExtension(std::vector<std::string> validExtensions, const std::string &suffix)
