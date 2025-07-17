@@ -121,7 +121,6 @@ bool EventLoop::isCgiInputPipe(int fd)
 
 void EventLoop::handleCgiOutput(int fd)
 {
-	std::cerr << "Entra en handleCgiOutput\n";
 	CgiHandler *cgi = this->_CgiOutputFds[fd];
 
 	char	buffer[4096];
@@ -132,17 +131,16 @@ void EventLoop::handleCgiOutput(int fd)
 	}
 	else if (bytesRead <= 0)
 	{
-		std::cout << "Entra 1\n";
 		this->_epollManager.removeFd(fd);
 		close(fd);
 		cgi->setOutputAsClosed();
 	}
-	std::cout << "Llega 1\n";
 	if (cgi->getInputFdClosed() == true && cgi->getOutputFdClosed() == true)
 	{
 		std::string buffer = cgi->parseCgiBuffer();
 		send(cgi->getClientFd(), buffer.c_str(), buffer.size(), 0);
 		this->_CgiOutputFds.erase(fd);
+		close(fd);
 	}
 }
 
