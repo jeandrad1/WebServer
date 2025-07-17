@@ -72,9 +72,9 @@ std::string	CgiHandler::parseCgiBuffer(void)
 	while (getline(iss, line))
 	{
 		if (line.empty())
-			break ;
+			continue ;
 		size_t colon = line.find(":");
-		if (colon != std::string::npos)
+		if (colon != std::string::npos && endHeadersFlag == -1)
 		{
 			std::string key = trimSpaces(line.substr(0, colon));
 			std::string lowerKey = to_lowercase(key);
@@ -104,17 +104,17 @@ std::string	CgiHandler::parseCgiBuffer(void)
 		}
 		else
 		{
+			parsedBuffer.append(line);
 			if (endHeadersFlag == -1)
 			{
 				endHeadersFlag = 1;
+				parsedBuffer.append("Connection: close\r\n");
 				parsedBuffer.append("\r\n");
 			}
-			parsedBuffer.append(line);
 		}
 	}
 	if (HttpHeaderFlag == -1)
 		parsedBuffer = "HTTP/1.1 200 OK\n" + parsedBuffer;
-	std::cout << "Parsed Buffer: \n" << parsedBuffer << "\n";
 	return (parsedBuffer);
 }
 
@@ -142,8 +142,6 @@ bool	CgiHandler::executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<in
 		close(output_pipe[0]);
 		close(STDIN_FILENO);
 		char *argv[] = {const_cast<char*>(this->_interpreterPath.c_str()), const_cast<char*>(this->_scriptPath.c_str()), NULL};
-		std::cerr << "Argv[0]: " << argv[0] << "\n";
-		std::cerr << "Argv[1]: " << argv[1] << "\n";
 		execve(argv[0], argv, this->_envv);
 		std::cerr << "Falla\n";
 		exit(1);
@@ -159,11 +157,9 @@ bool	CgiHandler::executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<in
 			this->_inputFd = input_pipe[1];
 			this->_inputFdClosed = false;
 			cgiInputFd[input_pipe[1]] = this;
-			std::cout << "InputPipe fd: " << input_pipe[1] << "\n";
 		}
 		ServerUtils::setNotBlockingFd(output_pipe[0]);
 		EpollManager::getInstance().addFd(output_pipe[0], EPOLLIN);
-		std::cout << "OutputPipe fd: " << output_pipe[0] << "\n";
 		this->_outputFd = output_pipe[0];
 		this->_outputFdClosed = false;
 		cgiOutputFd[output_pipe[0]] = this;
