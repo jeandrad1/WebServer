@@ -1,13 +1,5 @@
 #include "EpollManager.hpp"
 
-static void childHandler(int signum)
-{
-	(void)signum;
-	 int saved_errno = errno;
-	while (waitpid(-1, NULL, WNOHANG) > 0)
-	errno = saved_errno;
-}
-
 /***********************************************************************/
 /*                     Constructors & Destructor                       */
 /***********************************************************************/
@@ -19,7 +11,6 @@ EpollManager::EpollManager(void)
 	{
 		throw std::runtime_error("Failed to create epoll instance");
 	}
-	std::signal(SIGCHLD, childHandler);
 }
 
 EpollManager::~EpollManager(void)
@@ -34,7 +25,6 @@ EpollManager::~EpollManager(void)
 /***********************************************************************/
 /*                          Public Functions                           */
 /***********************************************************************/
-
 
 EpollManager &EpollManager::getInstance(void)
 {
