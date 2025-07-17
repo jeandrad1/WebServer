@@ -6,6 +6,9 @@
 # include <unistd.h>
 # include <iostream>
 # include <stdio.h>
+# include <sys/wait.h>
+# include <csignal>
+# include <cerrno>
 
 class EpollManager {
 

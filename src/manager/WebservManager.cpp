@@ -14,6 +14,14 @@ int						validateConfigTreeFactory(AConfigBlock &config);
 void					registerAllStrategies(void);
 void					registerBlockStrategies(void);
 
+static void childHandler(int signum)
+{
+	(void)signum;
+	 int saved_errno = errno;
+	while (waitpid(-1, NULL, WNOHANG) > 0)
+	errno = saved_errno;
+}
+
 /***********************************************************************/
 /*                     Constructors & Destructor                       */
 /***********************************************************************/
@@ -67,6 +75,7 @@ void WebservManager::run(void)
 
 	impressMapServer(servers);
 
+	std::signal(SIGCHLD, childHandler);
 	SocketsManager sockets;
 	sockets.createSockets(servers);
 	EventLoop loop(EpollManager::getInstance(), sockets.getServerSockets(), this->servers);
