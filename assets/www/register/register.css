@@ -6,11 +6,24 @@ body {
 	justify-content: center;
 	align-items: center;
 	flex-direction: column;
-	background-color: #f0f0f0;
+	background-color: #3b3030;
 	font-family: sans-serif;
 }
 
 h1 {
 	font-size: 3rem;
 	color: #333;
+	background-color: #fff;
+	padding: 2rem;
+	border-radius: 8px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+	font-family: 'MedievalSharp';
+}
+
+form {
+	background-color: #fff;
+	padding: 2rem;
+	border-radius: 8px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+	width: 300px;
 }

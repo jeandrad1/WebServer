@@ -6,43 +6,44 @@ body {
 	justify-content: center;
 	align-items: center;
 	flex-direction: column;
-	background-color: #f0f0f0;
+	background-color: #3b3030;
 	font-family: sans-serif;
+	padding-top: 80px;
 }
 
 h1 {
 	font-size: 3rem;
-	color: #333;
+	color: #ebe5e5;
+	padding: 2rem;
+	font-family: 'Anton', sans-serif;
 }
 
-h2 {
-	font-size: 2rem;
-	color: #555;
-	margin-top: 10px;
+header {
+	position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: #000000;
+    z-index: 1000;
 }
 
-p {
-	font-size: 1.2rem;
-	color: #666;
+.menu {
+	display: flex;
+	justify-content: center;
+	gap: 1.5rem;
 }
 
-.buttons {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 20px;
-	width: 80%;
-
-	max-width: 400px;
-}
-
-button {
-	width: 100%;
-	padding: 15px;
-	font-size: 1rem;
-	cursor: pointer;
-	border: none;
-	border-radius: 5px;
-	background-color: #007bff;
+.menu button {
+	background-color: #000000;
 	color: #fff;
-	transition: background-color 0.3s;
+	border: none;
+	padding: 0.7em 1.5em;
+	border-radius: 5px;
+	font-size: 1em;
+	cursor: pointer;
+	transition: background 0.2s;
+}
+
+.menu button:hover {
+	background-color: #666;
 }
