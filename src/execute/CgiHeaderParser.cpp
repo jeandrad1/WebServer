@@ -358,6 +358,7 @@ void CgiHeaderParser::loadMimeTypes()
 	known_mime_types.insert("application/x-stuffit");
 	known_mime_types.insert("application/x-tcl");
 	known_mime_types.insert("application/x-x509-ca-cert");
+	known_mime_types.insert("application/x-www-form-urlencoded");
 	known_mime_types.insert("application/x-xpinstall");
 	known_mime_types.insert("application/xhtml+xml");
 	known_mime_types.insert("application/xspf+xml");

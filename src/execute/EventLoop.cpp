@@ -148,32 +148,37 @@ void EventLoop::handleCgiOutput(int fd)
 
 void EventLoop::handleCgiInput(int fd)
 {
-	CgiHandler *cgi = this->_CgiInputFds[fd];
+    CgiHandler *cgi = this->_CgiInputFds[fd];
 
-	std::string body = cgi->getRequestBody();
-	size_t		bytesAlreadyWritten = cgi->getBytesWritten();
-	size_t		bytesToWrite = body.size() - bytesAlreadyWritten;
+    std::string body = cgi->getRequestBody();
+    size_t bytesAlreadyWritten = cgi->getBytesWritten();
+    size_t bodySize = body.size();
 
-	if (bytesToWrite > 0)
-	{
-		size_t	bytesWritten = write(fd, body.data() + bytesAlreadyWritten, bytesToWrite);
-		if (bytesWritten > 0)
-		{
-			cgi->updateBytesWritten(bytesWritten);
-		}
-		else if (bytesWritten <= 0)
-		{
-			this->_epollManager.removeFd(fd);
-			close(fd);
-			cgi->setInputAsClosed();
-		}
-	}
-	else
-	{
-		this->_epollManager.removeFd(fd);
-		close(fd);
-		cgi->setInputAsClosed();
-	}
+    size_t bytesToWrite = (bytesAlreadyWritten < bodySize) ? (bodySize - bytesAlreadyWritten) : 0;
+
+    std::cerr << "CGI BODY SIZE: " << bodySize << " | bytesToWrite: " << bytesToWrite << std::endl;
+
+    if (bytesToWrite > 0)
+    {
+        ssize_t bytesWritten = write(fd, body.data() + bytesAlreadyWritten, bytesToWrite);
+        std::cerr << "CGI bytesWritten: " << bytesWritten << std::endl;
+        if (bytesWritten > 0)
+        {
+            cgi->updateBytesWritten(bytesWritten);
+        }
+        else
+        {
+            this->_epollManager.removeFd(fd);
+            close(fd);
+            cgi->setInputAsClosed();
+        }
+    }
+    else
+    {
+        this->_epollManager.removeFd(fd);
+        close(fd);
+        cgi->setInputAsClosed();
+    }
 }
 
 void EventLoop::handleNewConnection(int serverFd)
