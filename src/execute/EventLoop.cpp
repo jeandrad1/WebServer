@@ -21,6 +21,8 @@ EventLoop::EventLoop(EpollManager &epollManager, std::map<Socket *, int> serverS
 			std::cerr << "Failed to add socketFd " << socketFd << " to epoll: " << e.what() << std::endl;
 		}
 	}
+	CgiHeaderParser::loadMimeTypes();
+	CgiHeaderParser::loadErrorCodes();
 }
 
 EventLoop::~EventLoop(void)
