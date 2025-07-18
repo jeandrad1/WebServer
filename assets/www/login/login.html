@@ -4,10 +4,21 @@
 		<meta charset="UTF-8">
 		<title>Login</title>
 		<link rel="stylesheet" href="login.css">
+		<link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
 		<link rel="icon" href="../favicon/favicon.ico" type="image/x-icon">
 	</head>
 	<body>
-		<h1>Dime quien eres</h1>
+		<header>
+			<div class="menu">
+				<a href="../register/register.html">
+					<button>Aun no conocen mi leyenda...</button>
+				</a>
+			</div>
+		</header>
+		<div class="image-container">
+			<img src="login.png" alt="login" class="left-img">
+			<h1>¿Santo y seña?</h1>
+		</div>
 		<form action="/send/login.php" method="post">
 			<label for="user">Usuario:</label><br>
 			<input type="text" id="user" name="user" placeholder="Escribe tu usuario aqui"><br><br>
