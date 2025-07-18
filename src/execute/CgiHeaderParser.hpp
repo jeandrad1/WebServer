@@ -14,23 +14,22 @@ class CgiHeaderParser {
 
     private:
     
-        void loadMimeTypes(void);
-        void loadErrorCodes(void);
     
     public:
     
         static std::map<int, std::string> error_codes;
         static std::map<std::string, std::string> mime_types;
         static std::set<std::string> known_mime_types;
-    
-        CgiHeaderParser(void);
-        static bool        parseFormatHeader(std::string line);
-    
 
+        static bool        parseFormatHeader(std::string line);
+        
+        
         static bool findValidMimeType(std::string value);
         static std::string parseStatusHeader(std::string line);
         static std::string parseLocationHeader(std::string line);
         static std::string parseContentTypeHeader(std::string line);
+        static void loadMimeTypes(void);
+        static void loadErrorCodes(void);
 };
 
 #endif
