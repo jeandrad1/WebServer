@@ -73,6 +73,7 @@ std::string	CgiHandler::parseCgiBuffer(void)
 	{
 		if (line.empty())
 			continue ;
+		line = line + "\n";
 		size_t colon = line.find(":");
 		if (colon != std::string::npos && endHeadersFlag == -1)
 		{
@@ -96,7 +97,8 @@ std::string	CgiHandler::parseCgiBuffer(void)
 			{
 				if (CgiHeaderParser::parseFormatHeader(line))
 				{
-					if (to_lowercase(line) == "http/1.1 200 ok\n")
+					std::cout << "Line: " << trim(to_lowercase(line));
+					if (trim(to_lowercase(line)) == "http/1.1 200 ok")
 						HttpHeaderFlag = 1;
 					parsedBuffer.append(trim(line) + "\r\n");
 				}
@@ -104,17 +106,20 @@ std::string	CgiHandler::parseCgiBuffer(void)
 		}
 		else
 		{
+			if (trim(to_lowercase(line)) == "http/1.1 200 ok")
+				HttpHeaderFlag = 1;
 			parsedBuffer.append(line);
-			if (endHeadersFlag == -1)
+			if (endHeadersFlag == -1 && trim(to_lowercase(line)) != "http/1.1 200 ok")
 			{
 				endHeadersFlag = 1;
-				parsedBuffer.append("Connection: close\r\n");
-				parsedBuffer.append("\r\n");
+				//parsedBuffer.append("Connection: close\r\n");
+				//parsedBuffer.append("\r\n");
 			}
 		}
 	}
 	if (HttpHeaderFlag == -1)
-		parsedBuffer = "HTTP/1.1 200 OK\n" + parsedBuffer;
+		parsedBuffer = "HTTP/1.1 200 OK\r\n" + parsedBuffer;
+	std::cout << "Parsed Buffer: \n" << parsedBuffer << "\n";
 	return (parsedBuffer);
 }
 
@@ -142,6 +147,7 @@ bool	CgiHandler::executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<in
 		close(output_pipe[0]);
 		close(STDIN_FILENO);
 		char *argv[] = {const_cast<char*>(this->_interpreterPath.c_str()), const_cast<char*>(this->_scriptPath.c_str()), NULL};
+		alarm(5);
 		execve(argv[0], argv, this->_envv);
 		std::cerr << "Falla\n";
 		exit(1);
