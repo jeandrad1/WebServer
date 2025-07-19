@@ -155,12 +155,30 @@ bool	CgiHandler::executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<in
 		dup2(input_pipe[0], STDIN_FILENO);
 		dup2(output_pipe[1], STDOUT_FILENO);
 
+		close(input_pipe[0]);
 		close(input_pipe[1]);
 		close(output_pipe[0]);
+		close(output_pipe[1]);
 
-		char *argv[] = {const_cast<char*>(this->_interpreterPath.c_str()), const_cast<char*>(this->_scriptPath.c_str()), NULL};
-		alarm(5);
-		execve(argv[0], argv, this->_envv);
+		if (this->_interpreterPath.empty() || this->_interpreterPath == this->_scriptPath)
+		{
+			char *argv[] = {
+				const_cast<char*>(this->_scriptPath.c_str()),
+				NULL
+			};
+			alarm(5);
+			execve(argv[0], argv, this->_envv);
+		}
+		else
+		{
+			char *argv[] = {
+				const_cast<char*>(this->_interpreterPath.c_str()),
+				const_cast<char*>(this->_scriptPath.c_str()),
+				NULL
+			};
+			alarm(5);
+			execve(argv[0], argv, this->_envv);
+		}
 		std::cerr << "Falla\n";
 		exit(1);
 	}
@@ -176,6 +194,12 @@ bool	CgiHandler::executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<in
 			this->_inputFdClosed = false;
 			cgiInputFd[input_pipe[1]] = this;
 		}
+		else
+    	{
+			close(input_pipe[1]);
+			this->_inputFdClosed = true;
+    	}
+
 		ServerUtils::setNotBlockingFd(output_pipe[0]);
 		EpollManager::getInstance().addFd(output_pipe[0], EPOLLIN);
 		this->_outputFd = output_pipe[0];
