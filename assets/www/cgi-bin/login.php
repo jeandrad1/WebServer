@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user']) && isset($_PO
         echo "<html><body>";
         echo "<h1>Login exitoso</h1>";
         echo "<p>Bienvenido, $user.</p>";
-        echo "<a href='index.html'>Ir al inicio</a>";
+        echo "<a href='/portal/portal.html'>Ir al inicio</a>";
         echo "</body></html>";
     } else {
         echo "Content-Type: text/html\r\n\r\n";

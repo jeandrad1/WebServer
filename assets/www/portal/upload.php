@@ -1,4 +1,6 @@
 <?php
+header('Content-Type: text/html; charset=UTF-8');
+
 $uploadDir = "file_library/";
 if (!is_dir($uploadDir)) {
     mkdir($uploadDir, 0755, true);

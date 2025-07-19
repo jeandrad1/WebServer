@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user']) && isset($_PO
 
         $html = "<html><body>";
         $html .= "<h1>Registro exitoso</h1>";
-        $html .= "<a href='/register/register.html'>Volver</a>";
+        $html .= "<a href='/portal/portal.php'>Continuar</a>";
         $html .= "</body></html>";
         send_response($html);
     }
