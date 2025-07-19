@@ -6,7 +6,7 @@
 /***********************************************************************/
 
 CgiHandler::CgiHandler(HttpRequest *req, std::string clientIp, std::vector<ServerConfig *> servers)
-	: _req(req), _clientIp(clientIp)
+	: _req(req), _clientIp(clientIp), _bytesWritten(0)
 {
 	this->_outputFdClosed = true;
 	this->_inputFdClosed = true;
@@ -140,12 +140,24 @@ bool	CgiHandler::executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<in
 	{
 		CgiEnvBuilder *envBuilder = new CgiEnvBuilder(this->_req, this->_server, this->_location, this->_clientIp);
 		this->_envv = envBuilder->build();
+
+		// DEBUG:
+        std::cout << "---- CGI ENV ----\n";
+        for (int i = 0; this->_envv[i]; ++i)
+            std::cout << this->_envv[i] << std::endl;
+        std::cout << "Interpreter: " << this->_interpreterPath << std::endl;
+        std::cout << "Script: " << this->_scriptPath << std::endl;
+        std::cout << "-----------------\n";
+		std::string body = this->getRequestBody();
+		std::cout << "---- CGI BODY ----\n" << body << "\n------------------\n";
+		//DELETE THIS
+
 		dup2(input_pipe[0], STDIN_FILENO);
 		dup2(output_pipe[1], STDOUT_FILENO);
 
 		close(input_pipe[1]);
 		close(output_pipe[0]);
-		close(STDIN_FILENO);
+
 		char *argv[] = {const_cast<char*>(this->_interpreterPath.c_str()), const_cast<char*>(this->_scriptPath.c_str()), NULL};
 		alarm(5);
 		execve(argv[0], argv, this->_envv);

@@ -156,18 +156,30 @@ void EventLoop::handleCgiInput(int fd)
 
     size_t bytesToWrite = (bytesAlreadyWritten < bodySize) ? (bodySize - bytesAlreadyWritten) : 0;
 
-    std::cerr << "CGI BODY SIZE: " << bodySize << " | bytesToWrite: " << bytesToWrite << std::endl;
+	// DEBUG
+    std::cerr << "[CGI DEBUG] BODY SIZE: " << bodySize 
+              << " | bytesAlreadyWritten: " << bytesAlreadyWritten
+              << " | bytesToWrite: " << bytesToWrite << std::endl;
 
     if (bytesToWrite > 0)
     {
         ssize_t bytesWritten = write(fd, body.data() + bytesAlreadyWritten, bytesToWrite);
-        std::cerr << "CGI bytesWritten: " << bytesWritten << std::endl;
+
+		//DEBUG
+        std::cerr << "[CGI DEBUG] write(fd=" << fd << ", offset=" << bytesAlreadyWritten 
+                  << ", bytesToWrite=" << bytesToWrite << ") -> bytesWritten: " << bytesWritten << std::endl;
         if (bytesWritten > 0)
-        {
+		{
             cgi->updateBytesWritten(bytesWritten);
-        }
+
+			//DEBUG
+			std::cerr << "[CGI DEBUG] Updated bytesWritten: " << cgi->getBytesWritten() << std::endl;
+		}
         else
         {
+			//DEBUG
+			std::cerr << "[CGI DEBUG] write() returned <= 0, closing fd=" << fd << std::endl;
+
             this->_epollManager.removeFd(fd);
             close(fd);
             cgi->setInputAsClosed();
@@ -175,9 +187,16 @@ void EventLoop::handleCgiInput(int fd)
     }
     else
     {
+		// DEBUG
+		std::cerr << "Cerrando pipe de entrada CGI fd=" << fd << std::endl;
+		
         this->_epollManager.removeFd(fd);
         close(fd);
         cgi->setInputAsClosed();
+		
+		// DEBUG
+		std::cerr << "Pipe de entrada CGI cerrado fd=" << fd << std::endl;
+
     }
 }
 
