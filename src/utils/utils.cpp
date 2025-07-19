@@ -92,6 +92,19 @@ std::string	trim(const std::string &str)
 	return str.substr(first, last - first + 1);
 }
 
+std::string	trimSpaces(const std::string &str)
+{
+	if (str.size() == 0)
+		return "";
+
+	size_t	first = str.find_first_not_of(" ");
+	if (first == std::string::npos)
+		return "";
+
+	size_t	last = str.find_last_not_of(" ");
+	return str.substr(first, last - first + 1);
+}
+
 int	countWhitespace(const std::string &str)
 {
 	int	count = 0;

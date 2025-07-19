@@ -6,7 +6,7 @@
 /***********************************************************************/
 
 CgiHandler::CgiHandler(HttpRequest *req, std::string clientIp, std::vector<ServerConfig *> servers)
-	: _req(req), _clientIp(clientIp)
+	: _req(req), _clientIp(clientIp), _bytesWritten(0)
 {
 	this->_outputFdClosed = true;
 	this->_inputFdClosed = true;
@@ -27,7 +27,9 @@ CgiHandler::CgiHandler(HttpRequest *req, std::string clientIp, std::vector<Serve
 
 	this->_location = ServerUtils::getLocationByRequestPath(this->_requestPath, this->_server);
 	if (!this->_location)
+	{
 		throw std::runtime_error("No matching location found for host: " + this->_requestPath);
+	}
 }
 
 /***********************************************************************/
@@ -40,7 +42,7 @@ CgiHandler::CgiHandler(HttpRequest *req, std::string clientIp, std::vector<Serve
 
 bool	CgiHandler::isCgiRequest(void)
 {
-	if (this->_location->cgiDirective == false)
+	if (!this->_location && this->_location->cgiDirective == false)
 	{
 		std::cerr << "Error with location in CGI\n";
 		return (false);
@@ -62,19 +64,62 @@ bool	CgiHandler::isCgiRequest(void)
 std::string	CgiHandler::parseCgiBuffer(void)
 {
 	std::istringstream iss(this->_buffer);
-	std::ostringstream oss;
+	std::string			line;
+	std::string			parsedBuffer;
+	int					HttpHeaderFlag = -1;
+	int					endHeadersFlag = -1;
 
-	std::cout << "Peta\n";
-	std::string line;
-	std::getline(iss, line);
-	std::cout << line << "\n";
-	oss << "HTTP/1.1 " << line.substr(line.size());
-	while (std::getline(iss, line))
+	while (getline(iss, line))
 	{
-		oss << line << "\n";
+		if (line.empty())
+			continue ;
+		line = line + "\n";
+		size_t colon = line.find(":");
+		if (colon != std::string::npos && endHeadersFlag == -1)
+		{
+			std::string key = trimSpaces(line.substr(0, colon));
+			std::string lowerKey = to_lowercase(key);
+
+			if (lowerKey == "status")
+			{
+				parsedBuffer.append(CgiHeaderParser::parseStatusHeader(line));
+				HttpHeaderFlag = 1;
+			}
+			else if (lowerKey == "content-type")
+			{
+				parsedBuffer.append(CgiHeaderParser::parseContentTypeHeader(line));
+			}
+			else if (lowerKey == "location")
+			{
+				parsedBuffer.append(CgiHeaderParser::parseLocationHeader(line));
+			}
+			else
+			{
+				if (CgiHeaderParser::parseFormatHeader(line))
+				{
+					std::cout << "Line: " << trim(to_lowercase(line));
+					if (trim(to_lowercase(line)) == "http/1.1 200 ok")
+						HttpHeaderFlag = 1;
+					parsedBuffer.append(trim(line) + "\r\n");
+				}
+			}
+		}
+		else
+		{
+			if (trim(to_lowercase(line)) == "http/1.1 200 ok")
+				HttpHeaderFlag = 1;
+			parsedBuffer.append(line);
+			if (endHeadersFlag == -1 && trim(to_lowercase(line)) != "http/1.1 200 ok")
+			{
+				endHeadersFlag = 1;
+				//parsedBuffer.append("Connection: close\r\n");
+				//parsedBuffer.append("\r\n");
+			}
+		}
 	}
-	std::string parsedBuffer = oss.str();
-	std::cout << parsedBuffer;
+	if (HttpHeaderFlag == -1)
+		parsedBuffer = "HTTP/1.1 200 OK\r\n" + parsedBuffer;
+	std::cout << "Parsed Buffer: \n" << parsedBuffer << "\n";
 	return (parsedBuffer);
 }
 
@@ -95,13 +140,26 @@ bool	CgiHandler::executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<in
 	{
 		CgiEnvBuilder *envBuilder = new CgiEnvBuilder(this->_req, this->_server, this->_location, this->_clientIp);
 		this->_envv = envBuilder->build();
+
+		// DEBUG:
+        std::cout << "---- CGI ENV ----\n";
+        for (int i = 0; this->_envv[i]; ++i)
+            std::cout << this->_envv[i] << std::endl;
+        std::cout << "Interpreter: " << this->_interpreterPath << std::endl;
+        std::cout << "Script: " << this->_scriptPath << std::endl;
+        std::cout << "-----------------\n";
+		std::string body = this->getRequestBody();
+		std::cout << "---- CGI BODY ----\n" << body << "\n------------------\n";
+		//DELETE THIS
+
 		dup2(input_pipe[0], STDIN_FILENO);
 		dup2(output_pipe[1], STDOUT_FILENO);
 
 		close(input_pipe[1]);
 		close(output_pipe[0]);
-		close(STDIN_FILENO);
+
 		char *argv[] = {const_cast<char*>(this->_interpreterPath.c_str()), const_cast<char*>(this->_scriptPath.c_str()), NULL};
+		alarm(5);
 		execve(argv[0], argv, this->_envv);
 		std::cerr << "Falla\n";
 		exit(1);
@@ -117,11 +175,9 @@ bool	CgiHandler::executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<in
 			this->_inputFd = input_pipe[1];
 			this->_inputFdClosed = false;
 			cgiInputFd[input_pipe[1]] = this;
-			std::cout << "InputPipe fd: " << input_pipe[1] << "\n";
 		}
 		ServerUtils::setNotBlockingFd(output_pipe[0]);
 		EpollManager::getInstance().addFd(output_pipe[0], EPOLLIN);
-		std::cout << "OutputPipe fd: " << output_pipe[0] << "\n";
 		this->_outputFd = output_pipe[0];
 		this->_outputFdClosed = false;
 		cgiOutputFd[output_pipe[0]] = this;

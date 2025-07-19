@@ -26,14 +26,18 @@ LocationConfig *ServerUtils::getLocationByRequestPath(std::string path, ServerCo
 {
 	if (server->getLocations().empty())
 		return (NULL);
+
 	std::string bestMatch;
 	std::vector<LocationConfig *> location = server->getLocations();
 	std::vector<LocationConfig *>::iterator bestIt = location.end();
+
+	std::string filename = path.substr(path.find_last_of("/") + 1);
+
 	std::vector<LocationConfig *>::iterator ite = location.end();
 	for (std::vector<LocationConfig *>::iterator it = location.begin(); it != ite; it++)
 	{
-		std::string locPath;
-		if (path.find((*it)->getLocationPath()) == 0)
+		std::string locPath = (*it)->getLocationPath();
+		if (path.find(locPath) == 0 || locPath == "/" + filename)
 		{
 			locPath = (*it)->getLocationPath();
 			if (locPath.length() > bestMatch.length())
@@ -44,7 +48,10 @@ LocationConfig *ServerUtils::getLocationByRequestPath(std::string path, ServerCo
 		}
 	}
 	if (bestIt == ite)
+	{
 		std::cerr << "Error: Not location block found for cgi\n";
+		return (NULL);
+	}
 	return ((*bestIt));
 }
 
@@ -60,15 +67,19 @@ std::string	ServerUtils::resolveScriptPath(const HttpRequest *req, const Locatio
 {
 	std::string script;
 	std::string rootPath = location->getRoot();
+	std::string path = req->getPath();
+
 	if (rootPath.compare("/") == 0)
 	{
-		script = req->getPath();
+		script = path;
 		std::cout << "Script: " << script << "\n";
 		return (script.substr(1, script.size() - 1));
 	}
 	else
-		script = req->getPath().substr(location->getLocationPath().length());
-	std::string scriptPath = rootPath + script;
+		script = path.substr(path.find_last_of("/") + 1);
+	std::cout << "Script: " << script << "\n";
+	std::cout << "RootPath: " << rootPath << "\n";
+	std::string scriptPath = rootPath.substr(1) + "/" + script;
 	return (scriptPath);
 }
 

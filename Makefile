@@ -1,4 +1,4 @@
-NAME = webserver
+NAME = webserv
 
 CC = c++
 CFLAGS = -Wall -Wextra -Werror -g
@@ -53,6 +53,7 @@ FILES = main \
 		execute/CgiHandler \
 		execute/CgiEnvBuilder \
 		execute/ServerUtils \
+		execute/CgiHeaderParser \
 
 
 $(shell mkdir -p ./build)

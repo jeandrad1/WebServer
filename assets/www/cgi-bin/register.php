@@ -1,5 +1,5 @@
 <?php
-$file = '/home/jeandrad/Desktop/webserv/assets/www/register/users.txt';
+$file = __DIR__ . '/../register/users.txt';
 
 function user_exists($file, $user) {
     if (!file_exists($file)) return false;
@@ -11,32 +11,38 @@ function user_exists($file, $user) {
     return false;
 }
 
+function send_response($html) {
+    header("Content-Type: text/html");
+    header("Content-Length: " . strlen($html));
+    echo $html;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user']) && isset($_POST['password'])) {
     $user = htmlspecialchars(trim($_POST['user']));
     $password = htmlspecialchars(trim($_POST['password']));
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
     if (user_exists($file, $user)) {
-        echo "Content-Type: text/html\r\n\r\n";
-        echo "<html><body>";
-        echo "<h1>El usuario ya existe.</h1>";
-        echo "<a href='register.html'>Volver</a>";
-        echo "</body></html>";
+        $html = "<html><body>";
+        $html .= "<h1>El usuario ya existe.</h1>";
+        $html .= "<a href='/login/login.html'>login</a>";
+        $html .= "</body></html>";
+        send_response($html);
     } else {
         $entry = $user . ':' . $hashed_password . "\n";
         file_put_contents($file, $entry, FILE_APPEND);
 
-        echo "Content-Type: text/html\r\n\r\n";
-        echo "<html><body>";
-        echo "<h1>Registro exitoso</h1>";
-        echo "<a href='register.html'>Volver</a>";
-        echo "</body></html>";
+        $html = "<html><body>";
+        $html .= "<h1>Registro exitoso</h1>";
+        $html .= "<a href='/register/register.html'>Volver</a>";
+        $html .= "</body></html>";
+        send_response($html);
     }
 } else {
-    echo "Content-Type: text/html\r\n\r\n";
-    echo "<html><body>";
-    echo "<h1>Error en el registro</h1>";
-    echo "<a href='register.html'>Volver</a>";
-    echo "</body></html>";
+    $html = "<html><body>";
+    $html .= "<h1>Error en el registro</h1>";
+    $html .= "<a href='/register/register.html'>Volver</a>";
+    $html .= "</body></html>";
+    send_response($html);
 }
 ?>
