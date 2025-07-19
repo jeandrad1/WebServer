@@ -119,7 +119,9 @@ int	countWhitespace(const std::string &str)
 
 bool	checkFilename(const std::string &word)
 {
-	return word.size() >= 5 && word.substr(word.size() - 5) == ".html";
+	return word.size() >= 5 && word.substr(word.size() - 5) == ".html"
+		|| word.size() >= 4 && word.substr(word.size() - 4) == ".php";
+;
 }
 
 std::vector<std::string> split_str(const std::string &str, const std::string &delimiter)
