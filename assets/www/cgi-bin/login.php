@@ -1,5 +1,5 @@
 <?php
-$file = '/home/jeandrad/Desktop/webserv/assets/www/register/users.txt';
+$file = __DIR__ . '/../register/users.txt';
 
 function verify_user($file, $user, $password) {
     if (!file_exists($file)) return false;

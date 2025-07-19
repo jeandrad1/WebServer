@@ -1,5 +1,5 @@
 <?php
-$file = '/home/jeandrad/Desktop/webserv/assets/www/register/users.txt';
+$file = __DIR__ . '/../register/users.txt';
 
 function user_exists($file, $user) {
     if (!file_exists($file)) return false;
@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user']) && isset($_PO
     if (user_exists($file, $user)) {
         $html = "<html><body>";
         $html .= "<h1>El usuario ya existe.</h1>";
-        $html .= "<a href='register.html'>Volver</a>";
+        $html .= "<a href='/login/login.html'>login</a>";
         $html .= "</body></html>";
         send_response($html);
     } else {
@@ -34,14 +34,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user']) && isset($_PO
 
         $html = "<html><body>";
         $html .= "<h1>Registro exitoso</h1>";
-        $html .= "<a href='register.html'>Volver</a>";
+        $html .= "<a href='/register/register.html'>Volver</a>";
         $html .= "</body></html>";
         send_response($html);
     }
 } else {
     $html = "<html><body>";
     $html .= "<h1>Error en el registro</h1>";
-    $html .= "<a href='register.html'>Volver</a>";
+    $html .= "<a href='/register/register.html'>Volver</a>";
     $html .= "</body></html>";
     send_response($html);
 }

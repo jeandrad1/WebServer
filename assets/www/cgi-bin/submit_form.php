@@ -1,6 +1,6 @@
 <?php
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
-    $uploadDir = '/home/jeandrad/Desktop/webserv/assets/www/download/';
+    $uploadDir = '/../download/';
     $uploadFile = $uploadDir . basename($_FILES['file']['name']);
 
     if (move_uploaded_file($_FILES['file']['tmp_name'], $uploadFile)) {
