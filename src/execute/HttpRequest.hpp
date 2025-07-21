@@ -17,7 +17,8 @@ class HttpRequest
 		std::string method;
 		std::string path;
 		std::string query_string;
-		std::string version;
+		std::string version;		
+		std::map<std::string, std::string> headers;
 
 		long long	contentLength;
 		std::string contentLengthString;
@@ -28,7 +29,8 @@ class HttpRequest
 		std::string serverName;
 		std::string serverPort;
 		bool		connection;
-
+		
+		
 		std::vector<unsigned char> body;
 
 		HttpRequest();
@@ -37,6 +39,8 @@ class HttpRequest
 
 		HttpRequest(std::string src_method, std::string src_path, std::string src_version);
 		~HttpRequest();
+
+		void setHeaders(const std::map<std::string, std::string>& h) { headers = h; }
 
 		void handleQueryString(std::string query_string_str);
 		void handleContentLength(std::string content_length_str);
@@ -62,6 +66,8 @@ class HttpRequest
 		std::string	getContentLengthString() const;
 		std::string getContentType() const;
 		std::vector<unsigned char> getBody() const;
+
+		std::string getHeader(const std::string& key) const;
 
 		//printer
 		void HttpRequestPrinter();

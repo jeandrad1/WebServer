@@ -151,6 +151,6 @@ HttpRequest *HttpRequestManager::buildHttpRequest()
 	request->handleUserAgent(getHeader("user-agent"));
 	request->handleAccept(getHeader("accept"));
 	request->handleBody(body);
-
+    request->setHeaders(headers); 
 	return(request);
 }

@@ -35,6 +35,10 @@ char	**CgiEnvBuilder::build(void)
 	addEnv("HTTP_USER_AGENT", _req->getUserAgent());
 	addEnv("HTTP_ACCEPT", _req->getAccept());
 	
+	std::string cookieHeader = _req->getHeader("cookie");
+    if (!cookieHeader.empty())
+		addEnv("HTTP_COOKIE", cookieHeader);
+
 	if (_req->getMethod() == "POST")
 	{
 		addEnv("CONTENT_LENGTH", _req->getContentLengthString());
