@@ -1,3 +1,4 @@
-r:$2y$10$ZA6Qo1C04IS07Nq69xkzt.7y9V1riXVIJIAS3rUlEcuCL1Tu7/kFm
-e:$2y$10$3xwjPLZy/LkJCYbKBoxtGumFPJiobOGF3u69nOvt8ESAI6CWbZMcG
-t:$2y$10$DEw9gkxye11f3wOghAJK7umimmCHXUrZXdSKy4QnBcOcvc9b0w4U6
+pepe:$2y$10$hixn3RMzIN4cudv2Hget6.mvDUph0FBW3NEEFnfhsBdjHQiAI6JFe
+chorizoconketchup:$2y$10$xMWh/W/XkG57D6wLn/482eiowvND0YbppgMdIGdwjSO.uRIQ5YDwK
+alba:$2y$10$BALdlNKcpkUfO4oOdAK4mOleUf9Is0E8BDxjlu9BfhhQjcTEOW/Sq
+chorizoyketchup:$2y$10$BZpTjWzgyGgoojOspAi1aOSvuDooxVgzlOCkkqHo2xyWRP8neAAqS

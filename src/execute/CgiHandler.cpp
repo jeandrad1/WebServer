@@ -63,64 +63,59 @@ bool	CgiHandler::isCgiRequest(void)
 
 std::string	CgiHandler::parseCgiBuffer(void)
 {
-	std::istringstream iss(this->_buffer);
-	std::string			line;
-	std::string			parsedBuffer;
-	int					HttpHeaderFlag = -1;
-	int					endHeadersFlag = -1;
+    std::istringstream iss(this->_buffer);
+    std::string line;
+    std::string statusLine;
+    std::string headersBuffer;
+    std::string bodyBuffer;
+    bool headersEnded = false;
 
-	while (getline(iss, line))
-	{
-		if (line.empty())
-			continue ;
-		line = line + "\n";
-		size_t colon = line.find(":");
-		if (colon != std::string::npos && endHeadersFlag == -1)
-		{
-			std::string key = trimSpaces(line.substr(0, colon));
-			std::string lowerKey = to_lowercase(key);
+    while (getline(iss, line))
+    {
+		while (!line.empty() && (line[line.size() - 1] == '\r' || line[line.size() - 1] == '\n'))
+			line.resize(line.size() - 1);
+        if (!headersEnded)
+        {
+            if (line.empty())
+            {
+                headersEnded = true;
+                headersBuffer += "\r\n";
+                continue;
+            }
+            size_t colon = line.find(":");
+            if (colon != std::string::npos)
+            {
+                std::string key = trimSpaces(line.substr(0, colon));
+                std::string lowerKey = to_lowercase(key);
 
-			if (lowerKey == "status")
-			{
-				parsedBuffer.append(CgiHeaderParser::parseStatusHeader(line));
-				HttpHeaderFlag = 1;
-			}
-			else if (lowerKey == "content-type")
-			{
-				parsedBuffer.append(CgiHeaderParser::parseContentTypeHeader(line));
-			}
-			else if (lowerKey == "location")
-			{
-				parsedBuffer.append(CgiHeaderParser::parseLocationHeader(line));
-			}
-			else
-			{
-				if (CgiHeaderParser::parseFormatHeader(line))
-				{
-					std::cout << "Line: " << trim(to_lowercase(line));
-					if (trim(to_lowercase(line)) == "http/1.1 200 ok")
-						HttpHeaderFlag = 1;
-					parsedBuffer.append(trim(line) + "\r\n");
-				}
-			}
-		}
-		else
-		{
-			if (trim(to_lowercase(line)) == "http/1.1 200 ok")
-				HttpHeaderFlag = 1;
-			parsedBuffer.append(line);
-			if (endHeadersFlag == -1 && trim(to_lowercase(line)) != "http/1.1 200 ok")
-			{
-				endHeadersFlag = 1;
-				//parsedBuffer.append("Connection: close\r\n");
-				//parsedBuffer.append("\r\n");
-			}
-		}
-	}
-	if (HttpHeaderFlag == -1)
-		parsedBuffer = "HTTP/1.1 200 OK\r\n" + parsedBuffer;
-	std::cout << "Parsed Buffer: \n" << parsedBuffer << "\n";
-	return (parsedBuffer);
+                if (lowerKey == "status")
+                {
+                    std::string statusValue = trimSpaces(line.substr(colon + 1));
+                    statusLine = "HTTP/1.1 " + statusValue + "\r\n";
+                }
+                else
+                {
+                    headersBuffer.append(line + "\r\n");
+                }
+            }
+            else
+            {
+                headersBuffer.append(line + "\r\n");
+            }
+        }
+        else
+        {
+            bodyBuffer += line + "\n";
+        }
+    }
+    if (statusLine.empty())
+		statusLine = "HTTP/1.1 200 OK\r\n";
+	std::string parsed = statusLine + headersBuffer;
+	if (parsed.substr(parsed.size() - 2) != "\r\n")
+		parsed += "\r\n";
+	parsed += bodyBuffer;
+	std::cout << "Parsed Buffer: \n" << parsed << "\n";
+	return parsed;
 }
 
 bool	CgiHandler::executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<int, CgiHandler *> &cgiOutputFd, int clientFd)

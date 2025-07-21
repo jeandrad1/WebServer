@@ -17,26 +17,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user']) && isset($_PO
     $user = htmlspecialchars(trim($_POST['user']));
     $password = htmlspecialchars(trim($_POST['password']));
 
-    if (verify_user($file, $user, $password)) {
-        setcookie("user", $user, time() + 3600, "/");
-        echo "Content-Type: text/html\r\n\r\n";
-        echo "<html><body>";
-        echo "<h1>Login exitoso</h1>";
-        echo "<p>Bienvenido, $user.</p>";
-        echo "<a href='/portal/portal.html'>Ir al inicio</a>";
-        echo "</body></html>";
-    } else {
+	if (verify_user($file, $user, $password)) {
+		setcookie("user", $user, time() + 3600, "/");
+		header("Status: 302 Found");
+		header("Location: /portal/portal.php");
+		exit();    } 
+	else {
         echo "Content-Type: text/html\r\n\r\n";
         echo "<html><body>";
         echo "<h1>Usuario o contraseña incorrectos</h1>";
-        echo "<a href='login.html'>Volver</a>";
+        echo "<a href='login/login.html'>Volver</a>";
         echo "</body></html>";
     }
 } else {
     echo "Content-Type: text/html\r\n\r\n";
     echo "<html><body>";
     echo "<h1>Error en el login</h1>";
-    echo "<a href='login.html'>Volver</a>";
+    echo "<a href='login/login.html'>Volver</a>";
     echo "</body></html>";
 }
 ?>

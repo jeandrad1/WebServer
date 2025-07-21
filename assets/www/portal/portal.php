@@ -1,3 +1,10 @@
+<?php
+if (!isset($_COOKIE['user'])) {
+    header("Location: /cgi-bin/check_cookie.php");
+    exit();
+}
+echo "Content-Type: text/html\r\n\r\n";
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>

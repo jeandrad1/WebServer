@@ -1,6 +1,18 @@
 <?php
 $file = __DIR__ . '/../register/users.txt';
 
+function verify_user($file, $user, $password) {
+    if (!file_exists($file)) return false;
+    $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        list($existing_user, $hashed_password) = explode(':', $line, 2);
+        if ($existing_user === $user && password_verify($password, $hashed_password)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 function user_exists($file, $user) {
     if (!file_exists($file)) return false;
     $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -22,21 +34,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user']) && isset($_PO
     $password = htmlspecialchars(trim($_POST['password']));
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-    if (user_exists($file, $user)) {
-        $html = "<html><body>";
-        $html .= "<h1>El usuario ya existe.</h1>";
-        $html .= "<a href='/login/login.html'>login</a>";
-        $html .= "</body></html>";
-        send_response($html);
+    if (verify_user($file, $user, $password)) {
+        setcookie("user", $user, time() + 3600, "/");
+		header("Status: 302 Found");
+        header("Location: /portal/portal.php");
+        exit();
     } else {
+        setcookie("user", $user, time() + 3600, "/");
         $entry = $user . ':' . $hashed_password . "\n";
         file_put_contents($file, $entry, FILE_APPEND);
-
-        $html = "<html><body>";
-        $html .= "<h1>Registro exitoso</h1>";
-        $html .= "<a href='/portal/portal.php'>Continuar</a>";
-        $html .= "</body></html>";
-        send_response($html);
+		header("Status: 302 Found");
+        header("Location: /portal/portal.php");
+        exit();
     }
 } else {
     $html = "<html><body>";
