@@ -3,9 +3,8 @@ if (!isset($_COOKIE['user'])) {
     header("Location: /cgi-bin/check_cookie.php");
     exit();
 }
-echo "Content-Type: text/html\r\n\r\n";
-?>
-<!DOCTYPE html>
+ob_start();
+?> <!DOCTYPE html>
 <html lang="es">
 <head>
 	<meta charset="UTF-8">
@@ -41,4 +40,11 @@ echo "Content-Type: text/html\r\n\r\n";
 		</ul>
 	</div>
 </body>
-</html>
+</html>;
+<?php
+
+$content = ob_get_clean();
+header("Content-Type: text/html; charset=UTF-8");
+header("Content-Length: " . strlen($content));
+echo $content;
+?>
