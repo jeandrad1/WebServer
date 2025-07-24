@@ -223,7 +223,7 @@ void HttpRequest::HttpRequestPrinter()
 		std::vector<unsigned char>::iterator it = body.begin();
 		for(std::vector<unsigned char>::iterator ite = body.end(); it != ite; it++)
 		{
-			std::cout << (*it) << "\n";
+			std::cout << (*it);
 		}
 	}
 }
