@@ -89,7 +89,7 @@ HttpResponse ResponseFactory::generateErrorResponse(int code, const ServerConfig
                 response.setStatus(code, getStatusText(code));
                 response.setHeader("Content-Type", "text/html");
                 response.setHeader("Content-Length", to_string(content.length()));
-                response.setBody(content);
+                response.setTextBody(content);
                 return response;
 			}
         }
@@ -108,7 +108,7 @@ HttpResponse ResponseFactory::createBasicErrorResponse(int code)
     response.setStatus(code, statusText);
     response.setHeader("Content-Type", "text/html");
     response.setHeader("Content-Length", to_string(body.length()));
-    response.setBody(body);
+    response.setTextBody(body);
     
     return response;
 }
@@ -141,7 +141,7 @@ HttpResponse ResponseFactory::createResponse(int code, const std::string& custom
     res.setStatus(code, message);
     res.setHeader("Content-Type", "text/plain");
     res.setHeader("Content-Length", oss.str());
-    res.setBody(body);
+    res.setTextBody(body);
 
     return res;
 }

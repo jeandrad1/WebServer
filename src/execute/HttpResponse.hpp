@@ -4,6 +4,7 @@
 #include <map>
 #include <sstream>
 #include <iostream>
+#include <vector>
 
 
 class HttpResponse
@@ -12,17 +13,24 @@ class HttpResponse
         int statusCode;
         std::string statusMessage;
         std::map<std::string, std::string> headers;
-        std::string body;
+        std::vector<unsigned char> body;
+		bool isBinary;
 
     public:
         void setStatus(int code, const std::string& message);
         void setHeader(const std::string& key, const std::string& value);
-        void setBody(const std::string& data);
         std::string buildResponse() const;
-        std::string getBody() const { return body; }
-        int getStatusCode() const;
+		
+		void setBinaryBody(const std::vector<unsigned char>& data); // binary
+		void setTextBody(const std::string& data); // text
+		const std::vector<unsigned char>& getBodyBinary() const;
+		std::string getBody() const;
+
+		int getStatusCode() const;
         std::string getStatusMessage() const;
         const std::map<std::string, std::string>& getHeaders() const;
+
+		bool bodyIsBinary() const;       
 
 };
 
