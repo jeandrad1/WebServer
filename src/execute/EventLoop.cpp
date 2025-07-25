@@ -366,13 +366,18 @@ HttpRequest *EventLoop::handleHttpRequest(int clientFd, size_t header_end)
 
 		long long content_length = request->getContentLength();
 		long long received_body_size = _buffers[clientFd].size() - (header_end + 4);
+		long long chunked_end = _buffers[clientFd].find("\r\n0\r\n\r\n");
 
-		if (received_body_size < content_length)
+		if (((received_body_size < content_length) && request->getTransferEncoding() != "chunked") || (request->getTransferEncoding() == "chunked" && static_cast<size_t>(chunked_end) == std::string::npos))
 		{
 			delete request;
 			return (NULL);
 		}
-		std::string full_request = _buffers[clientFd].substr(0, header_end + 4 + content_length);
+		std::string full_request;
+		if (request->getTransferEncoding() != "chunked")
+			full_request = _buffers[clientFd].substr(0, header_end + 4 + content_length);
+		else
+			full_request = _buffers[clientFd].substr(0, chunked_end + 5);
 		reqMan.parseHttpRequest(full_request);
 		request = reqMan.buildHttpRequest();
 		//reqMan.requestPrinter();
