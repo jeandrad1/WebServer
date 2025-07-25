@@ -14,18 +14,6 @@ HttpRequest::HttpRequest(std::string src_method, std::string src_path, std::stri
 
 HttpRequest::~HttpRequest(){}
 
-void	HttpRequest::handleContentLength(std::string content_length_str)
-{
-	if (!content_length_str.empty()) 
-	{
-		safe_atoll(content_length_str, contentLength);
-		this->contentLengthString = content_length_str;
-	}
-	else{
-		contentLength = 0;
-	}
-}
-
 /***********************************************************************/
 /*                         Operator Overload                           */
 /***********************************************************************/
@@ -51,14 +39,34 @@ static bool	checkType(std::string content_type_str)
 	for (size_t i = 0; i < valid_types.size(); i++)
 	{
 		if (content_type_str == valid_types[i])
-		return true;
+			return true;
 	}
 	return(false);
 }
 
+void	HttpRequest::handleContentLength(std::string content_length_str)
+{
+	if (!content_length_str.empty()) 
+	{
+		safe_atoll(content_length_str, contentLength);
+		this->contentLengthString = content_length_str;
+	}
+	else{
+		contentLength = 0;
+	}
+}
+
+void HttpRequest::handleTransferEncoding(std::string transfer_encoding_str)
+{
+	if (transfer_encoding_str == "chunked")
+		transferEncoding = transfer_encoding_str;
+	else
+		transferEncoding = "unchunked";
+}
+
 void	HttpRequest::handleQueryString(std::string query_string_str)
 {
-	this->query_string = query_string_str;
+	query_string = query_string_str;
 }
 
 void	HttpRequest::handleContentType(std::string content_type_str)
@@ -141,7 +149,7 @@ std::string	HttpRequest::getPath() const
 
 std::string HttpRequest::getQueryString() const
 {
-	return (this->query_string);
+	return (query_string);
 }
 
 std::string	HttpRequest::getVersion() const
@@ -151,27 +159,27 @@ std::string	HttpRequest::getVersion() const
 
 std::string HttpRequest::getUserAgent() const
 {
-	return (this->userAgent);
+	return (userAgent);
 }
 
 std::string HttpRequest::getAccept() const
 {
-	return (this->accept);
+	return (accept);
 }
 
 std::string HttpRequest::getHost() const
 {
-	return (this->host);
+	return (host);
 }
 
 std::string HttpRequest::getServerName() const
 {
-	return (this->serverName);
+	return (serverName);
 }
 
 std::string HttpRequest::getServerPort() const
 {
-	return (this->serverPort);
+	return (serverPort);
 }
 
 long long HttpRequest::getContentLength()
@@ -179,14 +187,19 @@ long long HttpRequest::getContentLength()
 	return(contentLength);
 }
 
+std::string HttpRequest::getTransferEncoding() const
+{
+	return(transferEncoding);
+}
+
 std::string HttpRequest::getContentType() const
 {
-	return (this->contentType);
+	return (contentType);
 }
 
 std::string HttpRequest::getContentLengthString() const
 {
-	return(this->contentLengthString);
+	return(contentLengthString);
 }
 
 std::vector<unsigned char> HttpRequest::getBody() const
@@ -216,10 +229,10 @@ void HttpRequest::HttpRequestPrinter()
 	else if (connection == false)
 		std::cout << "CLOSE\n";
 	if (body.empty())
-		std::cout << "\nNO BODY\n";
+		std::cout << RED "\nNO BODY\n" WHITE;
 	else
 	{
-		std::cout << "\nBODY:\n";
+		std::cout << GREEN "\nBODY:\n" WHITE;
 		std::vector<unsigned char>::iterator it = body.begin();
 		for(std::vector<unsigned char>::iterator ite = body.end(); it != ite; it++)
 		{

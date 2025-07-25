@@ -143,8 +143,9 @@ void	HttpRequestManager::requestPrinter()
 HttpRequest *HttpRequestManager::buildHttpRequest()
 {
 	HttpRequest *request = new HttpRequest(method, path, version);
-	request->handleQueryString(this->query_string);
+	request->handleQueryString(query_string);
 	request->handleContentLength(getHeader("content-length"));
+	request->handleTransferEncoding(getHeader("transfer-encoding"));
 	request->handleContentType(getHeader("content-type"));
 	request->handleHost(getHeader("host"));
 	request->handleConnection(getHeader("connection"));
