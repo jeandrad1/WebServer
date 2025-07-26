@@ -120,8 +120,17 @@ void HttpRequest::handleBody(std::string str_body)
 {
 	if (str_body.empty())
 		return;
-	for(size_t i = 0; i < str_body.size(); i++)
-		body.push_back(str_body[i]);
+ 	if (transferEncoding != "chunked")
+	{
+		for(size_t i = 0; i < str_body.size(); i++)
+			body.push_back(str_body[i]);
+	}
+	else
+	{
+		std::string chunked_body = chunkedBodyManager(str_body);
+		for(size_t i = 0; i < chunked_body.size(); i++)
+			body.push_back(chunked_body[i]);
+	}
 }
 
 void HttpRequest::handleTransferEncoding(std::string transfer_str)
@@ -206,6 +215,14 @@ std::vector<unsigned char> HttpRequest::getBody() const
 	return(body);
 }
 
+std::string HttpRequest::getHeader(const std::string& key) const
+{
+	std::map<std::string, std::string>::const_iterator it = headers.find(key);
+	if (it != headers.end())
+		return it->second;
+	return "";
+}
+
 /***********************************************************************/
 /*                          Private Functions                          */
 /***********************************************************************/
@@ -238,14 +255,51 @@ void HttpRequest::HttpRequestPrinter()
 		{
 			std::cout << (*it);
 		}
+		std::cout << CYAN "\nEND BODY\n" WHITE;
 	}
 }
 
-std::string HttpRequest::getHeader(const std::string& key) const
+std::string HttpRequest::chunkedBodyManager(const std::string &str_body)
 {
-    std::map<std::string, std::string>::const_iterator it = headers.find(key);
-    if (it != headers.end())
-        return it->second;
-    return "";
-}
+	std::string finalBody;
+	size_t pos = 0;
 
+	while (true)
+	{
+		size_t size_end = str_body.find("\r\n", pos);
+		if (size_end == std::string::npos)
+			break;
+
+		std::string size_str = str_body.substr(pos, size_end - pos);
+
+		long long chunk_size = 0;
+		try 
+		{
+			chunk_size = hexToDecimal(size_str);
+		} 
+		catch (...)
+		{
+			break;
+		}
+
+		if (chunk_size == 0)
+			break;
+
+		pos = size_end + 2; // Skip "\r\n"
+
+		if (pos + chunk_size > str_body.size())
+			break;
+
+		finalBody.append(str_body.substr(pos, chunk_size));
+
+		pos += chunk_size;
+
+		// Skip \r\n
+		if (str_body.substr(pos, 2) != "\r\n")
+			break;
+
+		pos += 2;
+	}
+
+	return finalBody;
+}

@@ -35,6 +35,8 @@ class HttpRequest
 		std::vector<unsigned char> body;
 
 		HttpRequest();
+
+		std::string chunkedBodyManager(const std::string &str_body);
 	
 	public:
 
