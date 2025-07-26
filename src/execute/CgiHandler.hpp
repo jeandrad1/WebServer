@@ -31,6 +31,7 @@ class CgiHandler {
 		bool						_outputFdClosed;
 		std::string					_buffer;
 		size_t						_bytesWritten;
+		size_t						_bytesSent;
 
 		std::string					_scriptPath;
 		std::string					_interpreterPath;
@@ -56,6 +57,7 @@ class CgiHandler {
 		bool	getInputFdClosed(void);
 		bool	getOutputFdClosed(void);
 		size_t	getBytesWritten(void);
+		size_t&	getBytesSent(void);
 		std::string getBuffer(void);
 		std::string getRequestBody(void);
 };

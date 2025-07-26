@@ -61,71 +61,84 @@ bool	CgiHandler::isCgiRequest(void)
 	return (false);
 }
 
-std::string	CgiHandler::parseCgiBuffer(void)
+std::string CgiHandler::parseCgiBuffer()
 {
-	std::istringstream iss(this->_buffer);
-	std::string			line;
-	std::string			parsedBuffer;
-	int					HttpHeaderFlag = -1;
-	int					HttpLocationFlag = -1;
-	int					endHeadersFlag = -1;
+    std::istringstream iss(this->_buffer);
+    std::string line;
 
-	while (getline(iss, line))
+    std::string header;
+    std::string body;
+    std::map<std::string, std::string> headerMap;
+
+    bool foundHeaderEnd = false;
+    std::string firstLine;
+    while (std::getline(iss, line))
 	{
-		if (line.empty())
-			continue ;
-		line = line + "\n";
-		size_t colon = line.find(":");
-		if (colon != std::string::npos && endHeadersFlag == -1)
-		{
-			std::string key = trimSpaces(line.substr(0, colon));
-			std::string lowerKey = to_lowercase(key);
+		if (!line.empty() && line[line.size() - 1] == '\r')
+    		line.erase(line.size() - 1);
 
-			if (lowerKey == "status")
-			{
-				parsedBuffer.append(CgiHeaderParser::parseStatusHeader(line));
-				HttpHeaderFlag = 1;
-			}
-			else if (lowerKey == "content-type")
-			{
-				parsedBuffer.append(CgiHeaderParser::parseContentTypeHeader(line));
-			}
-			else if (lowerKey == "location")
-			{
-				HttpHeaderFlag = 1;
-				HttpLocationFlag = 1;
-				parsedBuffer.append(CgiHeaderParser::parseLocationHeader(line));
-			}
-			else
-			{
-				if (CgiHeaderParser::parseFormatHeader(line))
-				{
-					std::cout << "Line: " << trim(to_lowercase(line));
-					if (trim(to_lowercase(line)) == "http/1.1 200 ok")
-						HttpHeaderFlag = 1;
-					parsedBuffer.append(trim(line) + "\r\n");
-				}
-			}
-		}
+        if (line.empty())
+		{
+            foundHeaderEnd = true;
+            break;
+        }
+
+        if (firstLine.empty())
+		{
+            firstLine = line;
+        }
 		else
 		{
-			if (trim(to_lowercase(line)) == "http/1.1 200 ok")
-				HttpHeaderFlag = 1;
-			parsedBuffer.append(line);
-			if (endHeadersFlag == -1 && trim(to_lowercase(line)) != "http/1.1 200 ok")
-			{
-				endHeadersFlag = 1;
-				//parsedBuffer.append("Connection: close\r\n");
-				//parsedBuffer.append("\r\n");
-			}
-		}
-	}
-	if (HttpHeaderFlag == -1)
-		parsedBuffer = "HTTP/1.1 200 OK\r\n" + parsedBuffer;
-	if (HttpLocationFlag == 1)
-		parsedBuffer = "HTTP/1.1 302 OK\r\n" + parsedBuffer;
-	std::cout << "Parsed Buffer: \n" << parsedBuffer << "\n";
-	return (parsedBuffer);
+            size_t pos = line.find(':');
+            if (pos != std::string::npos) {
+                std::string key = trimSpaces(line.substr(0, pos));
+                std::string value = trimSpaces(line.substr(pos + 1));
+                headerMap[key] = value;
+            }
+        }
+    }
+
+    std::ostringstream bodyStream;
+    while (std::getline(iss, line))
+	{
+        bodyStream << line << "\n";
+    }
+    body = bodyStream.str();
+
+    std::string statusLine;
+    if (headerMap.find("Status") != headerMap.end())
+	{
+        std::string code = headerMap["Status"].substr(0, headerMap["Status"].find(' '));
+        std::string description = headerMap["Status"].substr(headerMap["Status"].find(' ') + 1);
+        statusLine = "HTTP/1.1 " + code + " " + description + "\r\n";
+        headerMap.erase("Status");
+    }
+    else if (headerMap.find("Location") != headerMap.end())
+    {
+        statusLine = "HTTP/1.1 302 Found\r\n";
+    }
+	else
+	{
+        statusLine = "HTTP/1.1 200 OK\r\n";
+    }
+
+    if (headerMap.find("Content-Length") == headerMap.end())
+	{
+		std::ostringstream oss;
+		oss << body.size();
+		headerMap["Content-Length"] = oss.str();
+    }
+
+    std::ostringstream headerStream;
+    headerStream << statusLine;
+    for (std::map<std::string, std::string>::iterator it = headerMap.begin(); it != headerMap.end(); ++it)
+	{
+        headerStream << it->first << ": " << it->second << "\r\n";
+    }
+    headerStream << "\r\n";
+
+    std::string parsedBuffer = headerStream.str() + body;
+    return parsedBuffer;
 }
 
 bool	CgiHandler::executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<int, CgiHandler *> &cgiOutputFd, int clientFd)
@@ -160,10 +173,10 @@ bool	CgiHandler::executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<in
 		dup2(input_pipe[0], STDIN_FILENO);
 		dup2(output_pipe[1], STDOUT_FILENO);
 
-		close(input_pipe[0]);
+		//close(input_pipe[0]);
 		close(input_pipe[1]);
 		close(output_pipe[0]);
-		close(output_pipe[1]);
+		//close(output_pipe[1]);
 
 		if (this->_interpreterPath.empty() || this->_interpreterPath == this->_scriptPath)
 		{
@@ -171,7 +184,7 @@ bool	CgiHandler::executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<in
 				const_cast<char*>(this->_scriptPath.c_str()),
 				NULL
 			};
-			alarm(5);
+			alarm(1);
 			execve(argv[0], argv, this->_envv);
 		}
 		else
@@ -181,7 +194,7 @@ bool	CgiHandler::executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<in
 				const_cast<char*>(this->_scriptPath.c_str()),
 				NULL
 			};
-			alarm(5);
+			alarm(1);
 			execve(argv[0], argv, this->_envv);
 		}
 		std::cerr << "Falla\n";
@@ -261,6 +274,11 @@ int CgiHandler::getOutputFd(void)
 size_t CgiHandler::getBytesWritten(void)
 {
 	return (this->_bytesWritten);
+}
+
+size_t& CgiHandler::getBytesSent(void)
+{
+	return (this->_bytesSent);
 }
 
 std::string CgiHandler::getBuffer(void)
