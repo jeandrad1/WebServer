@@ -17,7 +17,7 @@ void					registerBlockStrategies(void);
 static void childHandler(int signum)
 {
 	(void)signum;
-	 int saved_errno = errno;
+	int saved_errno = errno;
 	while (waitpid(-1, NULL, WNOHANG) > 0)
 	errno = saved_errno;
 }
