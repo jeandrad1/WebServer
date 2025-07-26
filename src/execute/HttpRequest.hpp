@@ -22,6 +22,7 @@ class HttpRequest
 
 		long long	contentLength;
 		std::string contentLengthString;
+		std::string transferEncoding;
 		std::string contentType;
 		std::string userAgent;
 		std::string accept;
@@ -44,6 +45,7 @@ class HttpRequest
 
 		void handleQueryString(std::string query_string_str);
 		void handleContentLength(std::string content_length_str);
+		void handleTransferEncoding(std::string transfer_encoding_str);
 		void handleContentType(std::string content_type_str);
 		void handleHost(const std::string &host_str);
 		void handleConnection(std::string connection_str);
@@ -64,6 +66,7 @@ class HttpRequest
 		std::string getServerPort() const;
 		long long	getContentLength();
 		std::string	getContentLengthString() const;
+		std::string getTransferEncoding() const;
 		std::string getContentType() const;
 		std::vector<unsigned char> getBody() const;
 
