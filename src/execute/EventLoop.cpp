@@ -56,6 +56,8 @@ void EventLoop::runEventLoop(void)
 		for (int i = 0; i < n_ready; ++i)
 		{
 			int fd = events[i].data.fd;
+			uint32_t revents = events[i].events;
+
 			std::cout << "Actual fd: " << fd << "\nN_ready: " << n_ready << "\n";
 			if (isServerSocket(fd))
 			{
@@ -71,7 +73,18 @@ void EventLoop::runEventLoop(void)
 			}
 			else
 			{
-				handleClientData(fd);
+				if (revents & EPOLLOUT)
+					sendResponse(fd);
+				if (revents & EPOLLIN)
+					handleClientData(fd);
+				if ((revents & EPOLLHUP) || (revents & EPOLLERR))
+				{
+					close(fd);
+					_requestBuffers.erase(fd);
+					_clientToServer.erase(fd);
+					_clientSendOffset.erase(fd);
+					_epollManager.removeFd(fd);
+				}
 			}
 		}
 	}
@@ -270,20 +283,136 @@ void EventLoop::handleNewConnection(int serverFd)
 	std::cout << "New connection accepted (fd = " << client_fd << ")\n";
 }
 
+HttpRequest* EventLoop::parseRequestFromBuffer(int clientFd, size_t header_end)
+{
+	std::string bufferStr(_requestBuffers[clientFd].begin(), _requestBuffers[clientFd].end());
+	HttpRequestManager reqMan;
+	reqMan.parseHttpRequest(bufferStr);
+	HttpRequest *request = reqMan.buildHttpRequest();
+
+	long long content_length = request->getContentLength();
+	long long received_body_size = bufferStr.size() - (header_end + 4);
+	long long chunked_end = bufferStr.find("\r\n0\r\n\r\n");
+
+	if (((received_body_size < content_length) && request->getTransferEncoding() != "chunked") ||
+		(request->getTransferEncoding() == "chunked" && static_cast<size_t>(chunked_end) == std::string::npos))
+	{
+		delete request;
+		return NULL;
+	}
+	std::string full_request;
+	if (request->getTransferEncoding() != "chunked")
+		full_request = bufferStr.substr(0, header_end + 4 + content_length);
+	else
+		full_request = bufferStr.substr(0, chunked_end + 5);
+	reqMan.parseHttpRequest(full_request);
+	request = reqMan.buildHttpRequest();
+	return request;
+}
+
+bool EventLoop::handleCgiIfNeeded(HttpRequest* request, int clientFd)
+{
+	std::string ip = this->_ClientIPs[clientFd];
+	try
+	{
+		CgiHandler *cgi = new CgiHandler(request, ip, getServersByFd(_clientToServerSocket[clientFd]));
+		if (cgi->isCgiRequest())
+		{
+			std::cout << "CGI matches\n";
+			cgi->executeCgi(this->_CgiInputFds, this->_CgiOutputFds, clientFd);
+			_buffers[clientFd].erase();
+			delete request;
+			return true;
+		}
+	}
+	catch (const std::exception &e)
+	{
+		std::cerr << "Failed cgi: " << e.what() << "\n";
+	}
+	return false;
+}
+
+void EventLoop::prepareResponseBuffer(const HttpResponse& response)
+{
+	_responseBuffer.clear();
+	std::ostringstream oss;
+	oss << "HTTP/1.1 " << response.getStatusCode() << " " << response.getStatusMessage() << "\r\n";
+	const std::map<std::string, std::string>& headers = response.getHeaders();
+	for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
+	{
+		oss << it->first << ": " << it->second << "\r\n";
+	}
+	oss << "\r\n";
+	std::string headerStr = oss.str();
+	_responseBuffer.insert(_responseBuffer.end(), headerStr.begin(), headerStr.end());
+
+	if (response.bodyIsBinary())
+	{
+		const std::vector<unsigned char>& body = response.getBodyBinary();
+		_responseBuffer.insert(_responseBuffer.end(), body.begin(), body.end());
+	}
+	else
+	{
+		std::string bodyStr = response.getBody();
+		_responseBuffer.insert(_responseBuffer.end(), bodyStr.begin(), bodyStr.end());
+	}
+}
+
+void EventLoop::sendResponse(int clientFd)
+{
+	size_t &totalSent = _clientSendOffset[clientFd];
+	size_t bufferSize = _responseBuffer.size();
+
+	while (totalSent < bufferSize)
+	{	
+		size_t chunkSize = std::min(static_cast<size_t>(4096), bufferSize - totalSent);
+		ssize_t sent = send(clientFd, _responseBuffer.data() + totalSent, chunkSize, 0);
+
+		if (sent == -1)
+		{
+			perror("send");
+			close(clientFd);
+			_requestBuffers.erase(clientFd);
+			_clientToServer.erase(clientFd);
+			_clientSendOffset.erase(clientFd);
+			try
+			{
+				_epollManager.removeFd(clientFd);
+			}
+			catch (const std::exception& e)
+			{
+				std::cerr << "Failed to remove fd: " << e.what() << std::endl;
+			}
+			return;
+		}
+		totalSent += sent;
+		if (static_cast<size_t>(sent) < chunkSize)
+        {
+			_epollManager.modifyFd(clientFd, EPOLLOUT);
+			return;
+		}
+	}
+
+	_requestBuffers[clientFd].clear();
+	_clientSendOffset.erase(clientFd);
+	_epollManager.modifyFd(clientFd, EPOLLIN);
+	std::cout <<BLUE<< "Response sent, connection kept alive" <<RESET<< std::endl;
+}
+
+
 void EventLoop::handleClientData(int clientFd)
 {
 	char buffer[4096];
-	ssize_t count = recv(clientFd, buffer, sizeof(buffer), 0);  // Replaced read with recv
+	ssize_t count = recv(clientFd, buffer, sizeof(buffer), 0);
+
 	if (count <= 0)
 	{
 		if (count < 0)
-		{
 			perror("recv");
-			close(clientFd);
-		}
 		close(clientFd);
-		_buffers.erase(clientFd);
+		_requestBuffers.erase(clientFd);
 		_clientToServer.erase(clientFd);
+		_clientSendOffset.erase(clientFd);
 		try
 		{
 			this->_epollManager.removeFd(clientFd);
@@ -292,80 +421,34 @@ void EventLoop::handleClientData(int clientFd)
 		{
 			std::cerr << "Failed to remove client fd from epoll: " << e.what() << std::endl;
 		}
+		return;
 	}
 	else
-	{
-		_buffers[clientFd].append(buffer, count);
+    {
+		std::vector<char>& reqBuffer = _requestBuffers[clientFd];
+		reqBuffer.insert(reqBuffer.end(), buffer, buffer + count);
 
-		size_t header_end = _buffers[clientFd].find("\r\n\r\n");
+		std::string reqStr(reqBuffer.begin(), reqBuffer.end());
+		size_t header_end = reqStr.find("\r\n\r\n");
 		if (header_end != std::string::npos)
 		{
-			HttpRequest *request = handleHttpRequest(clientFd, header_end);
+			HttpRequest *request = parseRequestFromBuffer(clientFd, header_end);
 			if (request == NULL)
-				return ;
+				return;
+			if (handleCgiIfNeeded(request, clientFd))
+				return;
+
 			std::cout << RED << "Received HTTP request from fd " << clientFd << RESET << ":\n";
 			request->HttpRequestPrinter();
-			std::string ip = this->_ClientIPs[clientFd];
-			try
-			{
-				CgiHandler *cgi = new CgiHandler(request, ip, getServersByFd(_clientToServerSocket[clientFd]));
-				if (cgi->isCgiRequest())
-				{
-					std::cout << "CGI matches\n";
-					cgi->executeCgi(this->_CgiInputFds, this->_CgiOutputFds, clientFd);
-					_buffers[clientFd].clear();	
-					delete request;
-					return ;
-				}
-			}
-			catch (const std::exception &e)
-			{
-				std::cerr << "Failed cgi: " << e.what() << "\n";
-			}
-			if (request != NULL)
-			{
-				int serverFd = _clientToServer[clientFd];
 
-				//_servers[serverFd][0]->printValues();  
-				if (_servers.find(serverFd) != _servers.end() && !_servers[serverFd].empty())
-				{
-					HttpRequestRouter router;
-					HttpResponse response = router.handleRequest(*request, *(_servers[serverFd][0]));
-
-					// Transform the response into a string
-					std::ostringstream oss;
-					oss << "HTTP/1.1 " << response.getStatusCode() << " " << response.getStatusMessage() << "\r\n";
-					const std::map<std::string, std::string>& headers = response.getHeaders();
-					for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
-					{
-						oss << it->first << ": " << it->second << "\r\n";
-					}
-					oss << "\r\n";
-					oss << response.getBody();
-					std::string responseStr = oss.str();
-
-					// Send the response back to the client
-					//std::cout << "The response is:\n" << responseStr << std::endl;
-					ssize_t sent = send(clientFd, responseStr.c_str(), responseStr.size(), 0);
-					if (sent == -1)
-					{
-						perror("send");
-						close(clientFd);
-						_buffers.erase(clientFd);
-						_clientToServer.erase(clientFd);
-						try {
-							_epollManager.removeFd(clientFd);
-						} catch (const std::exception& e) {
-							std::cerr << "Failed to remove fd: " << e.what() << std::endl;
-						}
-					}
-					else
-					{
-						_buffers[clientFd].clear();
-						std::cout << "✓ Response sent, connection kept alive" << std::endl;
-					}
-					delete request;
-				}
+			int serverFd = _clientToServer[clientFd];
+			if (_servers.find(serverFd) != _servers.end() && !_servers[serverFd].empty())
+			{
+				HttpRequestRouter router;
+				HttpResponse response = router.handleRequest(*request, *(_servers[serverFd][0]));
+				prepareResponseBuffer(response);
+				sendResponse(clientFd);
+				delete request;
 			}
 		}
 	}

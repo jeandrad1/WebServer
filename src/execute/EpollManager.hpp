@@ -21,7 +21,7 @@ class EpollManager {
 		static	EpollManager &getInstance(void);
 
 		void	addFd(int serverFd, uint32_t events);
-		void	modidyFd(int serverFd, uint32_t events);
+		void	modifyFd(int serverFd, uint32_t events);
 		void	removeFd(int serverFd);
 
 		int		waitForEvents(int maxEvents, int timeoutMs, struct epoll_event *events);
