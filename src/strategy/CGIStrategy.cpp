@@ -39,7 +39,5 @@ bool	CGIStrategy::validate(const std::string &value) const
 	if (!isURI(path))
 		return (false);
 
-	std::cout << suffix << " " << path << "\n";
-
 	return (true);
 }
