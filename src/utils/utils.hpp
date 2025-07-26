@@ -22,6 +22,7 @@ std::string	trim(const std::string &str);
 std::string	trimSpaces(const std::string &str);
 int			countWhitespace(const std::string &str);
 bool		checkFilename(const std::string &word);
+long long   hexToDecimal(const std::string& hexStr);
 bool		safe_atoll(const std::string& str, long long& result);
 std::string to_lowercase(const std::string& input);
 
