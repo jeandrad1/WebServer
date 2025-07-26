@@ -132,6 +132,13 @@ void HttpRequest::handleBody(std::string str_body)
 		body.push_back(str_body[i]);
 }
 
+void HttpRequest::handleTransferEncoding(std::string transfer_str)
+{
+	if (transfer_str.empty())
+		return;
+	this->transferEncoding = transfer_str;
+}
+
 /***********************************************************************/
 /*                          Getters & Setters                          */
 /***********************************************************************/
@@ -223,6 +230,7 @@ void HttpRequest::HttpRequestPrinter()
 	std::cout << " - > contentLength " << contentLength << "\n";
 	std::cout << " - > contentType " << contentType << "\n";
 	std::cout << " - > host " << host << "\n";
+	std::cout << " - > transferEnconding " << transferEncoding << "\n";
 	std::cout << " - > connection ";
 	if (connection == true)
 		std::cout << "OPEN\n";
