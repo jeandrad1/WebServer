@@ -45,9 +45,7 @@ void EventLoop::runEventLoop(void)
 
 	while (true)
 	{
-		std::cout << "Llega hasta aquí\n";
 		int n_ready = this->_epollManager.waitForEvents(MAX_EVENTS, -1, events);
-		std::cout << "Sigue por aquí\n";
 		if (n_ready == -1)
 		{
 			perror("epoll_wait");
@@ -58,7 +56,6 @@ void EventLoop::runEventLoop(void)
 			int fd = events[i].data.fd;
 			uint32_t revents = events[i].events;
 
-			std::cout << "Actual fd: " << fd << "\nN_ready: " << n_ready << "\n";
 			if (isServerSocket(fd))
 			{
 				handleNewConnection(fd);
@@ -110,12 +107,10 @@ bool EventLoop::isServerSocket(int fd)
 
 bool EventLoop::isCgiOutputPipe(int fd)
 {
-	std::cerr << "IscgiOutputPipe 2\n";
 	for (std::map<int, CgiHandler *>::iterator it = this->_CgiOutputFds.begin(); it != this->_CgiOutputFds.end(); ++it)
 	{
 		if (it->first == fd)
 		{
-			std::cerr << "IscgiOutputPipe 1\n";
 			return (true);
 		}
 	}
@@ -124,12 +119,10 @@ bool EventLoop::isCgiOutputPipe(int fd)
 
 bool EventLoop::isCgiInputPipe(int fd)
 {
-	std::cerr << "IscgiInputPipe 2\n";
 	for (std::map<int, CgiHandler *>::iterator it = this->_CgiInputFds.begin(); it != this->_CgiInputFds.end(); ++it)
 	{
 		if (it->first == fd)
 		{
-			std::cerr << "IscgiInputPipe 1\n";
 			return (true);
 		}
 	}
@@ -166,7 +159,6 @@ void EventLoop::handleCgiOutput(int fd)
 		sent += ret;
 		if (sent >= buffer.size())
 		{
-			std::cout << "Toda la info mandada\n";
 			this->_CgiOutputFds.erase(fd);
 			close(fd);
 			delete cgi;
@@ -184,30 +176,16 @@ void EventLoop::handleCgiInput(int fd)
 
     size_t bytesToWrite = (bytesAlreadyWritten < bodySize) ? (bodySize - bytesAlreadyWritten) : 0;
 
-	// DEBUG
-    std::cerr << "[CGI DEBUG] BODY SIZE: " << bodySize 
-              << " | bytesAlreadyWritten: " << bytesAlreadyWritten
-              << " | bytesToWrite: " << bytesToWrite << std::endl;
-
     if (bytesToWrite > 0)
     {
         ssize_t bytesWritten = write(fd, body.data() + bytesAlreadyWritten, bytesToWrite);
 
-		//DEBUG
-        std::cerr << "[CGI DEBUG] write(fd=" << fd << ", offset=" << bytesAlreadyWritten 
-                  << ", bytesToWrite=" << bytesToWrite << ") -> bytesWritten: " << bytesWritten << std::endl;
         if (bytesWritten > 0)
 		{
             cgi->updateBytesWritten(bytesWritten);
-
-			//DEBUG
-			std::cerr << "[CGI DEBUG] Updated bytesWritten: " << cgi->getBytesWritten() << std::endl;
 		}
         else
         {
-			//DEBUG
-			std::cerr << "[CGI DEBUG] write() returned <= 0, closing fd=" << fd << std::endl;
-
             this->_epollManager.removeFd(fd);
             close(fd);
             cgi->setInputAsClosed();
@@ -215,16 +193,9 @@ void EventLoop::handleCgiInput(int fd)
     }
     else
     {
-		// DEBUG
-		std::cerr << "Cerrando pipe de entrada CGI fd=" << fd << std::endl;
-		
         this->_epollManager.removeFd(fd);
         close(fd);
         cgi->setInputAsClosed();
-		
-		// DEBUG
-		std::cerr << "Pipe de entrada CGI cerrado fd=" << fd << std::endl;
-
     }
 }
 
@@ -318,9 +289,10 @@ bool EventLoop::handleCgiIfNeeded(HttpRequest* request, int clientFd)
 		CgiHandler *cgi = new CgiHandler(request, ip, getServersByFd(_clientToServerSocket[clientFd]));
 		if (cgi->isCgiRequest())
 		{
-			std::cout << "CGI matches\n";
 			cgi->executeCgi(this->_CgiInputFds, this->_CgiOutputFds, clientFd);
-			_buffers[clientFd].erase();
+			_requestBuffers[clientFd].clear();
+			_clientSendOffset.erase(clientFd);
+			_epollManager.modifyFd(clientFd, EPOLLIN);
 			delete request;
 			return true;
 		}
@@ -328,6 +300,10 @@ bool EventLoop::handleCgiIfNeeded(HttpRequest* request, int clientFd)
 	catch (const std::exception &e)
 	{
 		std::cerr << "Failed cgi: " << e.what() << "\n";
+		_requestBuffers[clientFd].clear();
+		_clientSendOffset.erase(clientFd);
+		_epollManager.modifyFd(clientFd, EPOLLIN);
+		//delete request;
 	}
 	return false;
 }
@@ -439,7 +415,7 @@ void EventLoop::handleClientData(int clientFd)
 				return;
 
 			std::cout << RED << "Received HTTP request from fd " << clientFd << RESET << ":\n";
-			request->HttpRequestPrinter();
+			//request->HttpRequestPrinter();
 
 			int serverFd = _clientToServer[clientFd];
 			if (_servers.find(serverFd) != _servers.end() && !_servers[serverFd].empty())
