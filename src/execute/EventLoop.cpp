@@ -45,7 +45,9 @@ void EventLoop::runEventLoop(void)
 
 	while (true)
 	{
+		std::cout << "Llega hasta aquí\n";
 		int n_ready = this->_epollManager.waitForEvents(MAX_EVENTS, -1, events);
+		std::cout << "Sigue por aquí\n";
 		if (n_ready == -1)
 		{
 			perror("epoll_wait");
@@ -139,10 +141,23 @@ void EventLoop::handleCgiOutput(int fd)
 	}
 	if (cgi->getInputFdClosed() == true && cgi->getOutputFdClosed() == true)
 	{
+		size_t &sent = cgi->getBytesSent();
 		std::string buffer = cgi->parseCgiBuffer();
-		send(cgi->getClientFd(), buffer.c_str(), buffer.size(), 0);
-		this->_CgiOutputFds.erase(fd);
-		close(fd);
+		ssize_t ret = send(cgi->getClientFd(), buffer.c_str(), buffer.size(), MSG_DONTWAIT);
+		if (ret == -1)
+		{
+			perror("send failed");
+			close(fd);
+			return;
+		}
+		sent += ret;
+		if (sent >= buffer.size())
+		{
+			std::cout << "Toda la info mandada\n";
+			this->_CgiOutputFds.erase(fd);
+			close(fd);
+			delete cgi;
+		}
 	}
 }
 
@@ -288,6 +303,8 @@ void EventLoop::handleClientData(int clientFd)
 			HttpRequest *request = handleHttpRequest(clientFd, header_end);
 			if (request == NULL)
 				return ;
+			std::cout << RED << "Received HTTP request from fd " << clientFd << RESET << ":\n";
+			request->HttpRequestPrinter();
 			std::string ip = this->_ClientIPs[clientFd];
 			try
 			{
@@ -296,6 +313,8 @@ void EventLoop::handleClientData(int clientFd)
 				{
 					std::cout << "CGI matches\n";
 					cgi->executeCgi(this->_CgiInputFds, this->_CgiOutputFds, clientFd);
+					_buffers[clientFd].clear();	
+					delete request;
 					return ;
 				}
 			}
@@ -305,9 +324,6 @@ void EventLoop::handleClientData(int clientFd)
 			}
 			if (request != NULL)
 			{
-				std::cout << RED << "Received HTTP request from fd " << clientFd << RESET << ":\n";
-				request->HttpRequestPrinter();
-
 				int serverFd = _clientToServer[clientFd];
 
 				//_servers[serverFd][0]->printValues();  
@@ -347,7 +363,7 @@ void EventLoop::handleClientData(int clientFd)
 					{
 						_buffers[clientFd].clear();
 						std::cout << "✓ Response sent, connection kept alive" << std::endl;
-					}			
+					}
 					delete request;
 				}
 			}

@@ -37,6 +37,8 @@ class EventLoop {
 		~EventLoop(void);
 
 		void runEventLoop(void);
+
+		void printCgiOutputFds() const;
 		
 };
 
