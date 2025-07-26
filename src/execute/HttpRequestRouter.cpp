@@ -67,21 +67,24 @@ HttpResponse HttpRequestRouter::serveFile(const std::string& filePath, const std
 		else
 			return factory.generateErrorResponse(403, server, location, urlPath);
     }
-    std::string body;
-    char buffer[4096];
-    ssize_t bytes;
-    while ((bytes = read(fd, buffer, sizeof(buffer))) > 0)
-    {
-        body.append(buffer, bytes);
-    }
-    close(fd);
+	std::vector<unsigned char> body;
+	char buffer[4096];
+	ssize_t bytes;
+	while ((bytes = read(fd, buffer, sizeof(buffer))) > 0)
+	{
+		body.insert(body.end(), buffer, buffer + bytes);
+	}
+	close(fd);
+	
+	if (bytes < 0)
+		return ResponseFactory::createResponse(500);
 
-    if (bytes < 0)
-        return ResponseFactory::createResponse(500);
-
-    HttpResponse res = ResponseFactory::createResponse(200, body);
-    res.setHeader("Content-Type", mime.getMimeType(filePath));
-    return res;
+	HttpResponse res;
+	res.setStatus(200, "OK");
+	res.setHeader("Content-Type", mime.getMimeType(filePath));
+	res.setHeader("Content-Length", to_string(body.size()));
+	res.setBinaryBody(body); // uses the binary
+	return res;
 }
 
 HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerConfig& server)
