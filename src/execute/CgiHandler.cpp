@@ -1,5 +1,7 @@
 #include "CgiHandler.hpp"
 #include <stdio.h>
+#include <sys/stat.h>
+#include "ResponseFactory.hpp"
 
 /***********************************************************************/
 /*                     Constructors & Destructor                       */
@@ -141,10 +143,56 @@ std::string CgiHandler::parseCgiBuffer()
     return parsedBuffer;
 }
 
+bool	CgiHandler::checkScriptPermissions(void)
+{
+	struct stat s;
+	std::string script = ServerUtils::resolveScriptPath(_req, _location);
+
+	if (script.find(".cgi") == std::string::npos)
+	{
+		if (stat(script.c_str(), &s) != 0)
+		{
+			if (errno == ENOENT)
+			{
+				throw std::runtime_error("404 Not Found");
+			}
+			else
+				throw std::runtime_error("500 Internal Server Error");
+		}
+		int result = access(script.c_str(), R_OK);
+		if (result == -1)
+		{
+			perror("access");
+			throw std::runtime_error("403 Forbidden");
+		}
+	}
+	return (true);
+}
+
+bool	CgiHandler::checkInterpreterPermissions(void)
+{
+	struct stat s;
+	if (stat(this->_interpreterPath.c_str(), &s) != 0)
+	{
+		if (errno == ENOENT)
+			throw std::runtime_error("404 Not Found");
+		else
+			throw std::runtime_error("500 Internal Server Error");
+	}
+	int result = access(this->_interpreterPath.c_str(), X_OK);
+	if (result == -1)
+		throw std::runtime_error("403 Forbidden");
+	return (true);
+}
+
 bool	CgiHandler::executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<int, CgiHandler *> &cgiOutputFd, int clientFd)
 {
 	this->_scriptPath = ServerUtils::resolveScriptPath(const_cast<HttpRequest *>(this->_req), const_cast<LocationConfig *>(this->_location));
 	this->_interpreterPath = ServerUtils::resolveInterpreterPath(this->_location, this->_extension);
+
+	if (!checkScriptPermissions() || !checkInterpreterPermissions())
+		return (false);
+
 	this->_clientFd = clientFd;
 
 	int	input_pipe[2];
@@ -159,7 +207,7 @@ bool	CgiHandler::executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<in
 		CgiEnvBuilder *envBuilder = new CgiEnvBuilder(this->_req, this->_server, this->_location, this->_clientIp);
 		this->_envv = envBuilder->build();
 
-		// DEBUG:
+		/*// DEBUG:
         std::cout << "---- CGI ENV ----\n";
         for (int i = 0; this->_envv[i]; ++i)
             std::cout << this->_envv[i] << std::endl;
@@ -168,15 +216,13 @@ bool	CgiHandler::executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<in
         std::cout << "-----------------\n";
 		std::string body = this->getRequestBody();
 		std::cout << "---- CGI BODY ----\n" << body << "\n------------------\n";
-		//DELETE THIS
+		//DELETE THIS*/
 
 		dup2(input_pipe[0], STDIN_FILENO);
 		dup2(output_pipe[1], STDOUT_FILENO);
 
-		//close(input_pipe[0]);
 		close(input_pipe[1]);
 		close(output_pipe[0]);
-		//close(output_pipe[1]);
 
 		if (this->_interpreterPath.empty() || this->_interpreterPath == this->_scriptPath)
 		{
@@ -184,7 +230,7 @@ bool	CgiHandler::executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<in
 				const_cast<char*>(this->_scriptPath.c_str()),
 				NULL
 			};
-			alarm(1);
+			alarm(5);
 			execve(argv[0], argv, this->_envv);
 		}
 		else
@@ -194,7 +240,7 @@ bool	CgiHandler::executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<in
 				const_cast<char*>(this->_scriptPath.c_str()),
 				NULL
 			};
-			alarm(1);
+			alarm(5);
 			execve(argv[0], argv, this->_envv);
 		}
 		std::cerr << "Falla\n";
@@ -299,6 +345,24 @@ bool	CgiHandler::getInputFdClosed(void)
 bool	CgiHandler::getOutputFdClosed(void)
 {
 	return (this->_outputFdClosed);
+}
+
+std::string	CgiHandler::getGivenEnvvByKey(std::string key)
+{
+	if (!this->_envv || !this->_envv[0])
+		return (NULL);
+	for (int i = 0; this->_envv[i]; i++)
+    {
+		std::string envvar = to_string(this->_envv[i]);
+		size_t pos = envvar.find(key);
+		if (pos != std::string::npos)
+		{
+			pos = envvar.find("=");
+			std::string value = envvar.substr(pos + 1, envvar.size() - 1);
+			return (value);
+		}
+	}
+	return (NULL);
 }
 
 /***********************************************************************/

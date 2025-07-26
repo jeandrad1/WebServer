@@ -44,6 +44,9 @@ class CgiHandler {
 		bool	executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<int, CgiHandler *> &cgiOutputFd, int clientFd);
 		bool	isCgiRequest(void);
 
+		bool	checkScriptPermissions(void);
+		bool	checkInterpreterPermissions(void);
+
 		void	appendToCgiBuffer(char *buffer, ssize_t bytes_read);
 		void	updateBytesWritten(size_t newBytesWritten);
 		std::string	parseCgiBuffer(void);
@@ -60,6 +63,7 @@ class CgiHandler {
 		size_t&	getBytesSent(void);
 		std::string getBuffer(void);
 		std::string getRequestBody(void);
+		std::string	getGivenEnvvByKey(std::string key);
 };
 
 #endif
