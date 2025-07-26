@@ -72,13 +72,10 @@ std::string	ServerUtils::resolveScriptPath(const HttpRequest *req, const Locatio
 	if (rootPath.compare("/") == 0)
 	{
 		script = path;
-		std::cout << "Script: " << script << "\n";
 		return (script.substr(1, script.size() - 1));
 	}
 	else
 		script = path.substr(path.find_last_of("/") + 1);
-	std::cout << "Script: " << script << "\n";
-	std::cout << "RootPath: " << rootPath << "\n";
 	std::string scriptPath = rootPath.substr(1) + "/" + script;
 	return (scriptPath);
 }
