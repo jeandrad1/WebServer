@@ -1,5 +1,39 @@
 #include "utils.hpp"
 
+long long hexToDecimal(const std::string& hexStr) 
+{
+	long long result = 0;
+	size_t i = 0;
+
+	for (; i < hexStr.length(); ++i) 
+	{
+		char c = hexStr[i];
+		int value = 0;
+
+		if (c >= '0' && c <= '9') 
+		{
+			value = c - '0';
+		} 
+		else if (c >= 'A' && c <= 'F')
+		{
+			value = c - 'A' + 10;
+		}
+		else if (c >= 'a' && c <= 'f')
+		{
+			value = c - 'a' + 10;
+		} 
+		else 
+		{
+			std::cerr << "Error: carácter no válido en la cadena hexadecimal: " << c << std::endl;
+			return -1;
+		}
+
+		result = result * 16 + value;
+	}
+
+	return result;
+}
+
 bool safe_atoll(const std::string& str, long long& result) {
     char* end;
     errno = 0;
