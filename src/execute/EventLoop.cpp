@@ -54,6 +54,8 @@ void EventLoop::runEventLoop(void)
 		for (int i = 0; i < n_ready; ++i)
 		{
 			int fd = events[i].data.fd;
+			uint32_t revents = events[i].events;
+
 			std::cout << "Actual fd: " << fd << "\nN_ready: " << n_ready << "\n";
 			if (isServerSocket(fd))
 			{
@@ -69,7 +71,18 @@ void EventLoop::runEventLoop(void)
 			}
 			else
 			{
-				handleClientData(fd);
+				if (revents & EPOLLOUT)
+					sendResponse(fd);
+				if (revents & EPOLLIN)
+					handleClientData(fd);
+				if ((revents & EPOLLHUP) || (revents & EPOLLERR))
+				{
+					close(fd);
+					_requestBuffers.erase(fd);
+					_clientToServer.erase(fd);
+					_clientSendOffset.erase(fd);
+					_epollManager.removeFd(fd);
+				}
 			}
 		}
 	}
@@ -313,34 +326,60 @@ void EventLoop::prepareResponseBuffer(const HttpResponse& response)
 		oss << it->first << ": " << it->second << "\r\n";
 	}
 	oss << "\r\n";
-	oss << response.getBody();
-	std::string responseStr = oss.str();
-	_responseBuffer.assign(responseStr.begin(), responseStr.end());
+	std::string headerStr = oss.str();
+	_responseBuffer.insert(_responseBuffer.end(), headerStr.begin(), headerStr.end());
+
+	if (response.bodyIsBinary())
+	{
+		const std::vector<unsigned char>& body = response.getBodyBinary();
+		_responseBuffer.insert(_responseBuffer.end(), body.begin(), body.end());
+	}
+	else
+	{
+		std::string bodyStr = response.getBody();
+		_responseBuffer.insert(_responseBuffer.end(), bodyStr.begin(), bodyStr.end());
+	}
 }
 
 void EventLoop::sendResponse(int clientFd)
 {
-	ssize_t sent = send(clientFd, _responseBuffer.data(), _responseBuffer.size(), 0);
-	if (sent == -1)
-	{
-		perror("send");
-		close(clientFd);
-		_requestBuffers.erase(clientFd);
-		_clientToServer.erase(clientFd);
-		try
+	size_t &totalSent = _clientSendOffset[clientFd];
+	size_t bufferSize = _responseBuffer.size();
+
+	while (totalSent < bufferSize)
+	{	
+		size_t chunkSize = std::min(static_cast<size_t>(4096), bufferSize - totalSent);
+		ssize_t sent = send(clientFd, _responseBuffer.data() + totalSent, chunkSize, 0);
+
+		if (sent == -1)
 		{
-			_epollManager.removeFd(clientFd);
+			perror("send");
+			close(clientFd);
+			_requestBuffers.erase(clientFd);
+			_clientToServer.erase(clientFd);
+			_clientSendOffset.erase(clientFd);
+			try
+			{
+				_epollManager.removeFd(clientFd);
+			}
+			catch (const std::exception& e)
+			{
+				std::cerr << "Failed to remove fd: " << e.what() << std::endl;
+			}
+			return;
 		}
-		catch (const std::exception& e)
-		{
-			std::cerr << "Failed to remove fd: " << e.what() << std::endl;
+		totalSent += sent;
+		if (static_cast<size_t>(sent) < chunkSize)
+        {
+			_epollManager.modifyFd(clientFd, EPOLLOUT);
+			return;
 		}
 	}
-	else
-	{
-		_requestBuffers[clientFd].clear();
-		std::cout << "✓ Response sent, connection kept alive" << std::endl;
-	}
+
+	_requestBuffers[clientFd].clear();
+	_clientSendOffset.erase(clientFd);
+	_epollManager.modifyFd(clientFd, EPOLLIN);
+	std::cout <<BLUE<< "Response sent, connection kept alive" <<RESET<< std::endl;
 }
 
 
@@ -348,16 +387,15 @@ void EventLoop::handleClientData(int clientFd)
 {
 	char buffer[4096];
 	ssize_t count = recv(clientFd, buffer, sizeof(buffer), 0);
+
 	if (count <= 0)
 	{
 		if (count < 0)
-		{
 			perror("recv");
-			close(clientFd);
-		}
 		close(clientFd);
 		_requestBuffers.erase(clientFd);
 		_clientToServer.erase(clientFd);
+		_clientSendOffset.erase(clientFd);
 		try
 		{
 			this->_epollManager.removeFd(clientFd);
@@ -366,9 +404,10 @@ void EventLoop::handleClientData(int clientFd)
 		{
 			std::cerr << "Failed to remove client fd from epoll: " << e.what() << std::endl;
 		}
+		return;
 	}
 	else
-	{
+    {
 		std::vector<char>& reqBuffer = _requestBuffers[clientFd];
 		reqBuffer.insert(reqBuffer.end(), buffer, buffer + count);
 
@@ -381,6 +420,7 @@ void EventLoop::handleClientData(int clientFd)
 				return;
 			if (handleCgiIfNeeded(request, clientFd))
 				return;
+
 			std::cout << RED << "Received HTTP request from fd " << clientFd << RESET << ":\n";
 			request->HttpRequestPrinter();
 

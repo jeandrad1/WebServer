@@ -22,6 +22,7 @@ class EventLoop {
 		std::map<int, CgiHandler *> 				_CgiOutputFds;
 		std::map<int, std::vector<char> >			_requestBuffers;
 		std::vector<char> 							_responseBuffer;
+		std::map<int, size_t> 						_clientSendOffset;
 
 		bool isServerSocket(int fd);
 		bool isCgiOutputPipe(int fd);

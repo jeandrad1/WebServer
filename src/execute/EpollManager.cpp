@@ -44,7 +44,7 @@ void EpollManager::addFd(int serverFd, uint32_t events)
 	}
 }
 
-void EpollManager::modidyFd(int serverFd, uint32_t events)
+void EpollManager::modifyFd(int serverFd, uint32_t events)
 {
 	struct epoll_event ev;
 	ev.events = events;
