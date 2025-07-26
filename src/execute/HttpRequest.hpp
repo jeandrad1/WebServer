@@ -29,7 +29,6 @@ class HttpRequest
 		std::string host;
 		std::string serverName;
 		std::string serverPort;
-		std::string transferEncoding;
 		bool		connection;
 		
 		
@@ -52,7 +51,6 @@ class HttpRequest
 		void handleConnection(std::string connection_str);
 		void handleUserAgent(std::string userAgent_str);
 		void handleAccept(std::string accept_str);
-		void handleTransferEncoding(std::string transfer_str);
 
 		void handleBody(std::string body);
 

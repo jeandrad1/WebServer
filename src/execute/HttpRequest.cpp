@@ -56,14 +56,6 @@ void	HttpRequest::handleContentLength(std::string content_length_str)
 	}
 }
 
-void HttpRequest::handleTransferEncoding(std::string transfer_encoding_str)
-{
-	if (transfer_encoding_str == "chunked")
-		transferEncoding = transfer_encoding_str;
-	else
-		transferEncoding = "unchunked";
-}
-
 void	HttpRequest::handleQueryString(std::string query_string_str)
 {
 	query_string = query_string_str;
