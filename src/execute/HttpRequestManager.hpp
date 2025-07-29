@@ -15,7 +15,7 @@ class HttpRequestManager
         std::string body;
 
         void parseRequestLine(const std::string &line);
-        void parseHeaders(std::istream &stream, std::vector<ServerConfig *> servers);
+        void parseHeaders(std::istream &stream);
         void parseBody(std::istream &stream);
 
     public:
@@ -24,6 +24,7 @@ class HttpRequestManager
         void parseHttpRequest(const std::string& raw_request, std::vector<ServerConfig *> servers);
         void parseHttpHeader(const std::string& raw_header);
 
+        bool checkClientMaxBodySize(std::vector<ServerConfig *> servers);
         HttpRequest *buildHttpRequest();
 
         void requestPrinter();

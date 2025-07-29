@@ -1,5 +1,6 @@
 #include "HttpRequestManager.hpp"
 #include <cstdio>
+#include "ServerUtils.hpp"
 
 /***********************************************************************/
 /*                     Constructors & Destructor                       */
@@ -51,9 +52,71 @@ void HttpRequestManager::parseHttpRequest(const std::string& raw_request, std::v
 	
 	parseRequestLine(line);
 
-	parseHeaders(stream, servers);
-
+	parseHeaders(stream);
+	if (!checkClientMaxBodySize(servers))
+	{
+		throw std::out_of_range("ClientMaxBodySize too large");
+	}
 	parseBody(stream);
+}
+
+bool HttpRequestManager::checkClientMaxBodySize(std::vector<ServerConfig *> servers)
+{
+	if (method == "POST")
+	{
+		std::istringstream iss(getHeader("content-length"));
+		long long contentLength = 0;
+		iss >> contentLength;
+		std::string host_str = getHeader("host");
+	
+		std::string serverName;
+		std::string serverPort;
+		std::string host;
+		if (!host_str.empty())
+		{
+			host = host_str;
+			size_t colonPos = host_str.find(':');
+			if (colonPos != std::string::npos)
+			{
+				serverName = host_str.substr(0, colonPos);
+				serverPort = host_str.substr(colonPos + 1);
+			}
+			else
+			{
+				serverName = host_str;
+				serverPort = "80"; // Default HTTP port if not specified
+			}
+		}
+		else
+		{
+			host = "EMPTY";
+			serverName = "localhost";
+			serverPort = "80";
+		}
+	
+		ServerConfig *server = ServerUtils::getServerByHostName(serverName, servers);
+		if (server != NULL)
+		{
+			LocationConfig *location = ServerUtils::getLocationByRequestPath(path, server);
+			if (location != NULL)
+			{
+				if (contentLength > location->getClientMaxBodySize())
+				{
+					std::cout << "Error: Body too large\n";
+					return (false);
+				}
+				return (true);
+			}
+			if (contentLength > location->getClientMaxBodySize())
+			{
+				std::cout << "Error: Body too large\n";
+				return (false);
+			}
+			return (true);
+		}
+		return (true);
+	}
+	return (true);
 }
 
 void HttpRequestManager::parseRequestLine(const std::string &line)
@@ -85,7 +148,7 @@ void HttpRequestManager::parseRequestLine(const std::string &line)
         throw std::runtime_error("Invalid HTTP version: " + version);
 }
 
-void	HttpRequestManager::parseHeaders(std::istream &stream, std::vector<ServerConfig *> servers)
+void	HttpRequestManager::parseHeaders(std::istream &stream)
 {
 	std::string line;
 
@@ -108,21 +171,6 @@ void	HttpRequestManager::parseHeaders(std::istream &stream, std::vector<ServerCo
 			throw std::runtime_error(RED "Header error: " YELLOW + line + "\n\t->" + GREEN" KEY EMPTY" + WHITE);
 
 		headers[to_lowercase(key)] = value;
-
-		if (key.find("Content-Length") != std::string::npos)
-		{
-			for (std::vector<ServerConfig *>::iterator it = servers.begin(); it != servers.end(); it++)
-			{
-				std::istringstream iss(value);
-				long long contentLength = 0;
-				iss >> contentLength;
-
-				long long ClientMaxBodySize = (*it)->getClientMaxBodySize();
-				if (contentLength > ClientMaxBodySize) {
-    				std::cout << "Error: Body too large\n";
-				}
-			}
-		}
 	}
 }
 
