@@ -152,18 +152,25 @@ bool	CgiHandler::checkScriptPermissions(void)
 	{
 		if (stat(script.c_str(), &s) != 0)
 		{
+			ResponseFactory factory;
 			if (errno == ENOENT)
 			{
-				throw std::runtime_error("404 Not Found");
+				factory.generateErrorResponse(404, *_server, _location);
+				return (false);
 			}
 			else
-				throw std::runtime_error("500 Internal Server Error");
+			{
+				factory.generateErrorResponse(404, *_server, _location);
+				return (false);
+			}
 		}
 		int result = access(script.c_str(), R_OK);
 		if (result == -1)
 		{
+			ResponseFactory factory;
 			perror("access");
-			throw std::runtime_error("403 Forbidden");
+			factory.generateErrorResponse(403, *_server, _location);
+			return (false);
 		}
 	}
 	return (true);
@@ -174,14 +181,26 @@ bool	CgiHandler::checkInterpreterPermissions(void)
 	struct stat s;
 	if (stat(this->_interpreterPath.c_str(), &s) != 0)
 	{
+		ResponseFactory factory;
 		if (errno == ENOENT)
-			throw std::runtime_error("404 Not Found");
+		{
+			factory.generateErrorResponse(404, *_server, _location);
+			return (false);
+		}
 		else
-			throw std::runtime_error("500 Internal Server Error");
+		{
+			factory.generateErrorResponse(404, *_server, _location);
+			return (false);
+		}
 	}
 	int result = access(this->_interpreterPath.c_str(), X_OK);
 	if (result == -1)
-		throw std::runtime_error("403 Forbidden");
+	{
+		ResponseFactory factory;
+		perror("access");
+		factory.generateErrorResponse(403, *_server, _location);
+		return (false);
+	}
 	return (true);
 }
 
@@ -271,6 +290,8 @@ bool	CgiHandler::executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<in
 		cgiOutputFd[output_pipe[0]] = this;
 		return (true);
 	}
+	ResponseFactory factory;
+	factory.generateErrorResponse(500, *_server, _location);
 	return (false);
 }
 
