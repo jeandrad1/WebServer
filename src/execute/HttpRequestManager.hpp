@@ -2,6 +2,7 @@
 # define HTTPREQUESTMANAGER_HPP
 
 #include "HttpRequest.hpp"
+#include "../builder/ServerConfig.hpp"
 
 class HttpRequestManager
 {
@@ -14,13 +15,13 @@ class HttpRequestManager
         std::string body;
 
         void parseRequestLine(const std::string &line);
-        void parseHeaders(std::istream &stream);
+        void parseHeaders(std::istream &stream, std::vector<ServerConfig *> servers);
         void parseBody(std::istream &stream);
 
     public:
         std::string getHeader(const std::string& key) const;
 
-        void parseHttpRequest(const std::string& raw_request);
+        void parseHttpRequest(const std::string& raw_request, std::vector<ServerConfig *> servers);
         void parseHttpHeader(const std::string& raw_header);
 
         HttpRequest *buildHttpRequest();
