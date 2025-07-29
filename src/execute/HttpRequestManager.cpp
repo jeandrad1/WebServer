@@ -31,7 +31,7 @@ std::string HttpRequestManager::getHeader(const std::string& key) const
 	return "";
 }
 
-void	HttpRequestManager::parseHttpHeader(const std::string& raw_header)
+/*void	HttpRequestManager::parseHttpHeader(const std::string& raw_header)
 {
 	std::istringstream stream(raw_header);
 	std::string line;
@@ -40,9 +40,9 @@ void	HttpRequestManager::parseHttpHeader(const std::string& raw_header)
 	
 	parseRequestLine(line);
 	parseHeaders(stream);
-}
+}*/
 
-void HttpRequestManager::parseHttpRequest(const std::string& raw_request)
+void HttpRequestManager::parseHttpRequest(const std::string& raw_request, std::vector<ServerConfig *> servers)
 {
 	std::istringstream stream(raw_request);
 	std::string line;
@@ -51,7 +51,7 @@ void HttpRequestManager::parseHttpRequest(const std::string& raw_request)
 	
 	parseRequestLine(line);
 
-	parseHeaders(stream);
+	parseHeaders(stream, servers);
 
 	parseBody(stream);
 }
@@ -85,7 +85,7 @@ void HttpRequestManager::parseRequestLine(const std::string &line)
         throw std::runtime_error("Invalid HTTP version: " + version);
 }
 
-void	HttpRequestManager::parseHeaders(std::istream &stream)
+void	HttpRequestManager::parseHeaders(std::istream &stream, std::vector<ServerConfig *> servers)
 {
 	std::string line;
 
@@ -108,6 +108,21 @@ void	HttpRequestManager::parseHeaders(std::istream &stream)
 			throw std::runtime_error(RED "Header error: " YELLOW + line + "\n\t->" + GREEN" KEY EMPTY" + WHITE);
 
 		headers[to_lowercase(key)] = value;
+
+		if (key.find("Content-Length") != std::string::npos)
+		{
+			for (std::vector<ServerConfig *>::iterator it = servers.begin(); it != servers.end(); it++)
+			{
+				std::istringstream iss(value);
+				long long contentLength = 0;
+				iss >> contentLength;
+
+				long long ClientMaxBodySize = (*it)->getClientMaxBodySize();
+				if (contentLength > ClientMaxBodySize) {
+    				std::cout << "Error: Body too large\n";
+				}
+			}
+		}
 	}
 }
 

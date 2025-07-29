@@ -258,10 +258,11 @@ HttpRequest* EventLoop::parseRequestFromBuffer(int clientFd, size_t header_end)
 {
 	std::string bufferStr(_requestBuffers[clientFd].begin(), _requestBuffers[clientFd].end());
 	HttpRequestManager reqMan;
-	reqMan.parseHttpRequest(bufferStr);
+	reqMan.parseHttpRequest(bufferStr, this->getServersByFd(clientFd));
 	HttpRequest *request = reqMan.buildHttpRequest();
 
 	long long content_length = request->getContentLength();
+	
 	long long received_body_size = bufferStr.size() - (header_end + 4);
 	long long chunked_end = bufferStr.find("\r\n0\r\n\r\n");
 
@@ -276,7 +277,7 @@ HttpRequest* EventLoop::parseRequestFromBuffer(int clientFd, size_t header_end)
 		full_request = bufferStr.substr(0, header_end + 4 + content_length);
 	else
 		full_request = bufferStr.substr(0, chunked_end + 5);
-	reqMan.parseHttpRequest(full_request);
+	reqMan.parseHttpRequest(full_request, this->getServersByFd(clientFd));
 	request = reqMan.buildHttpRequest();
 	return request;
 }
@@ -436,10 +437,11 @@ HttpRequest *EventLoop::handleHttpRequest(int clientFd, size_t header_end)
 	{
 		HttpRequestManager reqMan;
 
-		reqMan.parseHttpRequest(_buffers[clientFd]);
+		reqMan.parseHttpRequest(_buffers[clientFd], this->getServersByFd(clientFd));
 		HttpRequest *request = reqMan.buildHttpRequest();
 
 		long long content_length = request->getContentLength();
+		
 		long long received_body_size = _buffers[clientFd].size() - (header_end + 4);
 		long long chunked_end = _buffers[clientFd].find("\r\n0\r\n\r\n");
 
@@ -453,7 +455,7 @@ HttpRequest *EventLoop::handleHttpRequest(int clientFd, size_t header_end)
 			full_request = _buffers[clientFd].substr(0, header_end + 4 + content_length);
 		else
 			full_request = _buffers[clientFd].substr(0, chunked_end + 5);
-		reqMan.parseHttpRequest(full_request);
+		reqMan.parseHttpRequest(full_request, this->getServersByFd(clientFd));
 		request = reqMan.buildHttpRequest();
 		//reqMan.requestPrinter();
 
