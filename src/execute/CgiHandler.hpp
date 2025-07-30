@@ -11,7 +11,7 @@
 # include "../utils/to_string.hpp"
 # include "../utils/utils.hpp"
 # include "EpollManager.hpp"
-# include "CgiHeaderParser.hpp"
+# include <set>
 
 class CgiHandler {
 
@@ -39,6 +39,12 @@ class CgiHandler {
 
 	public:
 
+        static std::map<int, std::string> error_codes;
+        static std::map<std::string, std::string> mime_types;
+        static std::set<std::string> known_mime_types;
+
+		static void loadMimeTypes(void);
+        static void loadErrorCodes(void);
 		CgiHandler(HttpRequest *req, std::string clientIp, std::vector<ServerConfig *> servers);
 
 		bool	executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<int, CgiHandler *> &cgiOutputFd, int clientFd);
