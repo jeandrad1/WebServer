@@ -63,9 +63,9 @@ HttpResponse HttpRequestRouter::serveFile(const std::string& filePath, const std
 		const LocationConfig* location = HttpRequestRouter::findMatchingLocation(server, urlPath);
 		ResponseFactory factory;
 		if (errno == ENOENT)
-			return factory.generateErrorResponse(404, server, location, urlPath);
+			return factory.generateErrorResponse(404, server, location);
 		else
-			return factory.generateErrorResponse(403, server, location, urlPath);
+			return factory.generateErrorResponse(403, server, location);
     }
 	std::vector<unsigned char> body;
 	char buffer[4096];
@@ -135,13 +135,13 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerCo
 	if (stat(fullPath.c_str(), &s) != 0)
 	{
 		ResponseFactory factory;
-        return factory.generateErrorResponse(404, server, location, path);
+        return factory.generateErrorResponse(404, server, location);
 	}
     
     if (!FilePathChecker::isSafePath(root, fullPath))
 	{
 		ResponseFactory factory;
-        return factory.generateErrorResponse(403, server, location, path);
+        return factory.generateErrorResponse(403, server, location);
 	}
 	
     if (S_ISDIR(s.st_mode))
@@ -191,7 +191,7 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerCo
         else
         {
             ResponseFactory factory;
-            return factory.generateErrorResponse(403, server, location, path);
+            return factory.generateErrorResponse(403, server, location);
         }
     }
 
@@ -246,31 +246,31 @@ HttpResponse HttpRequestRouter::handlePost(const HttpRequest& req, const ServerC
     if (!FilePathChecker::isSafePath(root, fullPath))
     {
 		ResponseFactory factory;
-        return factory.generateErrorResponse(403, server, location, path);
+        return factory.generateErrorResponse(403, server, location);
     }
     struct stat s;
     if (stat(fullPath.c_str(), &s) == 0 && S_ISDIR(s.st_mode))
     {
 		ResponseFactory factory;
-        return factory.generateErrorResponse(403, server, location, path);
+        return factory.generateErrorResponse(403, server, location);
     }
     if (access(fullPath.c_str(), F_OK) == 0)
 	{
     	ResponseFactory factory;
-        return factory.generateErrorResponse(409, server, location, path);
+        return factory.generateErrorResponse(409, server, location);
     }
     std::ofstream out(fullPath.c_str(), std::ios::binary);
 	
 	if (!out)
     {
 		ResponseFactory factory;
-        return factory.generateErrorResponse(409, server, location, path);
+        return factory.generateErrorResponse(409, server, location);
     }
 	std::string body = to_string(req.getBody());
 	if (body.empty())
     {
 		ResponseFactory factory;
-        return factory.generateErrorResponse(400, server, location, path);
+        return factory.generateErrorResponse(400, server, location);
     }
 	out.write(body.c_str(), body.size());
     out.close();
