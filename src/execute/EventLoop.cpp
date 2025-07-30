@@ -131,39 +131,55 @@ bool EventLoop::isCgiInputPipe(int fd)
 
 void EventLoop::handleCgiOutput(int fd)
 {
-	CgiHandler *cgi = this->_CgiOutputFds[fd];
+    CgiHandler *cgi = this->_CgiOutputFds[fd];
 
-	char	buffer[4096];
-	ssize_t	bytesRead = read(fd, buffer, sizeof(buffer));
-	if (bytesRead > 0)
-	{
-		cgi->appendToCgiBuffer(buffer, bytesRead);
-	}
-	else if (bytesRead <= 0)
-	{
-		this->_epollManager.removeFd(fd);
-		close(fd);
-		cgi->setOutputAsClosed();
-	}
-	if (cgi->getInputFdClosed() == true && cgi->getOutputFdClosed() == true)
-	{
-		size_t &sent = cgi->getBytesSent();
-		std::string buffer = cgi->parseCgiBuffer();
-		ssize_t ret = send(cgi->getClientFd(), buffer.c_str(), buffer.size(), MSG_DONTWAIT);
-		if (ret == -1)
-		{
-			perror("send failed");
-			close(fd);
-			return;
-		}
-		sent += ret;
-		if (sent >= buffer.size())
-		{
-			this->_CgiOutputFds.erase(fd);
-			close(fd);
-			delete cgi;
-		}
-	}
+    char	buffer[4096];
+    ssize_t	bytesRead = read(fd, buffer, sizeof(buffer));
+    if (bytesRead > 0)
+    {
+        std::cout << YELLOW << "CGI OUTPUT READ (" << bytesRead << " bytes): " << std::string(buffer, bytesRead) << RESET << std::endl;
+        
+        cgi->appendToCgiBuffer(buffer, bytesRead);
+        
+        std::cout << CYAN << "CGI BUFFER COMPLETO: " << cgi->getBuffer() << RESET << std::endl;
+    }
+    else if (bytesRead <= 0)
+    {
+        std::cout << MAGENTA << "CGI OUTPUT CERRADO (fd=" << fd << ")" << RESET << std::endl;
+        this->_epollManager.removeFd(fd);
+        close(fd);
+        cgi->setOutputAsClosed();
+    }
+    
+    if (cgi->getInputFdClosed() == true && cgi->getOutputFdClosed() == true)
+    {
+        std::cout << GREEN << "=== CGI COMPLETO - ENVIANDO RESPUESTA ===" << RESET << std::endl;
+        
+        size_t &sent = cgi->getBytesSent();
+        std::string parsedBuffer = cgi->parseCgiBuffer();
+        
+        std::cout << GREEN << "CGI PARSED BUFFER (" << parsedBuffer.size() << " bytes):\n" << parsedBuffer << RESET << std::endl;
+        
+        ssize_t ret = send(cgi->getClientFd(), parsedBuffer.c_str(), parsedBuffer.size(), MSG_DONTWAIT);
+        if (ret == -1)
+        {
+            perror("send failed");
+            std::cout << RED << "ERROR enviando respuesta CGI al cliente" << RESET << std::endl;
+            close(fd);
+            return;
+        }
+        
+        std::cout << GREEN << "CGI RESPUESTA ENVIADA (" << ret << " bytes)" << RESET << std::endl;
+        
+        sent += ret;
+        if (sent >= parsedBuffer.size())
+        {
+            this->_CgiOutputFds.erase(fd);
+            close(fd);
+            delete cgi;
+            std::cout << GREEN << "CGI HANDLER ELIMINADO" << RESET << std::endl;
+        }
+    }
 }
 
 void EventLoop::handleCgiInput(int fd)
@@ -171,14 +187,20 @@ void EventLoop::handleCgiInput(int fd)
     CgiHandler *cgi = this->_CgiInputFds[fd];
 
     std::string body = cgi->getRequestBody();
+
+	std::cout<<"requestBody para cgi: "<< body << std::endl;
+	//size_t header_end = body.find("\r\n\r\n");
+
+
     size_t bytesAlreadyWritten = cgi->getBytesWritten();
     size_t bodySize = body.size();
+	
 
     size_t bytesToWrite = (bytesAlreadyWritten < bodySize) ? (bodySize - bytesAlreadyWritten) : 0;
 
     if (bytesToWrite > 0)
     {
-        ssize_t bytesWritten = write(fd, body.data() + bytesAlreadyWritten, bytesToWrite);
+        ssize_t bytesWritten = write(fd, (body.data()) + bytesAlreadyWritten, bytesToWrite);
 
         if (bytesWritten > 0)
 		{
@@ -294,7 +316,7 @@ bool EventLoop::handleCgiIfNeeded(HttpRequest* request, int clientFd)
 			_requestBuffers[clientFd].clear();
 			_clientSendOffset.erase(clientFd);
 			_epollManager.modifyFd(clientFd, EPOLLIN);
-			delete request;
+			//delete request;
 			return true;
 		}
 	}
@@ -343,6 +365,7 @@ void EventLoop::sendResponse(int clientFd)
 	while (totalSent < bufferSize)
 	{	
 		size_t chunkSize = std::min(static_cast<size_t>(4096), bufferSize - totalSent);
+		std::cout<<RED<<"REsponse: "<< _responseBuffer.data()<<RESET<<std::endl;
 		ssize_t sent = send(clientFd, _responseBuffer.data() + totalSent, chunkSize, 0);
 
 		if (sent == -1)
@@ -410,13 +433,12 @@ void EventLoop::handleClientData(int clientFd)
 		if (header_end != std::string::npos)
 		{
 			HttpRequest *request = parseRequestFromBuffer(clientFd, header_end);
+			std::cout << RED << "Received HTTP request from fd " << clientFd << RESET << ":\n";
+			request->HttpRequestPrinter();
 			if (request == NULL)
 				return;
 			if (handleCgiIfNeeded(request, clientFd))
 				return;
-
-			std::cout << RED << "Received HTTP request from fd " << clientFd << RESET << ":\n";
-			//request->HttpRequestPrinter();
 
 			int serverFd = _clientToServer[clientFd];
 			if (_servers.find(serverFd) != _servers.end() && !_servers[serverFd].empty())
