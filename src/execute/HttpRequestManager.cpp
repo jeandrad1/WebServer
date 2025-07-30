@@ -55,6 +55,7 @@ void HttpRequestManager::parseHttpRequest(const std::string& raw_request, std::v
 	parseHeaders(stream);
 	if (!checkClientMaxBodySize(servers))
 	{
+		std::cout << "Error client\n";
 		throw std::out_of_range("ClientMaxBodySize too large");
 	}
 	parseBody(stream);
@@ -62,8 +63,10 @@ void HttpRequestManager::parseHttpRequest(const std::string& raw_request, std::v
 
 bool HttpRequestManager::checkClientMaxBodySize(std::vector<ServerConfig *> servers)
 {
+	std::cout << "Entra\n";
 	if (method == "POST")
 	{
+		std::cout << "Entra 2\n";
 		std::istringstream iss(getHeader("content-length"));
 		long long contentLength = 0;
 		iss >> contentLength;
@@ -93,29 +96,59 @@ bool HttpRequestManager::checkClientMaxBodySize(std::vector<ServerConfig *> serv
 			serverName = "localhost";
 			serverPort = "80";
 		}
-	
-		ServerConfig *server = ServerUtils::getServerByHostName(serverName, servers);
-		if (server != NULL)
+		ServerConfig *server;
+		if (!servers.empty())
 		{
-			LocationConfig *location = ServerUtils::getLocationByRequestPath(path, server);
-			if (location != NULL)
-			{
-				if (contentLength > location->getClientMaxBodySize())
+				server = ServerUtils::getServerByHostName(serverName, servers);
+				if (server != NULL)
 				{
-					std::cout << "Error: Body too large\n";
-					return (false);
+					LocationConfig *location = ServerUtils::getLocationByRequestPath(path, server);
+					if (location != NULL)
+					{
+						if (contentLength > location->getClientMaxBodySize())
+						{
+							std::cout << "Error: Body too large\n";
+							return (false);
+						}
+						return (true);
+					}
+					if (contentLength > server->getClientMaxBodySize())
+					{
+						std::cout << "Error: Body too large\n";
+						return (false);
+					}
+					return (true);
+				}
+				else
+				{
+					std::cout << "Entra 3\n";
+					if (servers[0])
+						server = servers[0];
+					std::cout << "Entra 3.5\n";
+					if (server != NULL)
+					{
+						std::cout << "Entra 4\n";
+						LocationConfig *location = ServerUtils::getLocationByRequestPath(path, server);
+						if (location != NULL)
+						{
+							if (contentLength > location->getClientMaxBodySize())
+							{
+								std::cout << "Error: Body too large\n";
+								return (false);
+							}
+							return (true);
+						}
+						if (contentLength > server->getClientMaxBodySize())
+						{
+							std::cout << "Error: Body too large\n";
+							return (false);
+						}
+						return (true);
+					}
 				}
 				return (true);
 			}
-			if (contentLength > location->getClientMaxBodySize())
-			{
-				std::cout << "Error: Body too large\n";
-				return (false);
-			}
-			return (true);
 		}
-		return (true);
-	}
 	return (true);
 }
 
