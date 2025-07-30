@@ -20,12 +20,11 @@ static std::string stripLeadingSlash(const std::string& path)
 }
 
 
-HttpResponse ResponseFactory::generateErrorResponse(int code, const ServerConfig& server, const LocationConfig* location, const std::string& urlPath)
+HttpResponse ResponseFactory::generateErrorResponse(int code, const ServerConfig& server, const LocationConfig* location)
 {
     std::string errorPagePath;
     
 	// Refactor the entire function !!
-	(void) urlPath;
     
     if (location && location->getErrorPageDirective())
     {

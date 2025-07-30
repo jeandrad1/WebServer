@@ -12,7 +12,7 @@ class ResponseFactory
         static HttpResponse createResponse(int statusCode, const std::string& customBody = "");
         std::string getStatusText(int code);
         HttpResponse createBasicErrorResponse(int code);
-        HttpResponse generateErrorResponse(int code, const ServerConfig& server, const LocationConfig* location, const std::string& urlPath);
+        HttpResponse generateErrorResponse(int code, const ServerConfig& server, const LocationConfig* location);
 
 
     private:
