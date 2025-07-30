@@ -21,10 +21,14 @@ HttpResponse HttpRequestRouter::handleRequest(const HttpRequest& req, const Serv
 {
     std::string method = req.getMethod();
 
-    if (method == "GET")       return handleGet(req, server);
-    else if (method == "POST") return handlePost(req, server);
-    else if (method == "DELETE") return handleDelete(req, server);
-    else                       return methodNotAllowed();
+    if (method == "GET")
+        return (handleGet(req, server));
+    else if (method == "POST")
+        return (handlePost(req, server));
+    else if (method == "DELETE")
+        return (handleDelete(req, server));
+    else
+        return methodNotAllowed();
 }
 
 HttpResponse HttpRequestRouter::generateAutoIndexResponse(const std::string& dirPath, const std::string& requestPath)

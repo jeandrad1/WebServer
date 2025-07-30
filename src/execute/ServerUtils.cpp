@@ -1,4 +1,5 @@
 #include "ServerUtils.hpp"
+#include <unistd.h>
 
 /***********************************************************************/
 /*                          Public Functions                           */
@@ -109,4 +110,47 @@ void	ServerUtils::setNotBlockingFd(int fd)
 	{
 		std::cerr << "Error setting Not Blocking pipe\n";
 	}
+}
+
+std::vector<char> ServerUtils::prepareResponseBuffer(const HttpResponse& response)
+{
+	std::vector<char> responseBuffer;
+
+	std::ostringstream oss;
+	oss << "HTTP/1.1 " << response.getStatusCode() << " " << response.getStatusMessage() << "\r\n";
+	const std::map<std::string, std::string>& headers = response.getHeaders();
+	for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
+	{
+		oss << it->first << ": " << it->second << "\r\n";
+	}
+	oss << "\r\n";
+	std::string headerStr = oss.str();
+	responseBuffer.insert(responseBuffer.end(), headerStr.begin(), headerStr.end());
+
+	if (response.bodyIsBinary())
+	{
+		const std::vector<unsigned char>& body = response.getBodyBinary();
+		responseBuffer.insert(responseBuffer.end(), body.begin(), body.end());
+	}
+	else
+	{
+		std::string bodyStr = response.getBody();
+		responseBuffer.insert(responseBuffer.end(), bodyStr.begin(), bodyStr.end());
+	}
+	return (responseBuffer);
+}
+
+void ServerUtils::sendErrorResponse(int clientFd, std::vector<char> responseBuffer)
+{
+	size_t bufferSize = responseBuffer.size();
+
+	std::cout << RED << "Response: " << responseBuffer.data() << RESET << std::endl;
+	ssize_t sent = send(clientFd, responseBuffer.data(), bufferSize, 0);
+
+	if (sent == -1)
+	{
+		return;
+	}
+	close(clientFd);
+	std::cout << BLUE << "Response sent, connection kept alive" << RESET << std::endl;
 }

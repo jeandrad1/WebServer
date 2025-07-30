@@ -365,7 +365,7 @@ void EventLoop::sendResponse(int clientFd)
 	while (totalSent < bufferSize)
 	{	
 		size_t chunkSize = std::min(static_cast<size_t>(4096), bufferSize - totalSent);
-		std::cout<<RED<<"REsponse: "<< _responseBuffer.data()<<RESET<<std::endl;
+		std::cout<<RED<<"Response: "<< _responseBuffer.data()<<RESET<<std::endl;
 		ssize_t sent = send(clientFd, _responseBuffer.data() + totalSent, chunkSize, 0);
 
 		if (sent == -1)
