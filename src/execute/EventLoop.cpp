@@ -1,5 +1,10 @@
 #include "EventLoop.hpp"
 #include "HttpRequestRouter.hpp"
+#include <fstream>
+#include <cstdlib>
+#include <ctime>
+#include <sys/stat.h>
+
 /***********************************************************************/
 /*                     Constructors & Destructor                       */
 /***********************************************************************/
@@ -137,80 +142,66 @@ void EventLoop::handleCgiOutput(int fd)
     ssize_t	bytesRead = read(fd, buffer, sizeof(buffer));
     if (bytesRead > 0)
     {
-        std::cout << YELLOW << "CGI OUTPUT READ (" << bytesRead << " bytes): " << std::string(buffer, bytesRead) << RESET << std::endl;
+        //std::cout << YELLOW << "CGI OUTPUT READ (" << bytesRead << " bytes): " << std::string(buffer, bytesRead) << RESET << std::endl;
         
         cgi->appendToCgiBuffer(buffer, bytesRead);
         
-        std::cout << CYAN << "CGI BUFFER COMPLETO: " << cgi->getBuffer() << RESET << std::endl;
+        //std::cout << CYAN << "CGI BUFFER COMPLETO: " << cgi->getBuffer() << RESET << std::endl;
     }
     else if (bytesRead <= 0)
     {
-        std::cout << MAGENTA << "CGI OUTPUT CERRADO (fd=" << fd << ")" << RESET << std::endl;
+        //std::cout << MAGENTA << "CGI OUTPUT CERRADO (fd=" << fd << ")" << RESET << std::endl;
         this->_epollManager.removeFd(fd);
-        close(fd);
         cgi->setOutputAsClosed();
     }
     
     if (cgi->getInputFdClosed() == true && cgi->getOutputFdClosed() == true)
     {
-        std::cout << GREEN << "=== CGI COMPLETO - ENVIANDO RESPUESTA ===" << RESET << std::endl;
-        
-        size_t &sent = cgi->getBytesSent();
         std::string parsedBuffer = cgi->parseCgiBuffer();
-        
-        std::cout << GREEN << "CGI PARSED BUFFER (" << parsedBuffer.size() << " bytes):\n" << parsedBuffer << RESET << std::endl;
-        
-        ssize_t ret = send(cgi->getClientFd(), parsedBuffer.c_str(), parsedBuffer.size(), MSG_DONTWAIT);
-        if (ret == -1)
-        {
-            perror("send failed");
-            std::cout << RED << "ERROR enviando respuesta CGI al cliente" << RESET << std::endl;
-            close(fd);
-            return;
-        }
-        
-        std::cout << GREEN << "CGI RESPUESTA ENVIADA (" << ret << " bytes)" << RESET << std::endl;
-        
-        sent += ret;
-        if (sent >= parsedBuffer.size())
-        {
-            this->_CgiOutputFds.erase(fd);
-            close(fd);
-            delete cgi;
-            std::cout << GREEN << "CGI HANDLER ELIMINADO" << RESET << std::endl;
-        }
+        _responseBuffer.assign(parsedBuffer.begin(), parsedBuffer.end());
+        _clientSendOffset[cgi->getClientFd()] = 0;
+        _epollManager.modifyFd(cgi->getClientFd(), EPOLLIN | EPOLLOUT);
+        this->_CgiOutputFds.erase(fd);
+        delete cgi;
+        std::cout << GREEN << "CGI HANDLER ELIMINADO" << RESET << std::endl;
     }
 }
 
 void EventLoop::handleCgiInput(int fd)
 {
     CgiHandler *cgi = this->_CgiInputFds[fd];
+	if (!cgi)
+		return ;
 
     std::string body = cgi->getRequestBody();
 
-	std::cout<<"requestBody para cgi: "<< body << std::endl;
+	//std::cout<<"requestBody para cgi: "<< body << std::endl;
 	//size_t header_end = body.find("\r\n\r\n");
-
 
     size_t bytesAlreadyWritten = cgi->getBytesWritten();
     size_t bodySize = body.size();
 	
-
-    size_t bytesToWrite = (bytesAlreadyWritten < bodySize) ? (bodySize - bytesAlreadyWritten) : 0;
-
-    if (bytesToWrite > 0)
+    if (bytesAlreadyWritten >= bodySize)
     {
-        ssize_t bytesWritten = write(fd, (body.data()) + bytesAlreadyWritten, bytesToWrite);
+        this->_epollManager.removeFd(fd);
+        close(fd);
+        cgi->setInputAsClosed();
+        this->_CgiInputFds.erase(fd);
+        return;
+    }
 
-        if (bytesWritten > 0)
-		{
-            cgi->updateBytesWritten(bytesWritten);
-		}
-        else
+    size_t bytesToWrite = bodySize - bytesAlreadyWritten;
+    ssize_t bytesWritten = write(fd, body.data() + bytesAlreadyWritten, bytesToWrite);
+
+    if (bytesWritten > 0)
+    {
+        cgi->updateBytesWritten(bytesWritten);
+        if (cgi->getBytesWritten() >= bodySize)
         {
             this->_epollManager.removeFd(fd);
             close(fd);
             cgi->setInputAsClosed();
+            this->_CgiInputFds.erase(fd);
         }
     }
     else
@@ -218,6 +209,7 @@ void EventLoop::handleCgiInput(int fd)
         this->_epollManager.removeFd(fd);
         close(fd);
         cgi->setInputAsClosed();
+        this->_CgiInputFds.erase(fd);
     }
 }
 
@@ -300,7 +292,32 @@ HttpRequest* EventLoop::parseRequestFromBuffer(int clientFd, size_t header_end)
 	else
 		full_request = bufferStr.substr(0, chunked_end + 5);
 	reqMan.parseHttpRequest(full_request, this->getServersByFd(clientFd));
+	delete request;
 	request = reqMan.buildHttpRequest();
+	
+	const size_t LARGE_BODY_THRESHOLD = 1024 * 1024; // 1MB
+    if (request->getContentLength() > 0 && static_cast<size_t>(request->getContentLength()) > LARGE_BODY_THRESHOLD)
+    {
+        std::stringstream temp_filename;
+        temp_filename << "/tmp/webserv_body_" << clientFd << "_" << std::time(0);
+
+        std::ofstream temp_file(temp_filename.str().c_str(), std::ios::binary);
+        if (temp_file.is_open())
+        {
+            const std::vector<unsigned char>& body_vec = request->getBody();
+            temp_file.write(reinterpret_cast<const char*>(body_vec.data()), body_vec.size());
+            temp_file.close();
+            chmod(temp_filename.str().c_str(), 0644);
+
+            request->setBodyFilePath(temp_filename.str());
+            request->clearBody();
+        }
+        else
+        {
+            std::cerr << "Error: Could not open temporary file for body." << std::endl;
+        }
+    }
+
 	return request;
 }
 
@@ -365,7 +382,7 @@ void EventLoop::sendResponse(int clientFd)
 	while (totalSent < bufferSize)
 	{	
 		size_t chunkSize = std::min(static_cast<size_t>(4096), bufferSize - totalSent);
-		std::cout<<RED<<"REsponse: "<< _responseBuffer.data()<<RESET<<std::endl;
+		//std::cout<<RED<<"REsponse: "<< _responseBuffer.data()<<RESET<<std::endl;
 		ssize_t sent = send(clientFd, _responseBuffer.data() + totalSent, chunkSize, 0);
 
 		if (sent == -1)
@@ -396,7 +413,7 @@ void EventLoop::sendResponse(int clientFd)
 	_requestBuffers[clientFd].clear();
 	_clientSendOffset.erase(clientFd);
 	_epollManager.modifyFd(clientFd, EPOLLIN);
-	std::cout <<BLUE<< "Response sent, connection kept alive" <<RESET<< std::endl;
+	//std::cout <<BLUE<< "Response sent, connection kept alive" <<RESET<< std::endl;
 }
 
 
@@ -433,10 +450,10 @@ void EventLoop::handleClientData(int clientFd)
 		if (header_end != std::string::npos)
 		{
 			HttpRequest *request = parseRequestFromBuffer(clientFd, header_end);
-			std::cout << RED << "Received HTTP request from fd " << clientFd << RESET << ":\n";
-			request->HttpRequestPrinter();
+			//std::cout << RED << "Received HTTP request from fd " << clientFd << RESET << ":\n";
 			if (request == NULL)
 				return;
+			//request->HttpRequestPrinter();
 			if (handleCgiIfNeeded(request, clientFd))
 				return;
 

@@ -1,6 +1,6 @@
 <?php
 if (!isset($_COOKIE['user'])) {
-    header("Location: /cgi-bin/check_cookie.php");
+    header("Location: /login/login.html");
     exit();
 }
 ob_start();
