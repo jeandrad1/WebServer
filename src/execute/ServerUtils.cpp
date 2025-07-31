@@ -149,8 +149,8 @@ void ServerUtils::sendErrorResponse(int clientFd, std::vector<char> responseBuff
 
 	if (sent == -1)
 	{
+		close(clientFd);
 		return;
 	}
-	close(clientFd);
 	std::cout << BLUE << "Response sent, connection kept alive" << RESET << std::endl;
 }
