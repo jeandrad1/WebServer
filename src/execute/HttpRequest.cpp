@@ -38,8 +38,8 @@ static bool	checkType(std::string content_type_str)
 	
 	for (size_t i = 0; i < valid_types.size(); i++)
 	{
-		if (content_type_str == valid_types[i])
-			return true;
+        if (content_type_str.find(valid_types[i]) == 0)
+            return true;
 	}
 	return(false);
 }
@@ -116,21 +116,34 @@ void HttpRequest::handleAccept(std::string accept_str)
 	this->accept = accept_str;
 }
 
+void HttpRequest::setBodyFilePath(const std::string& path)
+{
+    this->body_file_path = path;
+}
+
+std::string HttpRequest::getBodyFilePath() const
+{
+    return this->body_file_path;
+}
+
 void HttpRequest::handleBody(std::string str_body)
 {
 	if (str_body.empty())
 		return;
  	if (transferEncoding != "chunked")
 	{
-		for(size_t i = 0; i < str_body.size(); i++)
-			body.push_back(str_body[i]);
+        body.assign(str_body.begin(), str_body.end());
 	}
 	else
 	{
-		std::string chunked_body = chunkedBodyManager(str_body);
-		for(size_t i = 0; i < chunked_body.size(); i++)
-			body.push_back(chunked_body[i]);
+        std::string chunked_body = chunkedBodyManager(str_body);
+        body.assign(chunked_body.begin(), chunked_body.end());
 	}
+}
+
+void HttpRequest::clearBody()
+{
+	this->body.clear();
 }
 
 void HttpRequest::handleTransferEncoding(std::string transfer_str)
