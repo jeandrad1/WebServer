@@ -27,14 +27,18 @@ ob_start();
 		<ul>
 			<?php
 			$directorio = 'file_library/';
-			if (is_dir($directorio)) {
-				$archivos = array_diff(scandir($directorio), ['.', '..']);
-				foreach ($archivos as $archivo) {
-					$ruta = $directorio . urlencode($archivo);
-					echo "<li><a href='$ruta' download>" . htmlspecialchars($archivo) . "</a></li>";
-				}
-			} else {
-				echo "<p>No se encontró la carpeta de archivos.</p>";
+            if (is_dir($directorio)) {
+                $archivos = array_diff(scandir($directorio), ['.', '..']);
+                foreach ($archivos as $archivo) {
+                    $ruta = $directorio . urlencode($archivo);
+                    echo "<li><a href='$ruta' download>" . htmlspecialchars($archivo) . "</a>" .
+                         "<form action='delete.php' method='post' style='display: inline; margin-left: 10px;'>" .
+                         "<input type='hidden' name='filename' value='" . htmlspecialchars($archivo) . "'>" .
+                         "<button type='submit' class='delete-btn'>Borrar</button>" .
+                         "</form></li>";
+                }
+            } else {
+                echo "<p>No se encontró la carpeta de archivos.</p>";
 			}
 			?>
 		</ul>
