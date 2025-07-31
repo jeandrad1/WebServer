@@ -77,21 +77,26 @@ bool HttpRequestManager::checkClientMaxBodySize(std::vector<ServerConfig *> serv
 		std::string host;
 		if (!host_str.empty())
 		{
+			std::cout << "Entra 2.5\n";
 			host = host_str;
 			size_t colonPos = host_str.find(':');
 			if (colonPos != std::string::npos)
 			{
+				std::cout << "Entra 2.6\n";
 				serverName = host_str.substr(0, colonPos);
 				serverPort = host_str.substr(colonPos + 1);
+				std::cout << "serverName: " << serverName << "\n";
 			}
 			else
 			{
+				std::cout << "Entra 2.7\n";
 				serverName = host_str;
 				serverPort = "80"; // Default HTTP port if not specified
 			}
 		}
 		else
 		{
+			std::cout << "Entra 2.75\n";
 			host = "EMPTY";
 			serverName = "localhost";
 			serverPort = "80";
@@ -102,6 +107,7 @@ bool HttpRequestManager::checkClientMaxBodySize(std::vector<ServerConfig *> serv
 				server = ServerUtils::getServerByHostName(serverName, servers);
 				if (server != NULL)
 				{
+					std::cout << "Entra 2.9\n";
 					LocationConfig *location = ServerUtils::getLocationByRequestPath(path, server);
 					if (location != NULL)
 					{
