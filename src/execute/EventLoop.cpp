@@ -404,7 +404,7 @@ void EventLoop::sendResponse(int clientFd)
 		totalSent += sent;
 		if (static_cast<size_t>(sent) < chunkSize)
         {
-			_epollManager.modifyFd(clientFd, EPOLLOUT);
+			_epollManager.modifyFd(clientFd, EPOLLIN | EPOLLOUT);
 			return;
 		}
 	}
