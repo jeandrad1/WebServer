@@ -224,11 +224,10 @@ bool	CgiHandler::executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<in
 {
 	this->_scriptPath = ServerUtils::resolveScriptPath(const_cast<HttpRequest *>(this->_req), const_cast<LocationConfig *>(this->_location));
 	this->_interpreterPath = ServerUtils::resolveInterpreterPath(this->_location, this->_extension);
+	this->_clientFd = clientFd;
 
 	if (!checkScriptPermissions() || !checkInterpreterPermissions())
 		return (false);
-
-	this->_clientFd = clientFd;
 
 	int	input_pipe[2];
 	int output_pipe[2];
