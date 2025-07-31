@@ -1,6 +1,8 @@
 #include "CgiHandler.hpp"
 #include <stdio.h>
 #include <sys/stat.h>
+#include <fstream>
+#include <sstream>
 #include "ResponseFactory.hpp"
 
 std::map<int, std::string> CgiHandler::error_codes;
@@ -137,6 +139,14 @@ std::string CgiHandler::parseCgiBuffer()
 
     std::ostringstream headerStream;
     headerStream << statusLine;
+
+	if (headerMap.count("Set-Cookie"))
+    {
+        headerStream << "Set-Cookie: " << headerMap["Set-Cookie"] << "\r\n";
+        headerMap.erase("Set-Cookie");
+    }
+
+
     for (std::map<std::string, std::string>::iterator it = headerMap.begin(); it != headerMap.end(); ++it)
 	{
         headerStream << it->first << ": " << it->second << "\r\n";
@@ -241,6 +251,7 @@ bool	CgiHandler::executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<in
 	{
 		CgiEnvBuilder *envBuilder = new CgiEnvBuilder(this->_req, this->_server, this->_location, this->_clientIp);
 		this->_envv = envBuilder->build();
+		delete envBuilder;
 
 		/*// DEBUG:
         std::cout << "---- CGI ENV ----\n";
@@ -252,6 +263,26 @@ bool	CgiHandler::executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<in
 		std::string body = this->getRequestBody();
 		std::cout << "---- CGI BODY ----\n" << body << "\n------------------\n";
 		//DELETE THIS*/
+
+        if (!_req->getBodyFilePath().empty() && _req->getBodyFilePath() != "error_413_payload_too_large")
+        {
+            std::string body_path_env = "UPLOADED_FILE_PATH=" + _req->getBodyFilePath();
+            
+            int env_count = 0;
+            while (this->_envv[env_count] != NULL)
+                env_count++;
+
+            char** new_envv = new char*[env_count + 2];
+            for (int i = 0; i < env_count; ++i)
+            {
+                new_envv[i] = this->_envv[i];
+            }
+            new_envv[env_count] = new char[body_path_env.length() + 1];
+            strcpy(new_envv[env_count], body_path_env.c_str());
+            new_envv[env_count + 1] = NULL;
+            delete[] this->_envv;
+            this->_envv = new_envv;
+        }
 
 		dup2(input_pipe[0], STDIN_FILENO);
 		dup2(output_pipe[1], STDOUT_FILENO);
@@ -285,7 +316,7 @@ bool	CgiHandler::executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<in
 	{
 		close(input_pipe[0]);
 		close(output_pipe[1]);
-		if (this->_req->getMethod() == "POST")
+		if (this->_req->getMethod() == "POST" && _req->getBodyFilePath().empty())
 		{
 			ServerUtils::setNotBlockingFd(input_pipe[1]);
 			EpollManager::getInstance().addFd(input_pipe[1], EPOLLOUT);
@@ -371,6 +402,23 @@ std::string CgiHandler::getBuffer(void)
 
 std::string CgiHandler::getRequestBody(void)
 {
+	if (!_req->getBodyFilePath().empty())
+	{
+		std::ifstream file(_req->getBodyFilePath().c_str(), std::ios::binary);
+		if (file)
+		{
+			std::ostringstream ss;
+			ss << file.rdbuf();
+			file.close();
+			//std::remove(_req->getBodyFilePath().c_str());
+			return ss.str();
+		}
+		else
+		{
+			std::cerr << "CGI Error: Could not open temporary body file: " << _req->getBodyFilePath() << std::endl;
+			return "";
+		}
+	}
 	return (to_string(this->_req->getBody()));
 }
 

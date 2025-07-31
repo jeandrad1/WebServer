@@ -33,6 +33,7 @@ class HttpRequest
 		
 		
 		std::vector<unsigned char> body;
+        std::string body_file_path;
 
 		HttpRequest();
 
@@ -55,6 +56,9 @@ class HttpRequest
 		void handleAccept(std::string accept_str);
 
 		void handleBody(std::string body);
+		void clearBody();
+        void setBodyFilePath(const std::string& path);
+        std::string getBodyFilePath() const;
 
 		//getters
 		std::string getMethod() const;
