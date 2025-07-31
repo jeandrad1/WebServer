@@ -295,8 +295,7 @@ HttpRequest* EventLoop::parseRequestFromBuffer(int clientFd, size_t header_end)
 	delete request;
 	request = reqMan.buildHttpRequest();
 	
-	const size_t LARGE_BODY_THRESHOLD = 1024 * 1024; // 1MB
-    if (request->getContentLength() > 0 && static_cast<size_t>(request->getContentLength()) > LARGE_BODY_THRESHOLD)
+    if (request->getContentLength() > 0 && request->getContentType().find("multipart/form-data") != std::string::npos)
     {
         std::stringstream temp_filename;
         temp_filename << "/tmp/webserv_body_" << clientFd << "_" << std::time(0);
@@ -381,9 +380,9 @@ void EventLoop::sendResponse(int clientFd)
 
 	while (totalSent < bufferSize)
 	{	
-		size_t chunkSize = std::min(static_cast<size_t>(4096), bufferSize - totalSent);
+        size_t chunkSize = std::min(static_cast<size_t>(65536), bufferSize - totalSent);
 		//std::cout<<RED<<"REsponse: "<< _responseBuffer.data()<<RESET<<std::endl;
-		ssize_t sent = send(clientFd, _responseBuffer.data() + totalSent, chunkSize, 0);
+        ssize_t sent = send(clientFd, _responseBuffer.data() + totalSent, chunkSize, 0);
 
 		if (sent == -1)
 		{
@@ -419,7 +418,8 @@ void EventLoop::sendResponse(int clientFd)
 
 void EventLoop::handleClientData(int clientFd)
 {
-	char buffer[4096];
+    const int BUFFER_SIZE = 65536;
+    char buffer[BUFFER_SIZE];
 	ssize_t count = recv(clientFd, buffer, sizeof(buffer), 0);
 
 	if (count <= 0)

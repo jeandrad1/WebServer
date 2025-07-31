@@ -124,12 +124,6 @@ std::string CgiHandler::parseCgiBuffer()
     std::ostringstream headerStream;
     headerStream << statusLine;
 
-    if (headerMap.count("Set-Cookie"))
-    {
-        headerStream << "Set-Cookie: " << headerMap["Set-Cookie"] << "\r\n";
-        headerMap.erase("Set-Cookie");
-    }
-
     for (std::map<std::string, std::string>::iterator it = headerMap.begin(); it != headerMap.end(); ++it)
     {
         headerStream << it->first << ": " << it->second << "\r\n";
