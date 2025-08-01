@@ -1,6 +1,0 @@
-pollon:$2y$10$h1.Hq.tO1VW4A2pv538RP.ogmGBy2E8bb7J4ryGSzUJw8cq62C2k2
-caca:$2y$10$afUMD75ljA6.OmnYcphFB.pxoBepEkGF1yYEnLXWed6kiOJNXd0bG
-guerra:$2y$10$RD/fh6zRJ//PjVmK.OIVTuBHLTmwFSyG.75By00yGYdMKZH1wBW6W
-te:$2y$10$tdWvO5RZit2Wt5bBdakDQ.6zZz92jbLyG8zPfdGmLaylR7h4.sCLS
-caca:$2y$10$OGeLfsZBLsY/.o0XSdi0he/z82KWES01iQnKOp10GWQVguMIMFuOe
-pepe:$2y$10$kKHjZBPIN.Mpm1932zyceugQZp8KNqHQpoHlm2KvOh7WNhlMUvYZe

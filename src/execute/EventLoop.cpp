@@ -270,54 +270,81 @@ void EventLoop::handleNewConnection(int serverFd)
 
 HttpRequest* EventLoop::parseRequestFromBuffer(int clientFd, size_t header_end)
 {
-	std::string bufferStr(_requestBuffers[clientFd].begin(), _requestBuffers[clientFd].end());
-	HttpRequestManager reqMan;
-	reqMan.parseHttpRequest(bufferStr, this->getServersByFd(clientFd));
-	HttpRequest *request = reqMan.buildHttpRequest();
-
-	long long content_length = request->getContentLength();
-	
-	long long received_body_size = bufferStr.size() - (header_end + 4);
-	long long chunked_end = bufferStr.find("\r\n0\r\n\r\n");
-
-	if (((received_body_size < content_length) && request->getTransferEncoding() != "chunked") ||
-		(request->getTransferEncoding() == "chunked" && static_cast<size_t>(chunked_end) == std::string::npos))
+	try
 	{
+		std::string bufferStr(_requestBuffers[clientFd].begin(), _requestBuffers[clientFd].end());
+		HttpRequestManager reqMan;
+		reqMan.parseHttpRequest(bufferStr, this->getServersByFd(_clientToServerSocket[clientFd]));
+		HttpRequest *request = reqMan.buildHttpRequest();
+
+		long long content_length = request->getContentLength();
+		
+		long long received_body_size = bufferStr.size() - (header_end + 4);
+		long long chunked_end = bufferStr.find("\r\n0\r\n\r\n");
+
+		if (((received_body_size < content_length) && request->getTransferEncoding() != "chunked") ||
+			(request->getTransferEncoding() == "chunked" && static_cast<size_t>(chunked_end) == std::string::npos))
+		{
+			delete request;
+			return NULL;
+		}
+		std::string full_request;
+		if (request->getTransferEncoding() != "chunked")
+			full_request = bufferStr.substr(0, header_end + 4 + content_length);
+		else
+			full_request = bufferStr.substr(0, chunked_end + 5);
+		reqMan.parseHttpRequest(full_request, this->getServersByFd(_clientToServerSocket[clientFd]));
 		delete request;
+		request = reqMan.buildHttpRequest();
+		
+		if (request->getContentLength() > 0 && request->getContentType().find("multipart/form-data") != std::string::npos)
+		{
+			std::stringstream temp_filename;
+			temp_filename << "/tmp/webserv_body_" << clientFd << "_" << std::time(0);
+
+			std::ofstream temp_file(temp_filename.str().c_str(), std::ios::binary);
+			if (temp_file.is_open())
+			{
+				const std::vector<unsigned char>& body_vec = request->getBody();
+				temp_file.write(reinterpret_cast<const char*>(body_vec.data()), body_vec.size());
+				temp_file.close();
+				chmod(temp_filename.str().c_str(), 0644);
+
+				request->setBodyFilePath(temp_filename.str());
+				request->clearBody();
+			}
+			else
+			{
+				std::cerr << "Error: Could not open temporary file for body." << std::endl;
+			}
+		}
+		return request;
+	}
+
+	catch(const std::exception& e)
+	{
+		ResponseFactory factory;
+        HttpResponse res = factory.createBasicErrorResponse(413);
+		
+		std::ostringstream oss;
+		oss << "HTTP/1.1 " << res.getStatusCode() << " " << res.getStatusMessage() << "\r\n";
+		const std::map<std::string, std::string>& headers = res.getHeaders();
+		for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
+		{
+			oss << it->first << ": " << it->second << "\r\n";
+		}
+		oss << "\r\n";
+		oss << res.getBody();
+		std::string responseStr = oss.str();
+
+		std::vector<char> responseBuffer = ServerUtils::prepareResponseBuffer(res);
+		_requestBuffers[clientFd].clear();
+		ServerUtils::sendErrorResponse(clientFd, responseBuffer);
+
+		std::cerr << RED "REQUEST PARSER ERROR: " << e.what() << WHITE "\n";;
 		return NULL;
 	}
-	std::string full_request;
-	if (request->getTransferEncoding() != "chunked")
-		full_request = bufferStr.substr(0, header_end + 4 + content_length);
-	else
-		full_request = bufferStr.substr(0, chunked_end + 5);
-	reqMan.parseHttpRequest(full_request, this->getServersByFd(clientFd));
-	delete request;
-	request = reqMan.buildHttpRequest();
-	
-    if (request->getContentLength() > 0 && request->getContentType().find("multipart/form-data") != std::string::npos)
-    {
-        std::stringstream temp_filename;
-        temp_filename << "/tmp/webserv_body_" << clientFd << "_" << std::time(0);
-
-        std::ofstream temp_file(temp_filename.str().c_str(), std::ios::binary);
-        if (temp_file.is_open())
-        {
-            const std::vector<unsigned char>& body_vec = request->getBody();
-            temp_file.write(reinterpret_cast<const char*>(body_vec.data()), body_vec.size());
-            temp_file.close();
-            chmod(temp_filename.str().c_str(), 0644);
-
-            request->setBodyFilePath(temp_filename.str());
-            request->clearBody();
-        }
-        else
-        {
-            std::cerr << "Error: Could not open temporary file for body." << std::endl;
-        }
-    }
-
-	return request;
+	return NULL;
 }
 
 bool EventLoop::handleCgiIfNeeded(HttpRequest* request, int clientFd)
@@ -476,7 +503,8 @@ HttpRequest *EventLoop::handleHttpRequest(int clientFd, size_t header_end)
 	{
 		HttpRequestManager reqMan;
 
-		reqMan.parseHttpRequest(_buffers[clientFd], this->getServersByFd(clientFd));
+		std::cout << "Viene de request\n";
+		reqMan.parseHttpRequest(_buffers[clientFd], this->getServersByFd(_clientToServerSocket[clientFd]));
 		HttpRequest *request = reqMan.buildHttpRequest();
 
 		long long content_length = request->getContentLength();
@@ -494,7 +522,8 @@ HttpRequest *EventLoop::handleHttpRequest(int clientFd, size_t header_end)
 			full_request = _buffers[clientFd].substr(0, header_end + 4 + content_length);
 		else
 			full_request = _buffers[clientFd].substr(0, chunked_end + 5);
-		reqMan.parseHttpRequest(full_request, this->getServersByFd(clientFd));
+		std::cout << "Viene de request\n";
+		reqMan.parseHttpRequest(full_request, this->getServersByFd(_clientToServerSocket[clientFd]));
 		request = reqMan.buildHttpRequest();
 		//reqMan.requestPrinter();
 
@@ -534,6 +563,7 @@ std::vector<ServerConfig *> EventLoop::getServersByFd(int fd)
 	{
 		if (it->first->getSocket() == fd)
 		{
+			std::cout << "Hace match con un socket\n";
 			port = it->second;
 			break ;
 		}

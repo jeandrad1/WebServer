@@ -52,6 +52,7 @@ void HttpRequestManager::parseHttpRequest(const std::string& raw_request, std::v
 	
 	parseRequestLine(line);
 
+	(void) servers;
 	parseHeaders(stream);
 	if (!checkClientMaxBodySize(servers))
 	{
@@ -86,6 +87,7 @@ bool HttpRequestManager::checkClientMaxBodySize(std::vector<ServerConfig *> serv
 				serverName = host_str.substr(0, colonPos);
 				serverPort = host_str.substr(colonPos + 1);
 				std::cout << "serverName: " << serverName << "\n";
+				std::cout << "serverPort: " << serverPort << "\n";
 			}
 			else
 			{
@@ -104,6 +106,7 @@ bool HttpRequestManager::checkClientMaxBodySize(std::vector<ServerConfig *> serv
 		ServerConfig *server;
 		if (!servers.empty())
 		{
+			std::cout << "Entra 2.8\n";
 				server = ServerUtils::getServerByHostName(serverName, servers);
 				if (server != NULL)
 				{

@@ -73,81 +73,68 @@ std::string CgiHandler::parseCgiBuffer()
 {
     std::istringstream iss(this->_buffer);
     std::string line;
-
-    std::string header;
     std::string body;
     std::map<std::string, std::string> headerMap;
+    bool headers_ended = false;
 
-    bool foundHeaderEnd = false;
-    std::string firstLine;
     while (std::getline(iss, line))
-	{
-		if (!line.empty() && line[line.size() - 1] == '\r')
-    		line.erase(line.size() - 1);
+    {
+        if (!line.empty() && line[line.size() - 1] == '\r')
+            line.erase(line.size() - 1);
 
-        if (line.empty())
-		{
-            foundHeaderEnd = true;
-            break;
-        }
-
-        if (firstLine.empty())
-		{
-            firstLine = line;
-        }
-		else
-		{
+        if (!headers_ended)
+        {
+            if (line.empty())
+            {
+                headers_ended = true;
+                continue;
+            }
             size_t pos = line.find(':');
-            if (pos != std::string::npos) {
+            if (pos != std::string::npos)
+            {
                 std::string key = trimSpaces(line.substr(0, pos));
                 std::string value = trimSpaces(line.substr(pos + 1));
                 headerMap[key] = value;
             }
         }
+        else
+        {
+            body += line + "\n";
+        }
     }
-
-    std::ostringstream bodyStream;
-    while (std::getline(iss, line))
-	{
-        bodyStream << line << "\n";
-    }
-    body = bodyStream.str();
 
     std::string statusLine;
-    if (headerMap.find("Status") != headerMap.end())
-	{
-        std::string code = headerMap["Status"].substr(0, headerMap["Status"].find(' '));
-        std::string description = headerMap["Status"].substr(headerMap["Status"].find(' ') + 1);
-        statusLine = "HTTP/1.1 " + code + " " + description + "\r\n";
+    if (headerMap.count("Status"))
+    {
+        statusLine = "HTTP/1.1 " + headerMap["Status"] + "\r\n";
         headerMap.erase("Status");
     }
-    else if (headerMap.find("Location") != headerMap.end())
+    else if (headerMap.count("Location"))
     {
         statusLine = "HTTP/1.1 302 Found\r\n";
     }
-	else
-	{
+    else
+    {
         statusLine = "HTTP/1.1 200 OK\r\n";
     }
 
-    if (headerMap.find("Content-Length") == headerMap.end())
-	{
-		std::ostringstream oss;
-		oss << body.size();
-		headerMap["Content-Length"] = oss.str();
+    if (!headerMap.count("Content-Length"))
+    {
+        std::ostringstream oss;
+        oss << body.size();
+        headerMap["Content-Length"] = oss.str();
     }
 
     std::ostringstream headerStream;
     headerStream << statusLine;
 
     for (std::map<std::string, std::string>::iterator it = headerMap.begin(); it != headerMap.end(); ++it)
-	{
+    {
         headerStream << it->first << ": " << it->second << "\r\n";
     }
     headerStream << "\r\n";
 
-    std::string parsedBuffer = headerStream.str() + body;
-    return parsedBuffer;
+    return headerStream.str() + body;
 }
 
 bool	CgiHandler::checkScriptPermissions(void)
