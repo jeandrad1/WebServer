@@ -14,12 +14,21 @@ int						validateConfigTreeFactory(AConfigBlock &config);
 void					registerAllStrategies(void);
 void					registerBlockStrategies(void);
 
+volatile sig_atomic_t stopFlag = 0;
+
 static void childHandler(int signum)
 {
 	(void)signum;
 	int saved_errno = errno;
 	while (waitpid(-1, NULL, WNOHANG) > 0)
 	errno = saved_errno;
+}
+
+static void sigintHandler(int signum)
+{
+    (void)signum;
+    std::cout << "\nReceived SIGINT (Ctrl+C), shutting down webserv..." << std::endl;
+    stopFlag = 1;
 }
 
 /***********************************************************************/
@@ -71,6 +80,7 @@ void WebservManager::run(void)
 	serversMapConstructor(builtConfigs);
 
 	std::signal(SIGCHLD, childHandler);
+	std::signal(SIGINT, sigintHandler);
 	SocketsManager sockets;
 	sockets.createSockets(servers);
 	EventLoop loop(EpollManager::getInstance(), sockets.getServerSockets(), this->servers);

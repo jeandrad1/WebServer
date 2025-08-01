@@ -4,19 +4,22 @@
 #include <cstdlib>
 #include <ctime>
 #include <sys/stat.h>
+#include <sys/wait.h>
+#include <csignal>
+
 
 /***********************************************************************/
 /*                     Constructors & Destructor                       */
 /***********************************************************************/
 
 EventLoop::EventLoop(EpollManager &epollManager, std::map<Socket *, int> serverSockets, std::map<int, std::vector<ServerConfig *> >	servers)
-    : _epollManager(epollManager), _serverSockets(serverSockets), _servers(servers)
+: _epollManager(epollManager), _serverSockets(serverSockets), _servers(servers)
 {
-    /* Register sockets into epoll */
+	/* Register sockets into epoll */
 	for (std::map<Socket *, int>::iterator it = _serverSockets.begin(); it != _serverSockets.end(); ++it)
 	{
 		int socketFd = it->first->getSocket();
-
+		
 		try
 		{
 			_epollManager.addFd(socketFd, EPOLLIN);
@@ -32,7 +35,7 @@ EventLoop::EventLoop(EpollManager &epollManager, std::map<Socket *, int> serverS
 
 EventLoop::~EventLoop(void)
 {
-
+	
 }
 
 /***********************************************************************/
@@ -47,8 +50,9 @@ void EventLoop::runEventLoop(void)
 {
 	const int MAX_EVENTS = 1500;
 	struct epoll_event events[MAX_EVENTS];
-
-	while (true)
+	extern volatile sig_atomic_t stopFlag;
+	
+	while (!stopFlag)
 	{
 		int n_ready = this->_epollManager.waitForEvents(MAX_EVENTS, -1, events);
 		if (n_ready == -1)
