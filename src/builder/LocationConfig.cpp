@@ -97,7 +97,21 @@ void	LocationConfig::inheritFromServer(const ServerConfig &server)
 	if (server.getErrorPageDirective() && !_errorPageDirective)
 	{
 		_errorPageDirective = true;
-		_errorPages = server.getErrorPages();
+		_errorPages.clear();
+		const std::map<int, t_errorPage *>& serverPages = server.getErrorPages();
+		for (std::map<int, t_errorPage *>::const_iterator it = serverPages.begin(); it != serverPages.end(); ++it)
+		{
+			t_errorPage *orig = it->second;
+			if (orig) {
+				t_errorPage *copy = new t_errorPage;
+				*copy = *orig;
+				copy->referencesCount = 1;
+				_errorPages[it->first] = copy;
+			}
+			else {
+				_errorPages[it->first] = NULL;
+			}
+		}
 	}
 	if (_root == "-1" && server.getRoot() != "-1")
 		_root = server.getRoot();

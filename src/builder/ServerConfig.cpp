@@ -88,7 +88,6 @@ void	ServerConfig::printValues(int indent)
 		this->_locations[i]->LocationConfig::printValues(indent + 2);
 }
 
-
 void	ServerConfig::applyInheritedConfig(void)
 {
 	for (std::vector<LocationConfig *>::iterator it = _locations.begin(); it != _locations.end(); it++)
@@ -107,7 +106,20 @@ void	ServerConfig::inheritFromHttp(const HttpConfig &http)
 	if (http.errorPageDirective && !_errorPageDirective) 
 	{
 		_errorPageDirective = true;
-		_errorPages = http.errorPages;
+		_errorPages.clear();
+		for (std::map<int, t_errorPage *>::const_iterator it = http.errorPages.begin(); it != http.errorPages.end(); ++it)
+		{
+			t_errorPage *orig = it->second;
+			if (orig) {
+				t_errorPage *copy = new t_errorPage;
+				*copy = *orig;
+				copy->referencesCount = 1;
+				_errorPages[it->first] = copy;
+			}
+			else {
+				_errorPages[it->first] = NULL;
+			}
+		}
 	}
 }
 
