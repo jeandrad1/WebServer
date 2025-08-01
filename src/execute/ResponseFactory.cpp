@@ -29,13 +29,7 @@ HttpResponse ResponseFactory::generateErrorResponse(int code, const ServerConfig
     if (location && location->getErrorPageDirective())
     {
         const std::map<int, t_errorPage*>& errorPages = location->getErrorPages();
-        
-        for (std::map<int, t_errorPage*>::const_iterator it = errorPages.begin(); it != errorPages.end(); ++it)
-		{
-            std::cout << it->first << " ";
-        }
-        std::cout << RESET << std::endl;
-        
+                
         std::map<int, t_errorPage*>::const_iterator it = errorPages.find(code);
         
         if (it != errorPages.end() && it->second)

@@ -64,10 +64,8 @@ void HttpRequestManager::parseHttpRequest(const std::string& raw_request, std::v
 
 bool HttpRequestManager::checkClientMaxBodySize(std::vector<ServerConfig *> servers)
 {
-	std::cout << "Entra\n";
 	if (method == "POST")
 	{
-		std::cout << "Entra 2\n";
 		std::istringstream iss(getHeader("content-length"));
 		long long contentLength = 0;
 		iss >> contentLength;
@@ -78,27 +76,21 @@ bool HttpRequestManager::checkClientMaxBodySize(std::vector<ServerConfig *> serv
 		std::string host;
 		if (!host_str.empty())
 		{
-			std::cout << "Entra 2.5\n";
 			host = host_str;
 			size_t colonPos = host_str.find(':');
 			if (colonPos != std::string::npos)
 			{
-				std::cout << "Entra 2.6\n";
 				serverName = host_str.substr(0, colonPos);
 				serverPort = host_str.substr(colonPos + 1);
-				std::cout << "serverName: " << serverName << "\n";
-				std::cout << "serverPort: " << serverPort << "\n";
 			}
 			else
 			{
-				std::cout << "Entra 2.7\n";
 				serverName = host_str;
 				serverPort = "80"; // Default HTTP port if not specified
 			}
 		}
 		else
 		{
-			std::cout << "Entra 2.75\n";
 			host = "EMPTY";
 			serverName = "localhost";
 			serverPort = "80";
@@ -106,11 +98,9 @@ bool HttpRequestManager::checkClientMaxBodySize(std::vector<ServerConfig *> serv
 		ServerConfig *server;
 		if (!servers.empty())
 		{
-			std::cout << "Entra 2.8\n";
 				server = ServerUtils::getServerByHostName(serverName, servers);
 				if (server != NULL)
 				{
-					std::cout << "Entra 2.9\n";
 					LocationConfig *location = ServerUtils::getLocationByRequestPath(path, server);
 					if (location != NULL)
 					{
@@ -130,13 +120,10 @@ bool HttpRequestManager::checkClientMaxBodySize(std::vector<ServerConfig *> serv
 				}
 				else
 				{
-					std::cout << "Entra 3\n";
 					if (servers[0])
 						server = servers[0];
-					std::cout << "Entra 3.5\n";
 					if (server != NULL)
 					{
-						std::cout << "Entra 4\n";
 						LocationConfig *location = ServerUtils::getLocationByRequestPath(path, server);
 						if (location != NULL)
 						{

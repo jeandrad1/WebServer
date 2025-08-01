@@ -99,7 +99,7 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerCo
     
     std::string root;
     std::string indexFile;
-	std::vector<std::string> server_indexes = server.getIndex(); // default, change in the future to take all the strings
+	std::vector<std::string> server_indexes = server.getIndex();
 
 	std::string cleanPath = path;
     
@@ -118,9 +118,9 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerCo
         }
 
         if (!location->getIndex().empty())
-            indexFile = location->getIndex()[0]; // maybe future change to handle multiple index files
+            indexFile = location->getIndex()[0];
 		else if (!server_indexes.empty())
-            indexFile = server_indexes[0]; // Use server's index as fallback
+            indexFile = server_indexes[0];
 
     }
     else
@@ -150,11 +150,9 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerCo
 	
     if (S_ISDIR(s.st_mode))
     {
-        // Try to find any available index file from the list
         std::string indexPath;
         bool indexFound = false;
         
-        // If we have an indexFile, try it first
         if (!indexFile.empty())
         {
             indexPath = fullPath + "/" + indexFile;
@@ -163,7 +161,6 @@ HttpResponse HttpRequestRouter::handleGet(const HttpRequest& req, const ServerCo
                 indexFound = true;
         }
         
-        // If first index file not found, try all server indexes
         if (!indexFound && !server_indexes.empty())
         {
             for (std::vector<std::string>::const_iterator it = server_indexes.begin(); 

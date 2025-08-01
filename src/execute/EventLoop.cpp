@@ -163,7 +163,6 @@ void EventLoop::handleCgiOutput(int fd)
         _epollManager.modifyFd(cgi->getClientFd(), EPOLLIN | EPOLLOUT);
         this->_CgiOutputFds.erase(fd);
         delete cgi;
-        std::cout << GREEN << "CGI HANDLER ELIMINADO" << RESET << std::endl;
     }
 }
 
@@ -251,11 +250,10 @@ void EventLoop::handleNewConnection(int serverFd)
     if (serverKey != -1)
     {
         _clientToServer[client_fd] = serverKey; 
-        std::cout << "✓ Mapped client " << client_fd << " to server key " << serverKey << std::endl;
     }
     else
     {
-        std::cout << "✗ ERROR: No server key found for serverFd " << serverFd << std::endl;
+        std::cout << "ERROR: No server key found for serverFd " << serverFd << std::endl;
     }
 
 	_clientToServer[client_fd] = serverKey; 
@@ -264,8 +262,6 @@ void EventLoop::handleNewConnection(int serverFd)
 
 	std::string ip = ServerUtils::getClientIP(client_addr);
 	this->_ClientIPs[client_fd] = ip;
-
-	std::cout << "New connection accepted (fd = " << client_fd << ")\n";
 }
 
 HttpRequest* EventLoop::parseRequestFromBuffer(int clientFd, size_t header_end)
@@ -408,7 +404,6 @@ void EventLoop::sendResponse(int clientFd)
 	while (totalSent < bufferSize)
 	{	
 		size_t chunkSize = std::min(static_cast<size_t>(4096), bufferSize - totalSent);
-		//std::cout<<RED<<"Response: "<< _responseBuffer.data()<<RESET<<std::endl;
 		ssize_t sent = send(clientFd, _responseBuffer.data() + totalSent, chunkSize, 0);
 
 		if (sent == -1)
@@ -439,7 +434,6 @@ void EventLoop::sendResponse(int clientFd)
 	_requestBuffers[clientFd].clear();
 	_clientSendOffset.erase(clientFd);
 	_epollManager.modifyFd(clientFd, EPOLLIN);
-	//std::cout <<BLUE<< "Response sent, connection kept alive" <<RESET<< std::endl;
 }
 
 
@@ -497,64 +491,6 @@ void EventLoop::handleClientData(int clientFd)
 	}
 }
 
-HttpRequest *EventLoop::handleHttpRequest(int clientFd, size_t header_end)
-{
-	try
-	{
-		HttpRequestManager reqMan;
-
-		std::cout << "Viene de request\n";
-		reqMan.parseHttpRequest(_buffers[clientFd], this->getServersByFd(_clientToServerSocket[clientFd]));
-		HttpRequest *request = reqMan.buildHttpRequest();
-
-		long long content_length = request->getContentLength();
-		
-		long long received_body_size = _buffers[clientFd].size() - (header_end + 4);
-		long long chunked_end = _buffers[clientFd].find("\r\n0\r\n\r\n");
-
-		if (((received_body_size < content_length) && request->getTransferEncoding() != "chunked") || (request->getTransferEncoding() == "chunked" && static_cast<size_t>(chunked_end) == std::string::npos))
-		{
-			delete request;
-			return (NULL);
-		}
-		std::string full_request;
-		if (request->getTransferEncoding() != "chunked")
-			full_request = _buffers[clientFd].substr(0, header_end + 4 + content_length);
-		else
-			full_request = _buffers[clientFd].substr(0, chunked_end + 5);
-		std::cout << "Viene de request\n";
-		reqMan.parseHttpRequest(full_request, this->getServersByFd(_clientToServerSocket[clientFd]));
-		request = reqMan.buildHttpRequest();
-		//reqMan.requestPrinter();
-
-		return request;
-	}
-	catch(const std::exception& e)
-	{
-		ResponseFactory factory;
-        HttpResponse res = factory.createBasicErrorResponse(501);
-		
-		std::ostringstream oss;
-		oss << "HTTP/1.1 " << res.getStatusCode() << " " << res.getStatusMessage() << "\r\n";
-		const std::map<std::string, std::string>& headers = res.getHeaders();
-		for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
-		{
-			oss << it->first << ": " << it->second << "\r\n";
-		}
-		oss << "\r\n";
-		oss << res.getBody();
-		std::string responseStr = oss.str();
-
-		// lacks security
-		send(clientFd, responseStr.c_str(), responseStr.size(), 0);
-
-		std::cerr << RED "REQUEST PARSER ERROR: " << e.what() << WHITE "\n";;
-		return NULL;
-	}
-	return NULL;
-}
-
-
 std::vector<ServerConfig *> EventLoop::getServersByFd(int fd)
 {
 	std::map<Socket *, int>::iterator ite = this->_serverSockets.end();
@@ -563,7 +499,6 @@ std::vector<ServerConfig *> EventLoop::getServersByFd(int fd)
 	{
 		if (it->first->getSocket() == fd)
 		{
-			std::cout << "Hace match con un socket\n";
 			port = it->second;
 			break ;
 		}

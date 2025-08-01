@@ -22,7 +22,5 @@ bool FilePathChecker::isSafePath(const std::string& base, const std::string& req
     std::string realBaseStr(realBase);
     std::string realRequestedStr(realRequested);
 	
-	// print the real paths for debugging
-	std::cout << "Base: " << realBaseStr << ", Requested: " << realRequestedStr << std::endl;
     return realRequestedStr.find(realBaseStr) == 0;
 }

@@ -62,27 +62,23 @@ void WebservManager::run(void)
 
 	this->_rootBlock = createBlock(this->_configFile, config);
 
-	//this->_rootBlock->getBlock(0)->printConfig(0);
 
 	if (validateConfigTreeFactory((*this->_rootBlock)) != 0)
 		throw std::runtime_error("Invalid configuration file");
 	 
 	this->builtConfigs = createConfigClasses(this->_rootBlock);
 
-	//printBuiltConfigs(this->builtConfigs);
-
 	serversMapConstructor(builtConfigs);
-
-	impressMapServer(servers);
 
 	std::signal(SIGCHLD, childHandler);
 	SocketsManager sockets;
 	sockets.createSockets(servers);
 	EventLoop loop(EpollManager::getInstance(), sockets.getServerSockets(), this->servers);
 
+	std::cout << "Webserv running..." << std::endl;
 	loop.runEventLoop();        // listen, epoll and serve
-	std::cout << "runEpollLopp done" << std::endl;
-	sockets.printServerSockets();
+	std::cout << "Webserv done." << std::endl;
+	//sockets.printServerSockets();
 }
 
 /***********************************************************************/
