@@ -366,8 +366,8 @@ bool EventLoop::handleCgiIfNeeded(HttpRequest* request, int clientFd)
 			_epollManager.modifyFd(clientFd, EPOLLIN);
 			return true;
 		}
-		else
-			delete cgi;
+		delete cgi;
+		return false;
 	}
 	catch (const std::exception &e)
 	{
@@ -375,7 +375,7 @@ bool EventLoop::handleCgiIfNeeded(HttpRequest* request, int clientFd)
 		_requestBuffers[clientFd].clear();
 		_clientSendOffset.erase(clientFd);
 		_epollManager.modifyFd(clientFd, EPOLLIN);
-		delete request;
+		return false;
 	}
 	return false;
 }
@@ -487,7 +487,7 @@ void EventLoop::handleClientData(int clientFd)
 
 			if (handleCgiIfNeeded(request, clientFd))
 			{
-				delete request;
+				//delete request;
 				return;
 			}
 
