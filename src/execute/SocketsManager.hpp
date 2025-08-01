@@ -31,6 +31,7 @@ class SocketsManager
 	public:
 
 		SocketsManager();
+		~SocketsManager();
 		void	createSockets(const std::map<int, std::vector<ServerConfig * > > &servers);
 		int		createListeningSocket(int port);
 		void	printServerSockets();

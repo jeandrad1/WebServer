@@ -6,6 +6,14 @@
 
 SocketsManager::SocketsManager(){}
 
+SocketsManager::~SocketsManager()
+{
+	for (std::map<Socket *, int>::iterator it = serverSockets.begin(); it != serverSockets.end(); ++it)
+	{
+		delete (*it).first;
+	}
+}
+
 /***********************************************************************/
 /*                          Public Functions                           */
 /***********************************************************************/
