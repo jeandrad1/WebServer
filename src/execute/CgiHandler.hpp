@@ -46,6 +46,7 @@ class CgiHandler {
 		static void loadMimeTypes(void);
         static void loadErrorCodes(void);
 		CgiHandler(HttpRequest *req, std::string clientIp, std::vector<ServerConfig *> servers);
+        ~CgiHandler();
 
 		bool	executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<int, CgiHandler *> &cgiOutputFd, int clientFd);
 		bool	isCgiRequest(void);
@@ -70,6 +71,7 @@ class CgiHandler {
 		std::string getBuffer(void);
 		std::string getRequestBody(void);
 		std::string	getGivenEnvvByKey(std::string key);
+		HttpRequest* getRequest(void) const;
 };
 
 #endif

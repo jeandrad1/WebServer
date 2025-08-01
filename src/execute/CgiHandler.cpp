@@ -40,6 +40,10 @@ CgiHandler::CgiHandler(HttpRequest *req, std::string clientIp, std::vector<Serve
 	}
 }
 
+CgiHandler::~CgiHandler()
+{
+}
+
 /***********************************************************************/
 /*                         Operator Overload                           */
 /***********************************************************************/
@@ -427,6 +431,11 @@ std::string	CgiHandler::getGivenEnvvByKey(std::string key)
 		}
 	}
 	return (NULL);
+}
+
+HttpRequest* CgiHandler::getRequest(void) const
+{
+	return this->_req;
 }
 
 void CgiHandler::loadErrorCodes()

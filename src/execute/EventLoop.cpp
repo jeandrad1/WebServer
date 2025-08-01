@@ -145,16 +145,11 @@ void EventLoop::handleCgiOutput(int fd)
     char	buffer[4096];
     ssize_t	bytesRead = read(fd, buffer, sizeof(buffer));
     if (bytesRead > 0)
-    {
-        //std::cout << YELLOW << "CGI OUTPUT READ (" << bytesRead << " bytes): " << std::string(buffer, bytesRead) << RESET << std::endl;
-        
+    {        
         cgi->appendToCgiBuffer(buffer, bytesRead);
-        
-        //std::cout << CYAN << "CGI BUFFER COMPLETO: " << cgi->getBuffer() << RESET << std::endl;
-    }
+            }
     else if (bytesRead <= 0)
     {
-        //std::cout << MAGENTA << "CGI OUTPUT CERRADO (fd=" << fd << ")" << RESET << std::endl;
         this->_epollManager.removeFd(fd);
         cgi->setOutputAsClosed();
     }
@@ -166,7 +161,8 @@ void EventLoop::handleCgiOutput(int fd)
         _clientSendOffset[cgi->getClientFd()] = 0;
         _epollManager.modifyFd(cgi->getClientFd(), EPOLLIN | EPOLLOUT);
         this->_CgiOutputFds.erase(fd);
-        delete cgi;
+        delete cgi->getRequest();
+		delete cgi;
     }
 }
 
@@ -350,18 +346,19 @@ HttpRequest* EventLoop::parseRequestFromBuffer(int clientFd, size_t header_end)
 bool EventLoop::handleCgiIfNeeded(HttpRequest* request, int clientFd)
 {
 	std::string ip = this->_ClientIPs[clientFd];
+	CgiHandler *cgi = NULL;
 	try
 	{
-		CgiHandler *cgi = new CgiHandler(request, ip, getServersByFd(_clientToServerSocket[clientFd]));
+		cgi = new CgiHandler(request, ip, getServersByFd(_clientToServerSocket[clientFd]));
 		if (cgi->isCgiRequest())
 		{
 			cgi->executeCgi(this->_CgiInputFds, this->_CgiOutputFds, clientFd);
 			_requestBuffers[clientFd].clear();
 			_clientSendOffset.erase(clientFd);
 			_epollManager.modifyFd(clientFd, EPOLLIN);
-			//delete request;
 			return true;
 		}
+		delete cgi;
 	}
 	catch (const std::exception &e)
 	{
@@ -369,6 +366,8 @@ bool EventLoop::handleCgiIfNeeded(HttpRequest* request, int clientFd)
 		_requestBuffers[clientFd].clear();
 		_clientSendOffset.erase(clientFd);
 		_epollManager.modifyFd(clientFd, EPOLLIN);
+		if (cgi)
+			delete(cgi);
 		//delete request;
 	}
 	return false;
