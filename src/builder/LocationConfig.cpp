@@ -11,7 +11,10 @@ LocationConfig::~LocationConfig(void)
 	{
 		it->second->referencesCount--;
 		if (it->second->referencesCount == 0)
-			delete it->second;
+		{
+			if (it->second)	
+				delete it->second;
+		}
 	}
 	if (this->cgi.size() != 0)
 	{
@@ -20,6 +23,7 @@ LocationConfig::~LocationConfig(void)
 			delete (*it);
 		}
 	}
+	delete this->_limit_except;
 	delete this->_return;
 }
 

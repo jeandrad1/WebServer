@@ -11,7 +11,10 @@ ServerConfig::~ServerConfig(void)
 	{
 		it->second->referencesCount--;
 		if (it->second->referencesCount == 0)
-			delete it->second;
+		{
+			if (it->second)	
+				delete it->second;
+		}
 	}
 	if (this->_listen.size() != 0)
 	{
