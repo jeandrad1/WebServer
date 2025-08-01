@@ -35,7 +35,14 @@ EventLoop::EventLoop(EpollManager &epollManager, std::map<Socket *, int> serverS
 
 EventLoop::~EventLoop(void)
 {
-	
+	for (std::map<int, CgiHandler *>::iterator it = _CgiInputFds.begin(); it != _CgiInputFds.end(); it++)
+	{
+		delete (*it).second;
+	}
+	for (std::map<int, CgiHandler *>::iterator it = _CgiOutputFds.begin(); it != _CgiOutputFds.end(); it++)
+	{
+		delete (*it).second;
+	}
 }
 
 /***********************************************************************/
@@ -190,6 +197,7 @@ void EventLoop::handleCgiInput(int fd)
         close(fd);
         cgi->setInputAsClosed();
         this->_CgiInputFds.erase(fd);
+		//delete cgi;
         return;
     }
 
@@ -359,9 +367,10 @@ bool EventLoop::handleCgiIfNeeded(HttpRequest* request, int clientFd)
 			_requestBuffers[clientFd].clear();
 			_clientSendOffset.erase(clientFd);
 			_epollManager.modifyFd(clientFd, EPOLLIN);
-			//delete request;
 			return true;
 		}
+		else
+			delete cgi;
 	}
 	catch (const std::exception &e)
 	{
@@ -369,7 +378,7 @@ bool EventLoop::handleCgiIfNeeded(HttpRequest* request, int clientFd)
 		_requestBuffers[clientFd].clear();
 		_clientSendOffset.erase(clientFd);
 		_epollManager.modifyFd(clientFd, EPOLLIN);
-		//delete request;
+		delete request;
 	}
 	return false;
 }
@@ -475,12 +484,15 @@ void EventLoop::handleClientData(int clientFd)
 		if (header_end != std::string::npos)
 		{
 			HttpRequest *request = parseRequestFromBuffer(clientFd, header_end);
-			//std::cout << RED << "Received HTTP request from fd " << clientFd << RESET << ":\n";
+
 			if (request == NULL)
 				return;
-			//request->HttpRequestPrinter();
+
 			if (handleCgiIfNeeded(request, clientFd))
+			{
+				delete request;
 				return;
+			}
 
 			int serverFd = _clientToServer[clientFd];
 			if (_servers.find(serverFd) != _servers.end() && !_servers[serverFd].empty())
