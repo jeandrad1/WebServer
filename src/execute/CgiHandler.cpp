@@ -236,18 +236,7 @@ bool	CgiHandler::executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<in
 		this->_envv = envBuilder->build();
 		delete envBuilder;
 
-		/*// DEBUG:
-        std::cout << "---- CGI ENV ----\n";
-        for (int i = 0; this->_envv[i]; ++i)
-            std::cout << this->_envv[i] << std::endl;
-        std::cout << "Interpreter: " << this->_interpreterPath << std::endl;
-        std::cout << "Script: " << this->_scriptPath << std::endl;
-        std::cout << "-----------------\n";
-		std::string body = this->getRequestBody();
-		std::cout << "---- CGI BODY ----\n" << body << "\n------------------\n";
-		//DELETE THIS*/
-
-        if (!_req->getBodyFilePath().empty() && _req->getBodyFilePath() != "error_413_payload_too_large")
+		if (!_req->getBodyFilePath().empty() && _req->getBodyFilePath() != "error_413_payload_too_large")
         {
             std::string body_path_env = "UPLOADED_FILE_PATH=" + _req->getBodyFilePath();
             
@@ -292,7 +281,7 @@ bool	CgiHandler::executeCgi(std::map<int, CgiHandler *> &cgiInputFd, std::map<in
 			alarm(5);
 			execve(argv[0], argv, this->_envv);
 		}
-		std::cerr << "Falla\n";
+		std::cerr << "Error: Failed to execute CGI\n";
 		exit(1);
 	}
 	else
@@ -393,7 +382,6 @@ std::string CgiHandler::getRequestBody(void)
 			std::ostringstream ss;
 			ss << file.rdbuf();
 			file.close();
-			//std::remove(_req->getBodyFilePath().c_str());
 			return ss.str();
 		}
 		else
