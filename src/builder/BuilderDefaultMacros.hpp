@@ -1,0 +1,12 @@
+#ifndef MACROSDEFAULTVALUES_HPP
+# define MACROSDEFAULTVALUES_HPP
+
+# define DEFAULT_CLIENT_MAX_BODY_SIZE (1024 * 1024)
+# define DEFAULT_AUTOINDEX false
+# define DEFAULT_LISTEN_PORT 80
+# define DEFAULT_LISTEN_IP "0.0.0.0"
+# define DEFAULT_ROOT "./www"
+# define DEFAULT_CGI_PATH "/no/path"
+# define DEFAULT_CGI_EXTENSION ".not"
+
+#endif

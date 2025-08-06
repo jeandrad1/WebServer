@@ -1,0 +1,5 @@
+# print("HTTP/1.1 200 OK")
+print("Content-Type: text/plain\r")
+print("Content-Length: 23\r")
+print("\r")
+print("Hello World from Python")

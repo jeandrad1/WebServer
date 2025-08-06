@@ -1,0 +1,512 @@
+#include "EventLoop.hpp"
+#include "HttpRequestRouter.hpp"
+#include <fstream>
+#include <cstdlib>
+#include <ctime>
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <csignal>
+
+
+/***********************************************************************/
+/*                     Constructors & Destructor                       */
+/***********************************************************************/
+
+EventLoop::EventLoop(EpollManager &epollManager, std::map<Socket *, int> serverSockets, std::map<int, std::vector<ServerConfig *> >	servers)
+: _epollManager(epollManager), _serverSockets(serverSockets), _servers(servers)
+{
+	for (std::map<Socket *, int>::iterator it = _serverSockets.begin(); it != _serverSockets.end(); ++it)
+	{
+		int socketFd = it->first->getSocket();
+		
+		try
+		{
+			_epollManager.addFd(socketFd, EPOLLIN);
+		}
+		catch (const std::exception &e)
+		{
+			std::cerr << "Failed to add socketFd " << socketFd << " to epoll: " << e.what() << std::endl;
+		}
+	}
+	CgiHandler::loadMimeTypes();
+	CgiHandler::loadErrorCodes();
+}
+
+EventLoop::~EventLoop(void)
+{
+	for (std::map<int, CgiHandler *>::iterator it = _CgiInputFds.begin(); it != _CgiInputFds.end(); it++)
+	{
+		delete (*it).second;
+	}
+	for (std::map<int, CgiHandler *>::iterator it = _CgiOutputFds.begin(); it != _CgiOutputFds.end(); it++)
+	{
+		delete (*it).second;
+	}
+}
+
+/***********************************************************************/
+/*                         Operator Overload                           */
+/***********************************************************************/
+
+/***********************************************************************/
+/*                          Public Functions                           */
+/***********************************************************************/
+
+void EventLoop::runEventLoop(void)
+{
+	const int MAX_EVENTS = 1500;
+	struct epoll_event events[MAX_EVENTS];
+	extern volatile sig_atomic_t stopFlag;
+	
+	while (!stopFlag)
+	{
+		int n_ready = this->_epollManager.waitForEvents(MAX_EVENTS, -1, events);
+		if (n_ready == -1)
+		{
+			continue ;
+		}
+		for (int i = 0; i < n_ready; ++i)
+		{
+			int fd = events[i].data.fd;
+			uint32_t revents = events[i].events;
+
+			if (isServerSocket(fd))
+			{
+				handleNewConnection(fd);
+			}
+			else if (isCgiOutputPipe(fd))
+			{
+				handleCgiOutput(fd);
+			}
+			else if (isCgiInputPipe(fd))
+			{
+				handleCgiInput(fd);
+			}
+			else
+			{
+				if (revents & EPOLLOUT)
+					sendResponse(fd);
+				if (revents & EPOLLIN)
+					handleClientData(fd);
+				if ((revents & EPOLLHUP) || (revents & EPOLLERR))
+				{
+					close(fd);
+					_requestBuffers.erase(fd);
+					_clientToServer.erase(fd);
+					_clientSendOffset.erase(fd);
+					_epollManager.removeFd(fd);
+				}
+			}
+		}
+	}
+}
+
+
+
+/***********************************************************************/
+/*                          Private Functions                          */
+/***********************************************************************/
+
+bool EventLoop::isServerSocket(int fd)
+{
+	for (std::map<Socket *, int>::iterator it = _serverSockets.begin(); it != _serverSockets.end(); ++it)
+	{
+		if (it->first->getSocket() == fd)
+		{
+			return (true);
+		}
+	}
+	return (false);
+}
+
+bool EventLoop::isCgiOutputPipe(int fd)
+{
+	for (std::map<int, CgiHandler *>::iterator it = this->_CgiOutputFds.begin(); it != this->_CgiOutputFds.end(); ++it)
+	{
+		if (it->first == fd)
+		{
+			return (true);
+		}
+	}
+	return (false);
+}
+
+bool EventLoop::isCgiInputPipe(int fd)
+{
+	for (std::map<int, CgiHandler *>::iterator it = this->_CgiInputFds.begin(); it != this->_CgiInputFds.end(); ++it)
+	{
+		if (it->first == fd)
+		{
+			return (true);
+		}
+	}
+	return (false);
+}
+
+void EventLoop::handleCgiOutput(int fd)
+{
+    CgiHandler *cgi = this->_CgiOutputFds[fd];
+
+    char	buffer[4096];
+    ssize_t	bytesRead = read(fd, buffer, sizeof(buffer));
+    if (bytesRead > 0)
+    {        
+        cgi->appendToCgiBuffer(buffer, bytesRead);
+            }
+    else if (bytesRead <= 0)
+    {
+        this->_epollManager.removeFd(fd);
+        cgi->setOutputAsClosed();
+    }
+    
+    if (cgi->getInputFdClosed() == true && cgi->getOutputFdClosed() == true)
+    {
+        std::string parsedBuffer = cgi->parseCgiBuffer();
+        _responseBuffer.assign(parsedBuffer.begin(), parsedBuffer.end());
+        _clientSendOffset[cgi->getClientFd()] = 0;
+        _epollManager.modifyFd(cgi->getClientFd(), EPOLLIN | EPOLLOUT);
+        this->_CgiOutputFds.erase(fd);
+        delete cgi->getRequest();
+		delete cgi;
+    }
+}
+
+void EventLoop::handleCgiInput(int fd)
+{
+    CgiHandler *cgi = this->_CgiInputFds[fd];
+	if (!cgi)
+		return ;
+
+    std::string body = cgi->getRequestBody();
+
+    size_t bytesAlreadyWritten = cgi->getBytesWritten();
+    size_t bodySize = body.size();
+	
+    if (bytesAlreadyWritten >= bodySize)
+    {
+        this->_epollManager.removeFd(fd);
+        close(fd);
+        cgi->setInputAsClosed();
+        this->_CgiInputFds.erase(fd);
+        return;
+    }
+
+    size_t bytesToWrite = bodySize - bytesAlreadyWritten;
+    ssize_t bytesWritten = write(fd, body.data() + bytesAlreadyWritten, bytesToWrite);
+
+    if (bytesWritten > 0)
+    {
+        cgi->updateBytesWritten(bytesWritten);
+        if (cgi->getBytesWritten() >= bodySize)
+        {
+            this->_epollManager.removeFd(fd);
+            close(fd);
+            cgi->setInputAsClosed();
+            this->_CgiInputFds.erase(fd);
+        }
+    }
+    else
+    {
+        this->_epollManager.removeFd(fd);
+        close(fd);
+        cgi->setInputAsClosed();
+        this->_CgiInputFds.erase(fd);
+    }
+}
+
+void EventLoop::handleNewConnection(int serverFd)
+{
+	struct sockaddr_in client_addr;
+	socklen_t client_len = sizeof(client_addr);
+	int client_fd = accept(serverFd, (struct sockaddr *)&client_addr, &client_len);
+	if (client_fd == -1)
+	{
+		return ;
+	}
+
+	ServerUtils::setNotBlockingFd(client_fd);
+
+	try
+	{
+		this->_epollManager.addFd(client_fd, EPOLLIN | EPOLLET);
+	}
+	catch (const std::exception &e)
+	{
+		close(client_fd);
+		return ;
+	}
+	    int serverKey = -1;
+    for (std::map<Socket *, int>::iterator it = _serverSockets.begin(); it != _serverSockets.end(); ++it)
+    {
+        if (it->first->getSocket() == serverFd)
+        {
+            serverKey = it->second;
+            break;
+        }
+    }	
+
+    if (serverKey != -1)
+    {
+        _clientToServer[client_fd] = serverKey; 
+    }
+    else
+    {
+        std::cout << "ERROR: No server key found for serverFd " << serverFd << std::endl;
+    }
+
+	_clientToServer[client_fd] = serverKey; 
+
+	_clientToServerSocket[client_fd] = serverFd;
+
+	std::string ip = ServerUtils::getClientIP(client_addr);
+	this->_ClientIPs[client_fd] = ip;
+}
+
+HttpRequest* EventLoop::parseRequestFromBuffer(int clientFd, size_t header_end)
+{
+	try
+	{
+		std::string bufferStr(_requestBuffers[clientFd].begin(), _requestBuffers[clientFd].end());
+		HttpRequestManager reqMan;
+		reqMan.parseHttpRequest(bufferStr, this->getServersByFd(_clientToServerSocket[clientFd]));
+		HttpRequest *request = reqMan.buildHttpRequest();
+
+		long long content_length = request->getContentLength();
+		
+		long long received_body_size = bufferStr.size() - (header_end + 4);
+		long long chunked_end = bufferStr.find("\r\n0\r\n\r\n");
+
+		if (((received_body_size < content_length) && request->getTransferEncoding() != "chunked") ||
+			(request->getTransferEncoding() == "chunked" && static_cast<size_t>(chunked_end) == std::string::npos))
+		{
+			delete request;
+			return NULL;
+		}
+		std::string full_request;
+		if (request->getTransferEncoding() != "chunked")
+			full_request = bufferStr.substr(0, header_end + 4 + content_length);
+		else
+			full_request = bufferStr.substr(0, chunked_end + 5);
+		reqMan.parseHttpRequest(full_request, this->getServersByFd(_clientToServerSocket[clientFd]));
+		delete request;
+		request = reqMan.buildHttpRequest();
+		
+		if (request->getContentLength() > 0 && request->getContentType().find("multipart/form-data") != std::string::npos)
+		{
+			std::stringstream temp_filename;
+			temp_filename << "/tmp/webserv_body_" << clientFd << "_" << std::time(0);
+
+			std::ofstream temp_file(temp_filename.str().c_str(), std::ios::binary);
+			if (temp_file.is_open())
+			{
+				const std::vector<unsigned char>& body_vec = request->getBody();
+				temp_file.write(reinterpret_cast<const char*>(body_vec.data()), body_vec.size());
+				temp_file.close();
+				chmod(temp_filename.str().c_str(), 0644);
+
+				request->setBodyFilePath(temp_filename.str());
+				request->clearBody();
+			}
+			else
+			{
+				std::cerr << "Error: Could not open temporary file for body." << std::endl;
+			}
+		}
+		return request;
+	}
+
+	catch(const std::exception& e)
+	{
+		ResponseFactory factory;
+        HttpResponse res = factory.createBasicErrorResponse(413);
+		
+		std::ostringstream oss;
+		oss << "HTTP/1.1 " << res.getStatusCode() << " " << res.getStatusMessage() << "\r\n";
+		const std::map<std::string, std::string>& headers = res.getHeaders();
+		for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
+		{
+			oss << it->first << ": " << it->second << "\r\n";
+		}
+		oss << "\r\n";
+		oss << res.getBody();
+		std::string responseStr = oss.str();
+
+		std::vector<char> responseBuffer = ServerUtils::prepareResponseBuffer(res);
+		_requestBuffers[clientFd].clear();
+		ServerUtils::sendErrorResponse(clientFd, responseBuffer);
+
+		//std::cerr << RED "REQUEST PARSER ERROR: " << e.what() << WHITE "\n";;
+		return NULL;
+	}
+	return NULL;
+}
+
+bool EventLoop::handleCgiIfNeeded(HttpRequest* request, int clientFd)
+{
+	std::string ip = this->_ClientIPs[clientFd];
+	CgiHandler *cgi = NULL;
+	try
+	{
+		cgi = new CgiHandler(request, ip, getServersByFd(_clientToServerSocket[clientFd]));
+		if (cgi->isCgiRequest())
+		{
+			cgi->executeCgi(this->_CgiInputFds, this->_CgiOutputFds, clientFd);
+			_requestBuffers[clientFd].clear();
+			_clientSendOffset.erase(clientFd);
+			_epollManager.modifyFd(clientFd, EPOLLIN);
+			return true;
+		}
+		delete cgi;
+		return false;
+	}
+	catch (const std::exception &e)
+	{
+		std::cerr << "Failed cgi: " << e.what() << "\n";
+		_requestBuffers[clientFd].clear();
+		_clientSendOffset.erase(clientFd);
+		_epollManager.modifyFd(clientFd, EPOLLIN);
+		return false;
+	}
+	return false;
+}
+
+void EventLoop::prepareResponseBuffer(const HttpResponse& response)
+{
+	_responseBuffer.clear();
+	std::ostringstream oss;
+	oss << "HTTP/1.1 " << response.getStatusCode() << " " << response.getStatusMessage() << "\r\n";
+	const std::map<std::string, std::string>& headers = response.getHeaders();
+	for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
+	{
+		oss << it->first << ": " << it->second << "\r\n";
+	}
+	oss << "\r\n";
+	std::string headerStr = oss.str();
+	_responseBuffer.insert(_responseBuffer.end(), headerStr.begin(), headerStr.end());
+
+	if (response.bodyIsBinary())
+	{
+		const std::vector<unsigned char>& body = response.getBodyBinary();
+		_responseBuffer.insert(_responseBuffer.end(), body.begin(), body.end());
+	}
+	else
+	{
+		std::string bodyStr = response.getBody();
+		_responseBuffer.insert(_responseBuffer.end(), bodyStr.begin(), bodyStr.end());
+	}
+}
+
+void EventLoop::sendResponse(int clientFd)
+{
+	size_t &totalSent = _clientSendOffset[clientFd];
+	size_t bufferSize = _responseBuffer.size();
+
+	while (totalSent < bufferSize)
+	{	
+		size_t chunkSize = std::min(static_cast<size_t>(4096), bufferSize - totalSent);
+		ssize_t sent = send(clientFd, _responseBuffer.data() + totalSent, chunkSize, 0);
+
+		if (sent == -1)
+		{
+			perror("send");
+			try
+			{
+				_epollManager.removeFd(clientFd);
+			}
+			catch (const std::exception& e)
+			{
+				std::cerr << "Failed to remove fd: " << e.what() << std::endl;
+			}
+			close(clientFd);
+			_requestBuffers.erase(clientFd);
+			_clientToServer.erase(clientFd);
+			_clientSendOffset.erase(clientFd);
+			return;
+		}
+		totalSent += sent;
+		if (static_cast<size_t>(sent) < chunkSize)
+        {
+			_epollManager.modifyFd(clientFd, EPOLLIN | EPOLLOUT);
+			return;
+		}
+	}
+
+	_requestBuffers[clientFd].clear();
+	_clientSendOffset.erase(clientFd);
+	_epollManager.modifyFd(clientFd, EPOLLIN);
+}
+
+
+void EventLoop::handleClientData(int clientFd)
+{
+    const int BUFFER_SIZE = 65536;
+    char buffer[BUFFER_SIZE];
+	ssize_t count = recv(clientFd, buffer, sizeof(buffer), 0);
+
+	if (count <= 0)
+	{
+		if (count < 0)
+			perror("recv");
+		try
+		{
+			this->_epollManager.removeFd(clientFd);
+		}
+		catch (const std::exception &e)
+		{
+			std::cerr << "Failed to remove client fd from epoll: " << e.what() << std::endl;
+		}
+		close(clientFd);
+		_requestBuffers.erase(clientFd);
+		_clientToServer.erase(clientFd);
+		_clientSendOffset.erase(clientFd);
+		return;
+	}
+	else
+    {
+		std::vector<char>& reqBuffer = _requestBuffers[clientFd];
+		reqBuffer.insert(reqBuffer.end(), buffer, buffer + count);
+
+		std::string reqStr(reqBuffer.begin(), reqBuffer.end());
+		size_t header_end = reqStr.find("\r\n\r\n");
+		if (header_end != std::string::npos)
+		{
+			HttpRequest *request = parseRequestFromBuffer(clientFd, header_end);
+
+			if (request == NULL)
+				return;
+
+			if (handleCgiIfNeeded(request, clientFd))
+				return;
+
+			int serverFd = _clientToServer[clientFd];
+			if (_servers.find(serverFd) != _servers.end() && !_servers[serverFd].empty())
+			{
+				HttpRequestRouter router;
+				HttpResponse response = router.handleRequest(*request, *(_servers[serverFd][0]));
+				prepareResponseBuffer(response);
+				sendResponse(clientFd);
+				delete request;
+			}
+		}
+	}
+}
+
+std::vector<ServerConfig *> EventLoop::getServersByFd(int fd)
+{
+	std::map<Socket *, int>::iterator ite = this->_serverSockets.end();
+	int port = -1;
+	for (std::map<Socket *, int>::iterator it = this->_serverSockets.begin(); it != ite; it++)
+	{
+		if (it->first->getSocket() == fd)
+		{
+			port = it->second;
+			break ;
+		}
+	}
+	std::vector<ServerConfig *> server = this->_servers[port];
+	return (server);
+}
+
+/***********************************************************************/
+/*                          Getters & Setters                          */
+/***********************************************************************/
