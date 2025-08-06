@@ -144,7 +144,6 @@ void ServerUtils::sendErrorResponse(int clientFd, std::vector<char> responseBuff
 {
 	size_t bufferSize = responseBuffer.size();
 
-	std::cout << RED << "Response: " << responseBuffer.data() << RESET << std::endl;
 	ssize_t sent = send(clientFd, responseBuffer.data(), bufferSize, 0);
 
 	if (sent == -1)
@@ -152,5 +151,4 @@ void ServerUtils::sendErrorResponse(int clientFd, std::vector<char> responseBuff
 		close(clientFd);
 		return;
 	}
-	std::cout << BLUE << "Response sent, connection kept alive" << RESET << std::endl;
 }
