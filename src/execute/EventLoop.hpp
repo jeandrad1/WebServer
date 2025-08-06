@@ -34,7 +34,6 @@ class EventLoop {
 		HttpRequest *handleHttpRequest(int clientFd, size_t header_end);
 		std::vector<ServerConfig *> getServersByFd(int fd);
 		
-		// Aux for handleClientData
 		HttpRequest* parseRequestFromBuffer(int clientFd, size_t header_end);
 		bool handleCgiIfNeeded(HttpRequest* request, int clientFd);
 		void prepareResponseBuffer(const HttpResponse& response);

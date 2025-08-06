@@ -15,7 +15,6 @@
 EventLoop::EventLoop(EpollManager &epollManager, std::map<Socket *, int> serverSockets, std::map<int, std::vector<ServerConfig *> >	servers)
 : _epollManager(epollManager), _serverSockets(serverSockets), _servers(servers)
 {
-	/* Register sockets into epoll */
 	for (std::map<Socket *, int>::iterator it = _serverSockets.begin(); it != _serverSockets.end(); ++it)
 	{
 		int socketFd = it->first->getSocket();
@@ -64,7 +63,6 @@ void EventLoop::runEventLoop(void)
 		int n_ready = this->_epollManager.waitForEvents(MAX_EVENTS, -1, events);
 		if (n_ready == -1)
 		{
-			perror("epoll_wait");
 			continue ;
 		}
 		for (int i = 0; i < n_ready; ++i)
@@ -181,9 +179,6 @@ void EventLoop::handleCgiInput(int fd)
 
     std::string body = cgi->getRequestBody();
 
-	//std::cout<<"requestBody para cgi: "<< body << std::endl;
-	//size_t header_end = body.find("\r\n\r\n");
-
     size_t bytesAlreadyWritten = cgi->getBytesWritten();
     size_t bodySize = body.size();
 	
@@ -193,7 +188,6 @@ void EventLoop::handleCgiInput(int fd)
         close(fd);
         cgi->setInputAsClosed();
         this->_CgiInputFds.erase(fd);
-		//delete cgi;
         return;
     }
 
@@ -227,11 +221,9 @@ void EventLoop::handleNewConnection(int serverFd)
 	int client_fd = accept(serverFd, (struct sockaddr *)&client_addr, &client_len);
 	if (client_fd == -1)
 	{
-		perror("accept");
 		return ;
 	}
 
-	// Set non-blocking
 	ServerUtils::setNotBlockingFd(client_fd);
 
 	try
@@ -240,7 +232,6 @@ void EventLoop::handleNewConnection(int serverFd)
 	}
 	catch (const std::exception &e)
 	{
-		std::cerr << "Failed to add client fd to epoll: " << e.what() << std::endl;
 		close(client_fd);
 		return ;
 	}
@@ -254,7 +245,6 @@ void EventLoop::handleNewConnection(int serverFd)
         }
     }	
 
-	// new to handle the connections correctly
     if (serverKey != -1)
     {
         _clientToServer[client_fd] = serverKey; 
@@ -345,7 +335,7 @@ HttpRequest* EventLoop::parseRequestFromBuffer(int clientFd, size_t header_end)
 		_requestBuffers[clientFd].clear();
 		ServerUtils::sendErrorResponse(clientFd, responseBuffer);
 
-		std::cerr << RED "REQUEST PARSER ERROR: " << e.what() << WHITE "\n";;
+		//std::cerr << RED "REQUEST PARSER ERROR: " << e.what() << WHITE "\n";;
 		return NULL;
 	}
 	return NULL;
@@ -419,10 +409,6 @@ void EventLoop::sendResponse(int clientFd)
 		if (sent == -1)
 		{
 			perror("send");
-			close(clientFd);
-			_requestBuffers.erase(clientFd);
-			_clientToServer.erase(clientFd);
-			_clientSendOffset.erase(clientFd);
 			try
 			{
 				_epollManager.removeFd(clientFd);
@@ -431,6 +417,10 @@ void EventLoop::sendResponse(int clientFd)
 			{
 				std::cerr << "Failed to remove fd: " << e.what() << std::endl;
 			}
+			close(clientFd);
+			_requestBuffers.erase(clientFd);
+			_clientToServer.erase(clientFd);
+			_clientSendOffset.erase(clientFd);
 			return;
 		}
 		totalSent += sent;
@@ -457,10 +447,6 @@ void EventLoop::handleClientData(int clientFd)
 	{
 		if (count < 0)
 			perror("recv");
-		close(clientFd);
-		_requestBuffers.erase(clientFd);
-		_clientToServer.erase(clientFd);
-		_clientSendOffset.erase(clientFd);
 		try
 		{
 			this->_epollManager.removeFd(clientFd);
@@ -469,6 +455,10 @@ void EventLoop::handleClientData(int clientFd)
 		{
 			std::cerr << "Failed to remove client fd from epoll: " << e.what() << std::endl;
 		}
+		close(clientFd);
+		_requestBuffers.erase(clientFd);
+		_clientToServer.erase(clientFd);
+		_clientSendOffset.erase(clientFd);
 		return;
 	}
 	else
@@ -486,10 +476,7 @@ void EventLoop::handleClientData(int clientFd)
 				return;
 
 			if (handleCgiIfNeeded(request, clientFd))
-			{
-				//delete request;
 				return;
-			}
 
 			int serverFd = _clientToServer[clientFd];
 			if (_servers.find(serverFd) != _servers.end() && !_servers[serverFd].empty())
