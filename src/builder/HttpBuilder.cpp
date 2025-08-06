@@ -4,7 +4,7 @@
 /*                     Constructors & Destructor                       */
 /***********************************************************************/
 
-HttpBuilder::HttpBuilder() : built(false), http(new HttpConfig())
+HttpBuilder::HttpBuilder() : http(new HttpConfig()), built(false)
 {
 	setDefaultValues();
 

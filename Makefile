@@ -1,7 +1,7 @@
-NAME = webserver
+NAME = webserv
 
 CC = c++
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -g
 
 CPP98_FLAG = -std=c++98
 
@@ -29,6 +29,7 @@ FILES = main \
 		strategy/HttpBlockStrategy \
 		strategy/LocationBlockStrategy \
 		strategy/ServerBlockStrategy \
+		strategy/CGIStrategy \
 		manager/WebservManager \
 		builder/createConfigClasses \
 		builder/HttpBuilder \
@@ -38,6 +39,20 @@ FILES = main \
 		builder/ServerConfig \
 		builder/LocationConfig \
 		utils/utils \
+		execute/Socket \
+		execute/SocketsManager \
+		execute/HttpRequest \
+		execute/HttpResponse \
+		execute/HttpRequestRouter \
+		execute/HttpRequestManager \
+		execute/EpollManager \
+		execute/EventLoop \
+		execute/ResponseFactory \
+		execute/MimeTypeDetector \
+		execute/FilePathChecker \
+		execute/CgiHandler \
+		execute/CgiEnvBuilder \
+		execute/ServerUtils \
 
 
 $(shell mkdir -p ./build)
@@ -47,6 +62,7 @@ $(shell mkdir -p ./build/factory)
 $(shell mkdir -p ./build/builder)
 $(shell mkdir -p ./build/utils)
 $(shell mkdir -p ./build/manager)
+$(shell mkdir -p ./build/execute)
 $(shell mkdir -p ./build/charge_flag_makefile)
 
 SRCS_DIR = ./src/
@@ -56,12 +72,12 @@ SRCS = $(addprefix $(SRCS_DIR), $(addsuffix .cpp, $(FILES)))
 OBJS = $(addprefix $(OBJS_DIR), $(addsuffix .o, $(FILES)))
 
 $(OBJS_DIR)%.o: $(SRCS_DIR)%.cpp
-	@$(CC) $(FLAGS) $(CPP98_FLAG) -c $< -o $@
+	@$(CC) $(CFLAGS) $(CPP98_FLAG) -c $< -o $@
 
 all: $(NAME)
 
 $(NAME) : $(OBJS) $(OBJS_DIR)charge_flag_makefile/charge.flag
-	@$(CC) $(FLAGS) $(CPP98_FLAG) $(OBJS) -o $(NAME)
+	@$(CC) $(CFLAGS) $(CPP98_FLAG) $(OBJS) -o $(NAME)
 	@echo
 	@echo "$(GREEN)WebServer compiled!"
 	@echo
@@ -88,6 +104,7 @@ setup:
 	$(shell mkdir -p ./build/builder)
 	$(shell mkdir -p ./build/utils)
 	$(shell mkdir -p ./build/manager)
+	$(shell mkdir -p ./build/execute)
 	$(shell mkdir -p ./build/charge_flag_makefile)
 
 PHONY: clean fclean all re setup

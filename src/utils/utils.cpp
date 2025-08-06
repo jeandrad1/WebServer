@@ -1,7 +1,57 @@
-#include <string>
-#include <iostream>
-#include <vector>
-#include <sstream>
+#include "utils.hpp"
+
+long long hexToDecimal(const std::string& hexStr) 
+{
+	long long result = 0;
+	size_t i = 0;
+
+	for (; i < hexStr.length(); ++i) 
+	{
+		char c = hexStr[i];
+		int value = 0;
+
+		if (c >= '0' && c <= '9') 
+		{
+			value = c - '0';
+		} 
+		else if (c >= 'A' && c <= 'F')
+		{
+			value = c - 'A' + 10;
+		}
+		else if (c >= 'a' && c <= 'f')
+		{
+			value = c - 'a' + 10;
+		} 
+		else 
+		{
+			std::cerr << "Error: carácter no válido en la cadena hexadecimal: " << c << std::endl;
+			return -1;
+		}
+
+		result = result * 16 + value;
+	}
+
+	return result;
+}
+
+bool safe_atoll(const std::string& str, long long& result) {
+    char* end;
+    errno = 0;
+
+    const char* cstr = str.c_str();
+    result = std::strtoll(cstr, &end, 10);
+
+    if (errno == ERANGE)
+        return false;
+    if (end == cstr)
+        return false;
+    while (*end != '\0') {
+        if (!std::isspace(*end))
+            return false;
+        ++end;
+    }
+    return true;
+}
 
 bool	isInteger(std::string value)
 {
@@ -76,6 +126,19 @@ std::string	trim(const std::string &str)
 	return str.substr(first, last - first + 1);
 }
 
+std::string	trimSpaces(const std::string &str)
+{
+	if (str.size() == 0)
+		return "";
+
+	size_t	first = str.find_first_not_of(" ");
+	if (first == std::string::npos)
+		return "";
+
+	size_t	last = str.find_last_not_of(" ");
+	return str.substr(first, last - first + 1);
+}
+
 int	countWhitespace(const std::string &str)
 {
 	int	count = 0;
@@ -90,7 +153,8 @@ int	countWhitespace(const std::string &str)
 
 bool	checkFilename(const std::string &word)
 {
-	return word.size() >= 5 && word.substr(word.size() - 5) == ".html";
+	return (word.size() >= 5 && word.substr(word.size() - 5) == ".html")
+		|| (word.size() >= 4 && word.substr(word.size() - 4) == ".php");
 }
 
 std::vector<std::string> split_str(const std::string &str, const std::string &delimiter)
@@ -110,87 +174,12 @@ std::vector<std::string> split_str(const std::string &str, const std::string &de
     return tokens;
 }
 
-//Printers
-#include <iostream>
-#include "../builder/HttpBuilder.hpp"
-#include "../builder/ServerConfig.hpp"
-#include "../builder/LocationConfig.hpp"
-
-/*void printLocation(LocationConfig *location, int indent = 0)
-{
-    std::string spaces(indent * 2, ' ');
-    std::cout << spaces << "Location:" << std::endl;
-    std::cout << spaces << "  Root: " << location->root << std::endl;
-    std::cout << spaces << "  Index: ";
-    for (size_t i = 0; i < location->index.size(); ++i)
-        std::cout << location->index[i] << " ";
-    std::cout << std::endl;
-    std::cout << spaces << "  Autoindex: " << (location->autoindex ? "on" : "off") << std::endl;
-    std::cout << spaces << "  Client Max Body Size: " << location->clientMaxBodySize << std::endl;
-    std::cout << spaces << "  Return Code: " << location->_return->code << std::endl;
-    std::cout << spaces << "  Return HTTP: " << location->_return->http << std::endl;
+static char to_lower_char(char c) {
+    return static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
 }
 
-void printServer(ServerConfig *server, int indent = 0)
-{
-    std::string spaces(indent * 2, ' ');
-    std::cout << spaces << "Server:" << std::endl;
-    
-    for (size_t i = 0; i < server->listen.size(); ++i)
-    {
-        std::cout << spaces << "  Listen IP: " << server->listen[i]->ip << std::endl;
-        std::cout << spaces << "  Listen Port: " << server->listen[i]->port << std::endl;
-    }
-
-    if (!server->serverNames.empty())
-        std::cout << spaces << "  Server Name: " << server->serverNames[0] << std::endl;
-    else
-        std::cout << spaces << "  Server Name: (none)" << std::endl;
-
-    std::cout << spaces << "  Server Name: " << server->serverNames[0] << std::endl;
-    std::cout << spaces << "  Root: " << server->root << std::endl;
-    std::cout << spaces << "  Index: ";
-    for (size_t i = 0; i < server->index.size(); ++i)
-        std::cout << server->index[i] << " ";
-    std::cout << std::endl;
-    std::cout << spaces << "  Autoindex: " << (server->autoindex ? "on" : "off") << std::endl;
-    std::cout << spaces << "  Client Max Body Size: " << server->clientMaxBodySize << std::endl;
-    std::cout << spaces << "  Return Code: " << server->_return->code << std::endl;
-    std::cout << spaces << "  Return HTTP: " << server->_return->http << std::endl;
-
-    for (size_t i = 0; i < server->locations.size(); ++i)
-    {
-        printLocation(server->locations[i], indent + 1);
-    }
-}
-
-void printHttpConfig(HttpConfig *httpConfig, int indent = 0)
-{
-    std::string spaces(indent * 2, ' ');
-    std::cout << spaces << "HttpConfig:" << std::endl;
-    std::cout << spaces << "  Client Max Body Size: " << httpConfig->clientMaxBodySize << std::endl;
-
-    for (size_t i = 0; i < httpConfig->servers.size(); ++i)
-    {
-        printServer(httpConfig->servers[i], indent + 1);
-    }
-}
-*/
-void printBuiltConfigs(const std::vector<IConfig *> &builtConfigs)
-{
-    std::vector<IConfig * >::const_iterator ite = builtConfigs.end();
-    for (std::vector<IConfig *>::const_iterator it = builtConfigs.begin(); it != ite; ++it) {
-        if (HttpConfig *http = dynamic_cast<HttpConfig *>(*it))
-        {
-            http->printValues(0);
-        }
-        else if (ServerConfig *server = dynamic_cast<ServerConfig *>(*it))
-        {
-            server->printValues(0);
-        }
-        else
-        {
-            std::cerr << "Error: Unknown config type\n\n";
-        }
-    }
+std::string to_lowercase(const std::string& input) {
+    std::string result = input;
+    std::transform(result.begin(), result.end(), result.begin(), to_lower_char);
+    return result;
 }

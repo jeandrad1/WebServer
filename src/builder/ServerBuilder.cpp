@@ -38,7 +38,7 @@ void	ServerBuilder::setDirective(const std::string &name, const std::string &val
 void	ServerBuilder::addNestedBuilder(IConfigBuilder *child, AConfigBlock *newBlock)
 {
 	LocationConfig	*newLocation = static_cast<LocationConfig *>(child->build(newBlock));
-	this->server->locations.push_back(newLocation);
+	this->server->addLocation(newLocation);
 }
 
 IConfig	*ServerBuilder::build(AConfigBlock *serverBlock)
@@ -63,24 +63,27 @@ IConfig	*ServerBuilder::build(AConfigBlock *serverBlock)
 
 void	ServerBuilder::setDefaultValues()
 {
-	this->server->_return = new t_return;
 	t_listen	*listen = new t_listen;
-
+	
 	listen->port = DEFAULT_LISTEN_PORT;
 	listen->ip = DEFAULT_LISTEN_IP;
-	this->server->listen.push_back(listen);
-	this->server->listenDirective = false;
-
-    this->server->root = "-1";
-    this->server->autoindex = DEFAULT_AUTOINDEX;
-	this->server->clientMaxBodySize = -1;
-
-	this->server->serverNames.push_back("");
-
-    this->server->index.push_back(" ");
-
-	this->server->_return->returnDirective = false;
-	this->server->errorPageDirective = false;
+	this->server->addListen(listen);
+	this->server->setListenDirective(false);
+	
+	std::string root_value = "-1";
+    this->server->setRoot(root_value);
+    this->server->setAutoIndex(DEFAULT_AUTOINDEX);
+	this->server->setClientMaxBodySize(-1);
+	
+	this->server->addServerNames("");
+	
+    this->server->addIndex(" ");
+	
+	t_return *treturn = new t_return;
+	treturn->returnDirective = false;
+	this->server->setReturn(treturn);
+	
+	this->server->setErrorPageDirective(false);
 }
 
 /***********************************************************************/
@@ -89,17 +92,14 @@ void	ServerBuilder::setDefaultValues()
 
 void	ServerBuilder::handleListen(const std::string &value)
 {
-	if (this->server->listenDirective == false)
-	{
-		delete this->server->listen[0];
-		this->server->listen.clear();
-	}
-	this->server->listenDirective = true;
+	if (this->server->getListenDirective() == false)
+		this->server->clearListen();
+	this->server->setListenDirective(true);
 
 	t_listen	*listen = new t_listen;
 
 	std::string	real_value = value.substr(0, value.size() - 1);
-	int			colon_pos = real_value.find(":");
+	size_t		colon_pos = real_value.find(":");
 
 	if(colon_pos != std::string::npos)
 	{
@@ -117,59 +117,57 @@ void	ServerBuilder::handleListen(const std::string &value)
 		listen->ip = DEFAULT_LISTEN_IP;
 		listen->port = std::atoi(real_value.c_str());
 	}
-	this->server->listen.push_back(listen);
+	this->server->addListen(listen);
 }
 
 void	ServerBuilder::handleServerName(const std::string &value)
 {
-	if (this->server->serverNames.size() == 1 && this->server->serverNames[0] == "")
-	{
-		this->server->serverNames.pop_back();
-		this->server->serverNames.clear();
-	}
+	if (this->server->getServerNames().size() == 1 && this->server->getServerNames()[0] == "")
+		this->server->clearServerName();
 
 	std::string	real_value = value.substr(0, value.size() - 1);
-	this->server->serverNames.push_back(real_value);
+	this->server->addServerNames(real_value);
 }
 
 void	ServerBuilder::handleRoot(const std::string &value)
 {
 	std::string	real_value = value.substr(0, value.size() - 1);
-	this->server->root = real_value;
+	this->server->setRoot(real_value);
 }
 
 void	ServerBuilder::handleAutoindex(const std::string &value)
 {
 	std::string	real_value = value.substr(0, value.size() - 1);
 	if (real_value == "off")
-		this->server->autoindex = false;
+		this->server->setAutoIndex(false);
 	else
-		this->server->autoindex = true;
+		this->server->setAutoIndex(true);
 }
 
 void	ServerBuilder::handleReturn(const std::string &value)
 {
-	if (this->server->_return->returnDirective == true)
+	if (this->server->getReturn()->returnDirective == true)
 	{
 		std::cout << "Error in builder because of Return encountered twice, should throw exception?";
 		return ;
 	}
 
-	this->server->_return->returnDirective = true;
+	this->server->setReturnDirective(true);
 
 	std::string	real_value = value.substr(0, value.size() - 1);
-	int			http_pos = real_value.find("http");
+	size_t		http_pos = real_value.find("http");
 
-	if(http_pos != std::string::npos)
+	if (http_pos != std::string::npos)
 	{
-		this->server->_return->http = real_value.substr(http_pos, value.size());
+		std::string httpBuffer = real_value.substr(http_pos, value.size());
+		this->server->setReturnHttp(httpBuffer);
 		std::string	port_str = real_value.substr(0, http_pos);
-		this->server->_return->code = std::atoi(port_str.c_str());
+		this->server->setReturnCode(std::atoi(port_str.c_str()));
 	}
 	else
 	{
 		std::string	true_value = real_value.substr(0, std::string::npos);
-		this->server->_return->code = std::atoi(true_value.c_str());
+		this->server->setReturnCode(std::atoi(true_value.c_str()));
 	}
 }
 
@@ -178,7 +176,7 @@ void	ServerBuilder::handleIndex(const std::string &value)
 	std::string					real_value = value.substr(0, value.size() - 1);
 	std::vector<std::string>	index = split_str(real_value, " ");
 
-	this->server->index = index;
+	this->server->setIndex(index);
 }
 
 void	ServerBuilder::handleErrorPage(const std::string &value)
@@ -188,7 +186,7 @@ void	ServerBuilder::handleErrorPage(const std::string &value)
 	std::string					info;
 	t_errorPage					*errorPage = new t_errorPage;
 
-	this->server->errorPageDirective = true;
+	this->server->setErrorPageDirective(true);
 
 	if (value.empty())
 		return ;
@@ -203,7 +201,6 @@ void	ServerBuilder::handleErrorPage(const std::string &value)
 	ite--;
 	std::string	target = *ite;
 
-	errorPage->targetPage = target.substr(0, target.size() - 1);
 	errorPage->targetPage = target.substr(0, target.size() - 1);
 	errorPage->isEqualModifier = false;
 	errorPage->equalModifier = 0;
@@ -220,7 +217,7 @@ void	ServerBuilder::handleErrorPage(const std::string &value)
 	for (std::vector<std::string>::iterator	it = values.begin(); it != ite; it++)
 	{
 		errorPage->referencesCount++;
-		this->server->errorPages[std::atol((*it).c_str())] = errorPage;
+		this->server->addErrorPage(std::atoi((*it).c_str()), errorPage);
 	}
 }
 
@@ -240,21 +237,21 @@ void	ServerBuilder::handleClientMaxBodySize(std::string const &value)
 	switch (tolower(suffix))
 	{
 		case 'k':
-			this->server->clientMaxBodySize = maxBodySize * 1024;
+			this->server->setClientMaxBodySize(maxBodySize * 1024);
 			break ;
 		case 'm':
-			this->server->clientMaxBodySize = maxBodySize * 1024 * 1024;
+			this->server->setClientMaxBodySize(maxBodySize * 1024 * 1024);
 			break ;
 		case 'g':
-			this->server->clientMaxBodySize = maxBodySize * 1024 * 1024 * 1024;
+			this->server->setClientMaxBodySize(maxBodySize * 1024 * 1024 * 1024);
 			break ;
 		case '\0':
-			this->server->clientMaxBodySize = maxBodySize;
+			this->server->setClientMaxBodySize(maxBodySize);
 			break ;
 		default :
 			std::cout<<"Impossible value found"<<std::endl;
 			return ;
 	}
-	if (this->server->clientMaxBodySize > (1024 * 1024 * 1024))
-		this->server->clientMaxBodySize = (1024 * 1024 * 1024);
+	if (this->server->getClientMaxBodySize() > (1024 * 1024 * 1024))
+		this->server->setClientMaxBodySize(1024 * 1024 * 1024);
 }

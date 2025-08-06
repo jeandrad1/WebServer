@@ -7,6 +7,10 @@
 #include <fstream>
 # include "../composite/AConfigBlock.hpp"
 # include "../builder/ServerConfig.hpp"
+# include "../execute/EventLoop.hpp"
+# include <sys/wait.h>
+# include <csignal>
+# include <cerrno>
 
 class WebservManager {
 

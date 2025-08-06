@@ -55,7 +55,6 @@ AConfigBlock	*createBlock(std::ifstream &filename, AConfigBlock &block)
 	while (!line.empty())
 	{
 		std::size_t http = line.find("http");
-		std::size_t semicolon = line.find(";");
 		if (line.empty())
 			continue;
 		if (line.find("server") != std::string::npos && line.find("server_name") == std::string::npos)
@@ -64,7 +63,7 @@ AConfigBlock	*createBlock(std::ifstream &filename, AConfigBlock &block)
 			createAndAddBlock("http", block, filename);
 		else if (line.find("location") != std::string::npos)
 		{
-			if (line[line.find("{")] != std::string::npos)
+			if (line.find("{") != std::string::npos)
 				createAndAddBlock(line.substr(0, line.length() - 1), block, filename);
  			else
 				createAndAddBlock(line.substr(0, line.length()), block, filename);

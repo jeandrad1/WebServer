@@ -30,6 +30,7 @@ class LocationBuilder : public IConfigBuilder, public DirectiveProcessor<Locatio
 		void	handleErrorPage(std::string const &value);
 		void	handleReturn(std::string const &value);
 		void	handleLimitExcept(std::string const &value);
+		void	handleCGI(std::string const &value);
 };
 
 #endif
