@@ -69,7 +69,6 @@ int EpollManager::waitForEvents(int maxEvents, int timeoutMs, struct epoll_event
 	int n_ready = epoll_wait(this->_epollFd, events, maxEvents, timeoutMs);
 	if (n_ready == -1)
 	{
-		perror("epoll_wait");
 		return (-1);
 	}
 	return (n_ready);
