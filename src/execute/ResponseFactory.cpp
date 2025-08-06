@@ -23,9 +23,7 @@ static std::string stripLeadingSlash(const std::string& path)
 HttpResponse ResponseFactory::generateErrorResponse(int code, const ServerConfig& server, const LocationConfig* location)
 {
     std::string errorPagePath;
-    
-	// Refactor the entire function !!
-    
+        
     if (location && location->getErrorPageDirective())
     {
         const std::map<int, t_errorPage*>& errorPages = location->getErrorPages();
@@ -42,8 +40,8 @@ HttpResponse ResponseFactory::generateErrorResponse(int code, const ServerConfig
         if (it != serverErrorPages.end() && it->second)
             errorPagePath = it->second->targetPage;
     }
-    // with inheritance this else should not be necessary
-    else
+
+	else
     {
         const std::map<int, t_errorPage*> serverErrorPages = server.getErrorPages();
         std::map<int, t_errorPage*>::const_iterator it = serverErrorPages.find(code);
@@ -58,7 +56,6 @@ HttpResponse ResponseFactory::generateErrorResponse(int code, const ServerConfig
         struct stat s;
         if (stat(fullPath.c_str(), &s) == 0 && S_ISREG(s.st_mode))
         {
-            // Refactor this block entirely. it is to put the values 
             std::ifstream file(fullPath.c_str());
             if (file.is_open())
             {
@@ -139,8 +136,6 @@ HttpResponse ResponseFactory::createResponse(int code, const std::string& custom
     return res;
 }
 
-// Put better error codes and messages in macros or map
-// to avoid hardcoding them in the codebase.
 std::string ResponseFactory::getDefaultMessage(int code)
 {
     switch (code)
