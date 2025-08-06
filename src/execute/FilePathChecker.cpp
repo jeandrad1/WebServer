@@ -12,7 +12,6 @@ bool FilePathChecker::fileExists(const std::string& fullPath)
 
 bool FilePathChecker::isSafePath(const std::string& base, const std::string& requested)
 {
-    // Change the base size for a macro
     char realBase[4096];
     char realRequested[4096];
 
