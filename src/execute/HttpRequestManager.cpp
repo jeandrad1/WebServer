@@ -32,17 +32,6 @@ std::string HttpRequestManager::getHeader(const std::string& key) const
 	return "";
 }
 
-/*void	HttpRequestManager::parseHttpHeader(const std::string& raw_header)
-{
-	std::istringstream stream(raw_header);
-	std::string line;
-
-	std::getline(stream, line);
-	
-	parseRequestLine(line);
-	parseHeaders(stream);
-}*/
-
 void HttpRequestManager::parseHttpRequest(const std::string& raw_request, std::vector<ServerConfig *> servers)
 {
 	std::istringstream stream(raw_request);
@@ -56,7 +45,6 @@ void HttpRequestManager::parseHttpRequest(const std::string& raw_request, std::v
 	parseHeaders(stream);
 	if (!checkClientMaxBodySize(servers))
 	{
-		std::cout << "Error client\n";
 		throw std::out_of_range("ClientMaxBodySize too large");
 	}
 	parseBody(stream);
@@ -104,19 +92,16 @@ bool HttpRequestManager::checkClientMaxBodySize(std::vector<ServerConfig *> serv
 					LocationConfig *location = ServerUtils::getLocationByRequestPath(path, server);
 					if (location != NULL)
 					{
-						if (contentLength > location->getClientMaxBodySize())
+						long long locationMaxSize = location->getClientMaxBodySize();
+						if (locationMaxSize == -1)
 						{
-							std::cout << "Error: Body too large\n";
-							return (false);
+							if (contentLength >= server->getClientMaxBodySize())
+								return (false);
 						}
+						else if (contentLength >= locationMaxSize)
+							return (false);
 						return (true);
 					}
-					if (contentLength > server->getClientMaxBodySize())
-					{
-						std::cout << "Error: Body too large\n";
-						return (false);
-					}
-					return (true);
 				}
 				else
 				{
@@ -128,17 +113,11 @@ bool HttpRequestManager::checkClientMaxBodySize(std::vector<ServerConfig *> serv
 						if (location != NULL)
 						{
 							if (contentLength > location->getClientMaxBodySize())
-							{
-								std::cout << "Error: Body too large\n";
 								return (false);
-							}
 							return (true);
 						}
 						if (contentLength > server->getClientMaxBodySize())
-						{
-							std::cout << "Error: Body too large\n";
 							return (false);
-						}
 						return (true);
 					}
 				}
