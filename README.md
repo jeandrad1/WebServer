@@ -2,7 +2,7 @@
 
 Custom HTTP server implemented in C++ following HTTP/1.1 semantics.
 
-This README provides usage and configuration information, lists bonus/demo features present in the `assets/` folder, and includes a short design review (SOLID-style) describing how the codebase maps to common software design principles and where to improve.
+This README provides usage and configuration information, lists bonus/demo features present in the `assets/` folder, and includes a short design review (SOLID-style) describing how the codebase maps to common software design principles.
 
 ## Description
 
