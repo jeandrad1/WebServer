@@ -54,26 +54,22 @@ If no config path is provided the program currently expects exactly one argument
 
 ```
 server {
-    listen 8080;
-    server_name localhost;
-
-    root /var/www/html;
-    index index.html;
-
-    location / {
-        allowed_methods GET POST DELETE;
-        upload_dir /var/tmp;
-        cgi_path /usr/bin/python3;
-        cgi_ext .py;
-    }
-
-    location /cgi-bin {
-        cgi_path /usr/bin/python3 /usr/bin/bash;
-    }
-
-    error_page 404 /404.html;
-    error_page 500 /500.html;
-}
+  listen 989;
+  server_name example.com;
+  location /
+  {
+    root        /var/www/html;#hola
+    index index.html;     
+  }
+  listen pepe;
+  location /api{
+    proxy_pass http://backend;
+  }
+  server {
+    listen test_error;
+  }
+  listen 8080;
+}}
 ```
 
 ## HTTP methods & status codes
