@@ -20,7 +20,7 @@ Webserv is an educational HTTP server that accepts connections, parses requests,
 - Request size limits and basic input validation
 - Mime type detection
 
-## Bonuses / Demo assets (included)
+## Bonuses / Demo assets included
 
 Under `assets/www/` you will find example pages and scripts used for testing and demos:
 
@@ -131,8 +131,7 @@ This project uses several well-known patterns (Factory, Strategy, Builder, Compo
 - Interface Segregation (I): The code defines multiple small interfaces (e.g., `IValidationStrategy`, `IConfigBuilder`), which keeps consumers from depending on unused methods.
 - Dependency Inversion (D): High-level modules use abstract interfaces and factories, but there is still frequent use of raw `new`/`delete` and concrete type construction. Consider injecting dependencies (or factories) where possible instead of constructing concrete dependencies deep in the call stack.
 
-## Functionality coverage (what the code implements)
-
+## Functionality coverage
 From inspection the codebase implements:
 
 - Configuration parsing into `ServerConfig` / `LocationConfig` structures (Builder/Composite)
