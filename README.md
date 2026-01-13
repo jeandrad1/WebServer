@@ -29,7 +29,7 @@ Under `assets/www/` you will find example pages and scripts used for testing and
 - `cgi-bin/` — example CGI scripts (`.php`, `.py`, compiled test programs)
 - `download/` — example downloadable files
 - `error_page/` — custom error page assets
-- `config_files/` — example configuration files used in tests (`should_work.conf`, `test_server.conf`, etc.)
+- `config_files/` (located at `assets/config_files/`, directly under `assets/`) — example configuration files used in tests (`should_work.conf`, `test_server.conf`, etc.)
 
 ## Compilation
 
