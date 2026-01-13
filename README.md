@@ -48,7 +48,7 @@ make re     # Rebuild from scratch
 ./webserv <config_file.conf>
 ```
 
-If no config path is provided the program currently expects exactly one argument (a config file path). See `assets/config_files/` for example configs.
+The program currently expects exactly one argument (a config file path). See `assets/config_files/` for example configs.
 
 ## Example configuration
 
